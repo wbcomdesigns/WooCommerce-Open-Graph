@@ -26,7 +26,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
-	die;
+    die;
 }
 
 /**
@@ -34,8 +34,8 @@ if ( ! defined( 'WPINC' ) ) {
  * This action is documented in includes/class-woo-open-graph-activator.php
  */
 function activate_woo_open_graph() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-woo-open-graph-activator.php';
-	Woo_Open_Graph_Activator::activate();
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-woo-open-graph-activator.php';
+    Woo_Open_Graph_Activator::activate();
 }
 
 /**
@@ -43,8 +43,8 @@ function activate_woo_open_graph() {
  * This action is documented in includes/class-woo-open-graph-deactivator.php
  */
 function deactivate_woo_open_graph() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-woo-open-graph-deactivator.php';
-	Woo_Open_Graph_Deactivator::deactivate();
+    require_once plugin_dir_path( __FILE__ ) . 'includes/class-woo-open-graph-deactivator.php';
+    Woo_Open_Graph_Deactivator::deactivate();
 }
 
 register_activation_hook( __FILE__, 'activate_woo_open_graph' );
@@ -67,8 +67,8 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-woo-open-graph.php';
  */
 function run_woo_open_graph() {
 
-	$plugin = new Woo_Open_Graph();
-	$plugin->run();
+    $plugin = new Woo_Open_Graph();
+    $plugin->run();
 
 }
 run_woo_open_graph();
