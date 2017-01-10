@@ -1,10 +1,10 @@
-=== Woo Open Graph ===
+﻿=== Woo Open Graph ===
 Contributors: vapvarun,wbcomdesigns
-Donate link: http://wbcomdesigns.com
+Donate link: http://wbcomdesigns.com/donate
 Tags: woocommerce, open graph, meta tags
-Requires at least: 4.0.1
+Requires at least: 3.0.1
 Tested up to: 4.7
-Stable tag: 4.7
+Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ This Plugin will add Open Graph Meta tags and dynamic values to your site.
 
 == Description ==
 
-This plugin will add an extended feature to the big name “ WooCommerce ” that will adds well executed and accurate Open Graph Meta Tags to your site with title, description and WooCommerce featured  image.
+This plugin will add an extended feature to the big name “ WooCommerce ” that will adds well executed and accurate Open Graph Meta Tags to your site with title,description and WooCommerce featured  image.
 
 == Installation ==
 

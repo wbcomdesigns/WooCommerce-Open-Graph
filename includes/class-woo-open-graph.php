@@ -80,7 +80,7 @@ class Woo_Open_Graph {
         $this->plugin_name = 'woo-open-graph';
         $this->version = '1.0.0';
         $this->plugin_basename = 'woo-open-graph/woo-open-graph.php';
-        
+
         $this->load_dependencies();
         $this->set_locale();
         $this->define_admin_hooks();
@@ -185,7 +185,12 @@ class Woo_Open_Graph {
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
         $this->loader->add_filter('language_attributes', $plugin_public, 'wog_doctype_opengraph');
-        $this->loader->add_action('wp_head', $plugin_public, 'wog_opengraph', 5);
+        $this->loader->add_action('wp_head', $plugin_public, 'wog_opengraph', 1, 1);
+        if (in_array('wordpress-seo/wp-seo.php', apply_filters('active_plugins', get_option('active_plugins')))) {
+            if (in_array('wc-vendors/class-wc-vendors.php', apply_filters('active_plugins', get_option('active_plugins')))) {
+                $this->loader->add_filter('wpseo_title', $plugin_public, 'override_title');
+            }
+        }
     }
 
     /**
