@@ -3,8 +3,8 @@ Contributors: vapvarun,wbcomdesigns
 Donate link: http://wbcomdesigns.com/donate
 Tags: woocommerce, open graph, meta tags
 Requires at least: 3.0.1
-Tested up to: 4.7
-Stable tag: 1.0
+Tested up to: 4.8
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ This Plugin will add Open Graph Meta tags and dynamic values to your site.
 
 == Description ==
 
-This plugin will add an extended feature to the big name “ WooCommerce ” that will adds well executed and accurate Open Graph Meta Tags to your site with title,description and WooCommerce featured  image.
+This plugin will add an extended feature to the big name “ WooCommerce ” that will adds well executed and accurate Open Graph Meta Tags to your site's <HEAD>...</HEAD> with title,description and WooCommerce featured image.By adding the meta tags,your site products/pages will be fully shareable to social sites.This plugin also provide you a feature to share your products/pages from product individual page directly by using social media share buttons. 
 
 == Installation ==
 
@@ -35,14 +35,28 @@ Yes, It needs you to have WooCommerce installed and activated.
 = Where Do I Ask for support? =
 Please visit [wbcomdesigns] (http://wbcomdesigns.com/) for any query related to plugin and WooCommerce.
 
+= Can i enable and disable meta tags from setting for open graph ? =
+Yes, You can enable and disable meta tags for any social site from plugin setting.
+
+= Can we share products to any social media site like facebook, twitter etc? =
+Yes, This plugin also provide you a feature to share your products/pages from product individual page directly by using social media share buttons.
+
 == Screenshots ==
 
 1. It is displaying default Plugin setting page screenshot-1.png
 2. It is displaying simple screenshot when share products links on twitter screenshot-2.png
 3. It is displaying simple screenshot when share products links on facebook screenshot-3.png
 4. It is displaying simple screenshot when share products links on google Plus screenshot-4.png
+5. It is displaying modified default Plugin setting page screenshot-5.png
+6. It is displaying modified default Plugin meta tags in <HEAD>...</HEAD> tag screenshot-6.png
+7. It is displaying modified default Plugin share buttons on product page screenshot-7.png
 
 == Changelog ==
 
 = 1.0.0 =
 * first version.
+= 1.0.1 =
+* modified version.
+Added two more new social media sites linkedin and pinterest to this plugin.
+Added more settings there to enable and disable any social media meta tags.
+Added social media share buttons on product page that make easy to share any product.

@@ -129,35 +129,86 @@ class Woo_Open_Graph_Public {
                 } else {
                     $img_src = apply_filters('woocommerce_placeholder_img_src', WC()->plugin_url() . '/assets/images/placeholder.png');
                 }
-                ?>
+                ?>    
+                <script type='text/javascript' src='//platform-api.sharethis.com/js/sharethis.js#property=593650112e01ff00121c6800&product=inline-share-buttons' async='async'></script>
+                <?php if(isset($options['wog_checkbox_disable_enable_twitter_option'])) { ?>
                 <!--/ Twitter Open Graph for Woo Product /-->
                 <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?>
                     <meta property="twitter:title" content="<?php echo get_the_title(); ?>" />
                     <meta property="twitter:description" content="<?php echo get_the_excerpt(); ?>" />
                 <?php endif; ?>
-                <meta property="twitter:image" content="<?php echo esc_attr($img_src);
-                ?>" />
+                <meta property="twitter:image" content="<?php echo esc_attr($img_src); ?>" />
                 <meta property="twitter:card" content="summary" />
                 <meta property="twitter:url" content="<?php echo get_permalink(); ?>" />
                 <meta property="twitter:site" content="<?php echo '@' . get_bloginfo(strip_tags('name')); ?>" />
+                <!--/ End of Twitter Open Graph for Woo Product /-->
+                <?php } ?>
+                
+                <?php if(isset($options['wog_checkbox_disable_enable_facebook_option'])) { ?>
                 <!--/ Facebook Open Graph for Woo Product /-->
                 <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?>
                     <meta property="og:title" content="<?php echo esc_attr(get_the_title()); ?>" />
                     <meta property="og:description" content="<?php echo get_the_excerpt(); ?>" />
                 <?php endif; ?>
-                <meta property="og:image" content="<?php echo esc_attr($img_src);
-                ?>" />
+                <meta property="og:image" content="<?php echo esc_attr($img_src); ?>" />
                 <meta property="og:type" content="product" />
                 <meta property="og:url" content="<?php echo get_permalink(); ?>" />
                 <meta property="og:site_name" content="<?php echo get_bloginfo(strip_tags('name')); ?>" />
+                <!--/ End of Facebook Open Graph for Woo Product /-->
+                <?php } ?>
+                
+                <?php if(isset($options['wog_checkbox_disable_enable_google_option'])) { ?>
                 <!-- Google Plus Open Graph for Woo Product /-->
                 <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?>
                     <meta property="name" content="<?php echo get_the_title(); ?>" />
                     <meta property="description" content="<?php echo get_the_excerpt(); ?>" />
                 <?php endif; ?>
                 <meta property="image" content="<?php echo esc_attr($img_src); ?>" />
+                <!-- End of Google Plus Open Graph for Woo Product /-->
+                <?php } ?>     
+                
+                <?php if(isset($options['wog_checkbox_disable_enable_linkedin_option'])) { ?>
+                    <!-- LinkedIn Open Graph for Woo Product /-->
+                <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?>
+                        <meta property="og:title" content="<?php echo get_the_title(); ?>" />
+                    	<meta property="og:description" content="<?php echo get_the_excerpt(); ?>" />
+                <?php endif; ?>                    
+                    <meta property="og:url" content="<?php echo get_permalink(); ?>" />
+                    <meta property="og:image" content="<?php echo esc_attr($img_src); ?>" />
+                    <!-- End of LinkedIn Open Graph for Woo Product /-->
+                <?php } ?>
+                    
+                
+                <?php if(isset($options['wog_checkbox_disable_enable_pinterest_option'])) { 
+				$qty = $amount = $standard_amount = 0;
+				$currency = $availability = '';
+				$product = new WC_Product(get_the_ID()); 
+				$amount = $product->get_price(); 
+				$standard_amount = $product->get_regular_price();
+				$currency = get_woocommerce_currency(); 
+				$qty = $product->get_stock_quantity();				
+				if($qty > 0)
+					$availability = 'instock';
+				?>
+                <!-- Pinterest Open Graph for Woo Product /-->                
+                <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?> 
+                <!-- Tittle is required for pinterest thats why it is out of this condition -->  				
+    			<meta property="og:description" content="<?php echo get_the_excerpt(); ?>" />
+                <?php endif; ?>
+                <meta property="og:type" content="product" />
+                <meta property="og:title" content="<?php echo esc_attr(get_the_title()); ?>" />
+                <meta property="og:image" content="<?php echo esc_attr($img_src); ?>" />
+    			<meta property="og:url" content="<?php echo get_permalink(); ?>"/>
+    			<meta property="og:site_name" content="<?php echo get_bloginfo( 'name' ); ?>" />
+    			<meta property="og:price:amount" content="<?php echo $amount; ?>" />
+                <meta property="og:price:standard_amount" content="<?php echo $standard_amount; ?>" />
+    			<meta property="og:price:currency" content="<?php echo $currency; ?>" />
+    			<meta property="og:availability" content="instock" />
+                <!-- End of Pinterest Open Graph for Woo Product /-->
+                <?php } ?>
+                
                 <?php
-            }else if (is_product_category()) {
+            } else if (is_product_category()) {
                 $category = get_queried_object();
                 $category_link = get_category_link($category->term_id);
                 if (is_woocommerce() && is_product_category($category->slug)) {
@@ -171,35 +222,86 @@ class Woo_Open_Graph_Public {
                         $img_src = apply_filters('woocommerce_placeholder_img_src', WC()->plugin_url() . '/assets/images/placeholder.png');
                     }
                     ?>
+                    <script type='text/javascript' src='//platform-api.sharethis.com/js/sharethis.js#property=593650112e01ff00121c6800&product=inline-share-buttons' async='async'></script>                    <?php if(isset($options['wog_checkbox_disable_enable_twitter_option'])) { ?>
                     <!--/ Twitter Open Graph for Woo Product /-->
                     <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?>
                         <meta property="twitter:title" content="<?php echo $category->name; ?>" />
                         <meta property="twitter:description" content="<?php echo $category->description; ?>" />
                     <?php endif; ?>
-                    <meta property="twitter:image" content="<?php echo esc_attr($img_src);
-                    ?>" />
+                    <meta property="twitter:image" content="<?php echo esc_attr($img_src); ?>" />
                     <meta property="twitter:card" content="summary" />
                     <meta property="twitter:url" content="<?php echo esc_url($category_link); ?>" />
                     <meta property="twitter:site" content="<?php echo '@' . get_bloginfo(strip_tags('name')); ?>" />
+                    <!--/ End of Twitter Open Graph for Woo Product /-->
+                    <?php } ?>
+                    
+                    <?php if(isset($options['wog_checkbox_disable_enable_facebook_option'])) { ?>
                     <!--/ Facebook Open Graph for Woo Product /-->
                     <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?>
                         <meta property="og:title" content="<?php echo $category->name; ?>" />
                         <meta property="og:description" content="<?php echo $category->description; ?>" />
                     <?php endif; ?>
-                    <meta property="og:image" content="<?php echo esc_attr($img_src);
-                    ?>" />
+                    <meta property="og:image" content="<?php echo esc_attr($img_src); ?>" />
                     <meta property="og:type" content="product" />
                     <meta property="og:url" content="<?php echo esc_url($category_link); ?>" />
                     <meta property="og:site_name" content="<?php echo get_bloginfo(strip_tags('name')); ?>" />
+                    <!--/ End of Facebook Open Graph for Woo Product /-->
+                    <?php } ?>
+                    
+                    <?php if(isset($options['wog_checkbox_disable_enable_google_option'])) { ?>
                     <!-- Google Plus Open Graph for Woo Product /-->
                     <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?>
                         <meta property="name" content="<?php echo $category->name; ?>" />
                         <meta property="description" content="<?php echo $category->description; ?>" />
                     <?php endif; ?>
                     <meta property="image" content="<?php echo esc_attr($img_src); ?>" />
+                    <!-- End of Google Plus Open Graph for Woo Product /-->
+                    <?php } ?>
+                    
+                    <?php if(isset($options['wog_checkbox_disable_enable_linkedin_option'])) { ?>
+                    <!-- LinkedIn Open Graph for Woo Product /-->
+                    <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?>
+                        <meta property="og:title" content="<?php echo $category->name; ?>" />
+                        <meta property="og:description" content="<?php echo $category->description; ?>" />
+                    <?php endif; ?>                    
+                    <meta property="og:url" content="<?php echo esc_url($category_link); ?>" />
+                    <meta property="og:image" content="<?php echo esc_attr($img_src); ?>" />
+                    <!-- End of LinkedIn Open Graph for Woo Product /-->
+                    <?php } ?>
+                    
+                    <?php if(isset($options['wog_checkbox_disable_enable_pinterest_option'])) { 
+                    $qty = $amount = $standard_amount = 0;
+                    $currency = $availability = '';
+                    $product = new WC_Product(get_the_ID()); 
+                    $amount = $product->get_price();
+					$standard_amount = $product->get_regular_price();			
+                    $currency = get_woocommerce_currency(); 
+                    $qty = $product->get_stock_quantity();				
+                    if($qty > 0)
+                        $availability = 'instock';
+                    ?>
+                    <!-- Pinterest Open Graph for Woo Product /-->                
+                    <?php if (!isset($options['wog_checkbox_disabled_plugins_options'])): ?> 
+                    <!-- Tittle is required for pinterest thats why it is out of this condition -->                    
+                    <meta property="og:description" content="<?php echo $category->description; ?>" />
+                    <?php endif; ?>
+                    <meta property="og:type" content="product" />
+                    <meta property="og:title" content="<?php echo $category->name; ?>" />
+                    <meta property="og:image" content="<?php echo esc_attr($img_src); ?>" />
+                    <meta property="og:url" content="<?php echo esc_url($category_link); ?>"/>
+                    <meta property="og:site_name" content="<?php echo get_bloginfo( 'name' ); ?>" />
+                    <meta property="og:price:amount" content="<?php echo $amount; ?>" />
+                    <meta property="og:price:standard_amount" content="<?php echo $standard_amount; ?>" />
+                    <meta property="og:price:currency" content="<?php echo $currency; ?>" />
+                    <meta property="og:availability" content="instock" />
+                    <!-- End of Pinterest Open Graph for Woo Product /-->
+                    <?php } ?>
+                    
                     <?php
                 }
             }
+			
+			
             if (in_array('wc-vendors/class-wc-vendors.php', apply_filters('active_plugins', get_option('active_plugins')))) {
                 $v_page = WCV_Vendors::is_vendor_page();
                 if ($v_page) {

@@ -15,7 +15,7 @@
  * Plugin Name:       Woo Open Graph
  * Plugin URI:        http://wbcomdesigns.com
  * Description:       This plugin will add an extended feature to the big name “ WooCommerce ” that will adds well executed and accurate Open Graph Meta Tags to your site with title,description and WooCommerce featured image.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Wbcom Designs <admin@wbcomdesigns.com>
  * Author URI:        http://wbcomdesigns.com
  * License:           GPL-2.0+

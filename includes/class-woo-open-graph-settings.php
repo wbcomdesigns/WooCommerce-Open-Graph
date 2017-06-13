@@ -69,16 +69,76 @@ class Woo_Open_Graph_Settings {
         add_settings_field(
                 'wog_checkbox_disabled_plugins_options', __('Disable Product Title and Description for open graph', $this->plugin_name), array($this, 'wog_checkbox_disabled_plugins_options_render'), 'wog_settings', 'wog_settings_section'
         );
+		add_settings_field(
+                'wog_checkbox_disable_enable_twitter_option', __('Enable Twitter for open graph', $this->plugin_name), array($this, 'wog_checkbox_disable_enable_twitter_option_render'), 'wog_settings', 'wog_settings_section'
+        );
+		add_settings_field(
+                'wog_checkbox_disable_enable_facebook_option', __('Enable Facebook for open graph', $this->plugin_name), array($this, 'wog_checkbox_disable_enable_facebook_option_render'), 'wog_settings', 'wog_settings_section'
+        );		
+		add_settings_field(
+                'wog_checkbox_disable_enable_google_option', __('Enable Google+ for open graph', $this->plugin_name), array($this, 'wog_checkbox_disable_enable_google_option_render'), 'wog_settings', 'wog_settings_section'
+        );
+		add_settings_field(
+                'wog_checkbox_disable_enable_linkedin_option', __('Enable LinkedIn for open graph', $this->plugin_name), array($this, 'wog_checkbox_disable_enable_linkedin_option_render'), 'wog_settings', 'wog_settings_section'
+        );
+		add_settings_field(
+                'wog_checkbox_disable_enable_pinterest_option', __('Enable Pinterest for open graph', $this->plugin_name), array($this, 'wog_checkbox_disable_enable_pinterest_option_render'), 'wog_settings', 'wog_settings_section'
+        );
     }
 
     public function wog_checkbox_disabled_plugins_options_render() {
 
         $options = get_option('wog_settings');
         ?>
-        <input type='checkbox' name='wog_settings[wog_checkbox_disabled_plugins_options]' <?php checked(isset($options['wog_checkbox_disabled_plugins_options']), 1); ?> value='1'>
+        <input type='checkbox' name='wog_settings[wog_checkbox_disabled_plugins_options]' <?php checked(isset($options['wog_checkbox_disabled_plugins_options']), 1); ?> value='1'>        
         <?php
     }
+	
+	public function wog_checkbox_disable_enable_twitter_option_render() {
 
+        $options = get_option('wog_settings');
+        ?>        
+        <input type='checkbox' name='wog_settings[wog_checkbox_disable_enable_twitter_option]' <?php checked(isset($options['wog_checkbox_disable_enable_twitter_option']), 1); ?> value='1'>
+        
+        <?php
+    }
+	
+	public function wog_checkbox_disable_enable_facebook_option_render() {
+
+        $options = get_option('wog_settings');
+        ?>        
+        <input type='checkbox' name='wog_settings[wog_checkbox_disable_enable_facebook_option]' <?php checked(isset($options['wog_checkbox_disable_enable_facebook_option']), 1); ?> value='1'>
+        
+        <?php
+    }
+	
+	public function wog_checkbox_disable_enable_google_option_render() {
+
+        $options = get_option('wog_settings');
+        ?>        
+        <input type='checkbox' name='wog_settings[wog_checkbox_disable_enable_google_option]' <?php checked(isset($options['wog_checkbox_disable_enable_google_option']), 1); ?> value='1'>
+        
+        <?php
+    }
+	
+	public function wog_checkbox_disable_enable_linkedin_option_render() {
+
+        $options = get_option('wog_settings');
+        ?>        
+        <input type='checkbox' name='wog_settings[wog_checkbox_disable_enable_linkedin_option]' <?php checked(isset($options['wog_checkbox_disable_enable_linkedin_option']), 1); ?> value='1'>
+        
+        <?php
+    }
+	
+	public function wog_checkbox_disable_enable_pinterest_option_render() {
+
+        $options = get_option('wog_settings');
+        ?>        
+        <input type='checkbox' name='wog_settings[wog_checkbox_disable_enable_pinterest_option]' <?php checked(isset($options['wog_checkbox_disable_enable_pinterest_option']), 1); ?> value='1'>
+        
+        <?php
+    }
+	
 // add admin page to menu
     public function wog_plugin_menu() {
 
@@ -86,8 +146,8 @@ class Woo_Open_Graph_Settings {
     }
 
     public function wog_settings_section_callback() {
-
-        echo __('If already have any Open Graph Plugin like: WP Facebook Open Graph protocol, Yoast plugin etc.. and need to override title and description please check the checkbox and save this setting.', $this->plugin_name);
+		
+        echo __('If already have any Open Graph Plugin like: WP Facebook Open Graph protocol, Yoast plugin etc.. and need to override title and description please check the checkbox below. <br/>You can also enable social media like Facebook, Twitter, LinkedIn and Pinterest to add meta tags to your &lt;HEAD&gt;...&lt;/HEAD&gt; section for open graph. <br/>Please save this setting after enable or disable any checkbox.', $this->plugin_name);
     }
 
     public function wog_plugin_options() {

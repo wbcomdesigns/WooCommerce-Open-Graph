@@ -85,8 +85,17 @@ class Woo_Open_Graph {
         $this->set_locale();
         $this->define_admin_hooks();
         $this->define_public_hooks();
+		add_action('woocommerce_after_add_to_cart_button',array($this,'show_social_media_buttons'));
     }
 
+	/*
+		Show social media buttons under add to card button on product individual page.
+	*/
+	
+	function show_social_media_buttons() {	
+		echo '<div style="clear:both"></div><br/>Share this product to: <div class="sharethis-inline-share-buttons"></div>';
+	}
+	
     /**
      * Load the required dependencies for this plugin.
      *
@@ -232,5 +241,6 @@ class Woo_Open_Graph {
     public function get_version() {
         return $this->version;
     }
+	
 
 }
