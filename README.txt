@@ -1,5 +1,5 @@
 ﻿=== Woo Open Graph ===
-Contributors: vapvarun,wbcomdesigns
+Contributors: wbcomdesigns
 Donate link: http://wbcomdesigns.com/donate
 Tags: woocommerce, open graph, meta tags
 Requires at least: 3.0.1
@@ -56,7 +56,6 @@ Yes, This plugin also provide you a feature to share your products/pages from pr
 = 1.0.0 =
 * first version.
 = 1.0.1 =
-* modified version.
-Added two more new social media sites linkedin and pinterest to this plugin.
-Added more settings there to enable and disable any social media meta tags.
-Added social media share buttons on product page that make easy to share any product.
+* Added two more new social media sites linkedin and pinterest to this plugin.
+* Added more settings there to enable and disable any social media meta tags.
+* Added social media share buttons on product page that make easy to share any product.
