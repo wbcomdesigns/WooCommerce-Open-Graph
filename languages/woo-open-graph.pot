@@ -1,0 +1,63 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Woo Open Graph\n"
+"POT-Creation-Date: 2017-08-25 00:14+0530\n"
+"PO-Revision-Date: 2017-08-25 00:14+0530\n"
+"Last-Translator: \n"
+"Language-Team: wbcomdesigns <admin@wbcomdesigns.com>\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.8.11\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: admin/class-woo-open-graph-admin.php:99
+msgid "Settings"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:66
+msgid "Woo Open Graph Settings"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:70
+msgid "Disable Product Title and Description for open graph"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:73
+msgid "Enable Twitter for open graph"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:76
+msgid "Enable Facebook for open graph"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:79
+msgid "Enable Google+ for open graph"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:82
+msgid "Enable LinkedIn for open graph"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:85
+msgid "Enable Pinterest for open graph"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:145
+msgid "Woo Open Graph"
+msgstr ""
+
+#: includes/class-woo-open-graph-settings.php:150
+msgid ""
+"If already have any Open Graph Plugin like: WP Facebook Open Graph protocol, "
+"Yoast plugin etc.. and need to override title and description please check "
+"the checkbox below. <br/>You can also enable social media like Facebook, "
+"Twitter, LinkedIn and Pinterest to add meta tags to your &lt;HEAD&gt;...&lt;/"
+"HEAD&gt; section for open graph. <br/>Please save this setting after enable "
+"or disable any checkbox."
+msgstr ""
