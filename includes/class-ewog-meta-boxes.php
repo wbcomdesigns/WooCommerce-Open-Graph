@@ -158,13 +158,15 @@ class EWOG_Meta_Boxes {
                                 </label>
                                 <div class="ewog-field-wrapper">
                                     <input type="text" 
-                                           id="ewog_og_title" 
-                                           name="ewog_og_title" 
-                                           value="<?php echo esc_attr($og_title); ?>" 
-                                           class="ewog-modern-input" 
-                                           maxlength="60"
-                                           placeholder="<?php echo esc_attr($defaults['title']); ?>"
-                                           data-default="<?php echo esc_attr($defaults['title']); ?>" />
+                                        id="ewog_og_title" 
+                                        name="ewog_og_title" 
+                                        value="<?php echo esc_attr($og_title); ?>" 
+                                        class="ewog-modern-input" 
+                                        maxlength="60"
+                                        placeholder="<?php echo esc_attr($defaults['title']); ?>"
+                                        data-default="<?php echo esc_attr($defaults['title']); ?>"
+                                        data-field-type="title" />
+                                    
                                     <div class="ewog-field-actions">
                                         <button type="button" class="ewog-btn-default" data-field="title">
                                             <?php _e('Use Default', EWOG_TEXT_DOMAIN); ?>
@@ -174,6 +176,7 @@ class EWOG_Meta_Boxes {
                                             <?php _e('Optimize', EWOG_TEXT_DOMAIN); ?>
                                         </button>
                                     </div>
+                                    
                                     <div class="ewog-field-footer">
                                         <div class="ewog-char-counter">
                                             <span class="ewog-char-current">0</span>/<span class="ewog-char-max">60</span>
@@ -181,14 +184,14 @@ class EWOG_Meta_Boxes {
                                                 <div class="ewog-char-bar"></div>
                                             </div>
                                         </div>
-                                        <div class="ewog-field-status">
+                                        <div class="ewog-field-status optimal">
                                             <span class="ewog-status-icon"></span>
                                             <span class="ewog-status-text"><?php _e('Optimal length: 40-60 characters', EWOG_TEXT_DOMAIN); ?></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Description Field -->
                             <div class="ewog-field-group">
                                 <label for="ewog_og_description" class="ewog-field-label">
@@ -196,12 +199,14 @@ class EWOG_Meta_Boxes {
                                 </label>
                                 <div class="ewog-field-wrapper">
                                     <textarea id="ewog_og_description" 
-                                              name="ewog_og_description" 
-                                              rows="3" 
-                                              class="ewog-modern-textarea" 
-                                              maxlength="155"
-                                              placeholder="<?php echo esc_attr($defaults['description']); ?>"
-                                              data-default="<?php echo esc_attr($defaults['description']); ?>"><?php echo esc_textarea($og_description); ?></textarea>
+                                            name="ewog_og_description" 
+                                            rows="3" 
+                                            class="ewog-modern-textarea" 
+                                            maxlength="155"
+                                            placeholder="<?php echo esc_attr($defaults['description']); ?>"
+                                            data-default="<?php echo esc_attr($defaults['description']); ?>"
+                                            data-field-type="description"><?php echo esc_textarea($og_description); ?></textarea>
+                                    
                                     <div class="ewog-field-actions">
                                         <button type="button" class="ewog-btn-default" data-field="description">
                                             <?php _e('Use Default', EWOG_TEXT_DOMAIN); ?>
@@ -211,6 +216,7 @@ class EWOG_Meta_Boxes {
                                             <?php _e('Optimize', EWOG_TEXT_DOMAIN); ?>
                                         </button>
                                     </div>
+                                    
                                     <div class="ewog-field-footer">
                                         <div class="ewog-char-counter">
                                             <span class="ewog-char-current">0</span>/<span class="ewog-char-max">155</span>
@@ -218,7 +224,7 @@ class EWOG_Meta_Boxes {
                                                 <div class="ewog-char-bar"></div>
                                             </div>
                                         </div>
-                                        <div class="ewog-field-status">
+                                        <div class="ewog-field-status optimal">
                                             <span class="ewog-status-icon"></span>
                                             <span class="ewog-status-text"><?php _e('Optimal length: 120-155 characters', EWOG_TEXT_DOMAIN); ?></span>
                                         </div>
@@ -750,9 +756,6 @@ class EWOG_Meta_Boxes {
         do_action('ewog_product_meta_saved', $post_id, $_POST);
     }
     
-    /**
-     * Enqueue modern admin scripts and styles
-     */
     public function enqueue_admin_scripts($hook) {
         global $post_type, $post;
         
@@ -783,7 +786,7 @@ class EWOG_Meta_Boxes {
             true
         );
         
-        // Localize script with enhanced data
+        // FIXED: Proper localization with all necessary data
         wp_localize_script('ewog-modern-meta-boxes', 'ewogModernMeta', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('ewog_meta_boxes_nonce'),
@@ -801,6 +804,10 @@ class EWOG_Meta_Boxes {
                 'needs_improvement' => __('Needs Improvement', EWOG_TEXT_DOMAIN),
                 'too_short' => __('Too short', EWOG_TEXT_DOMAIN),
                 'too_long' => __('Too long', EWOG_TEXT_DOMAIN),
+                'field_required' => __('Field is required', EWOG_TEXT_DOMAIN),
+                'perfect_length' => __('Perfect length', EWOG_TEXT_DOMAIN),
+                'good_could_be_longer' => __('Good - could be longer', EWOG_TEXT_DOMAIN),
+                'too_long_reduce' => __('Too long - reduce content', EWOG_TEXT_DOMAIN),
                 'confirm_reset' => __('Are you sure you want to reset all settings to defaults?', EWOG_TEXT_DOMAIN)
             ),
             'limits' => array(
@@ -824,8 +831,23 @@ class EWOG_Meta_Boxes {
                     'name' => 'LinkedIn',
                     'debugUrl' => 'https://www.linkedin.com/post-inspector/'
                 )
-            )
+            ),
+            'debug' => defined('WP_DEBUG') && WP_DEBUG
         ));
+        
+        // FIXED: Add inline script for immediate initialization
+        wp_add_inline_script('ewog-modern-meta-boxes', '
+            console.log("EWOG: Meta boxes script loaded");
+            
+            // Ensure DOM is ready
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", function() {
+                    console.log("EWOG: DOM ready, initializing meta boxes");
+                });
+            } else {
+                console.log("EWOG: DOM already ready");
+            }
+        ');
     }
     
     /**

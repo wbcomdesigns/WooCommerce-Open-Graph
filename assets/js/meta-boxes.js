@@ -1,7 +1,8 @@
 /**
- * Enhanced WooCommerce Open Graph - WordPress Default Meta Box JavaScript
+ * Enhanced WooCommerce Open Graph - Complete Meta Boxes JavaScript
  * 
  * All functionality preserved with WordPress native styling compatibility
+ * Working character counters, field validation, tabs, and preview
  * 
  * @package Enhanced_Woo_Open_Graph
  * @version 2.0.0
@@ -109,18 +110,26 @@ class EWOGModernMetaBox {
             });
         });
         
-        // Real-time content updates
+        // Real-time content updates with working character counters
         if (this.elements.titleField) {
-            this.elements.titleField.addEventListener('input', () => {
-                this.updateCharacterCounter(this.elements.titleField);
+            this.elements.titleField.addEventListener('input', (e) => {
+                this.updateCharacterCounter(e.target);
                 this.schedulePreviewUpdate();
+            });
+            
+            this.elements.titleField.addEventListener('blur', (e) => {
+                this.validateField(e.target);
             });
         }
         
         if (this.elements.descriptionField) {
-            this.elements.descriptionField.addEventListener('input', () => {
-                this.updateCharacterCounter(this.elements.descriptionField);
+            this.elements.descriptionField.addEventListener('input', (e) => {
+                this.updateCharacterCounter(e.target);
                 this.schedulePreviewUpdate();
+            });
+            
+            this.elements.descriptionField.addEventListener('blur', (e) => {
+                this.validateField(e.target);
             });
         }
         
@@ -258,12 +267,19 @@ class EWOGModernMetaBox {
             this.initializeCustomTags();
         }
         
+        // Re-initialize character counters when switching to basic tab
+        if (tabId === 'basic') {
+            setTimeout(() => {
+                this.initializeCharacterCounters();
+            }, 100);
+        }
+        
         // Update URL hash for better UX
         window.location.hash = `ewog-tab-${tabId}`;
     }
     
     /**
-     * Initialize character counters
+     * Initialize character counters - FIXED VERSION
      */
     initializeCharacterCounters() {
         const fields = [this.elements.titleField, this.elements.descriptionField];
@@ -273,56 +289,75 @@ class EWOGModernMetaBox {
                 this.updateCharacterCounter(field);
             }
         });
+        
+        console.log('EWOG: Character counters initialized');
     }
     
     /**
-     * Update character counter with WordPress-style visual feedback
+     * Update character counter with WordPress-style visual feedback - WORKING VERSION
      */
     updateCharacterCounter(field) {
-        const wrapper = field.closest('.ewog-field-wrapper');
-        if (!wrapper) return;
+        if (!field) {
+            console.warn('EWOG: No field provided to updateCharacterCounter');
+            return;
+        }
         
-        const counter = wrapper.querySelector('.ewog-char-counter');
-        const statusElement = wrapper.querySelector('.ewog-field-status');
-        const bar = wrapper.querySelector('.ewog-char-bar');
+        const fieldWrapper = field.closest('.ewog-field-wrapper');
+        if (!fieldWrapper) {
+            console.warn('EWOG: Could not find field wrapper for', field.id);
+            return;
+        }
         
-        if (!counter || !statusElement || !bar) return;
+        const counter = fieldWrapper.querySelector('.ewog-char-counter');
+        const statusElement = fieldWrapper.querySelector('.ewog-field-status');
+        const bar = fieldWrapper.querySelector('.ewog-char-bar');
+        const currentSpan = fieldWrapper.querySelector('.ewog-char-current');
+        const maxSpan = fieldWrapper.querySelector('.ewog-char-max');
+        const statusText = fieldWrapper.querySelector('.ewog-status-text');
+        
+        if (!counter || !statusElement || !bar || !currentSpan || !maxSpan) {
+            console.warn('EWOG: Missing counter elements for', field.id, {
+                counter: !!counter,
+                statusElement: !!statusElement,
+                bar: !!bar,
+                currentSpan: !!currentSpan,
+                maxSpan: !!maxSpan
+            });
+            return;
+        }
         
         const maxLength = parseInt(field.getAttribute('maxlength')) || 0;
         const currentLength = field.value.length;
-        const percentage = (currentLength / maxLength) * 100;
+        const percentage = maxLength > 0 ? (currentLength / maxLength) * 100 : 0;
         
         // Update counter text
-        const currentSpan = counter.querySelector('.ewog-char-current');
-        if (currentSpan) {
-            currentSpan.textContent = currentLength;
-        }
+        currentSpan.textContent = currentLength;
+        maxSpan.textContent = maxLength;
         
         // Update progress bar
         bar.style.width = `${Math.min(percentage, 100)}%`;
         
         // Determine status using WordPress color scheme
         let status = 'optimal';
-        let statusText = ewogModernMeta.strings.optimal;
+        let statusTextContent = this.getStatusText('optimal');
         
-        const limits = ewogModernMeta.limits;
-        const fieldType = field.id.includes('title') ? 'title' : 'desc';
+        const limits = this.getFieldLimits(field);
         
         if (currentLength === 0) {
             status = 'error';
-            statusText = 'Field is required';
-        } else if (currentLength < limits[`${fieldType}_min`]) {
+            statusTextContent = this.getStatusText('required');
+        } else if (currentLength < limits.min) {
             status = 'warning';
-            statusText = ewogModernMeta.strings.too_short;
-        } else if (currentLength > limits[`${fieldType}_max`]) {
+            statusTextContent = this.getStatusText('too_short');
+        } else if (currentLength > limits.max) {
             status = 'error';
-            statusText = ewogModernMeta.strings.too_long;
-        } else if (currentLength >= limits[`${fieldType}_optimal`]) {
+            statusTextContent = this.getStatusText('too_long');
+        } else if (currentLength >= limits.optimal) {
             status = 'optimal';
-            statusText = ewogModernMeta.strings.optimal;
+            statusTextContent = this.getStatusText('optimal');
         } else {
-            status = 'good';
-            statusText = ewogModernMeta.strings.good;
+            status = 'warning';
+            statusTextContent = this.getStatusText('good');
         }
         
         // Apply status classes with WordPress colors
@@ -333,17 +368,104 @@ class EWOGModernMetaBox {
         field.className = field.className.replace(/\b(success|error|warning|optimal|good)\b/g, '') + ` ${status}`;
         
         // Update status text
-        const statusTextElement = statusElement.querySelector('.ewog-status-text');
-        if (statusTextElement) {
-            statusTextElement.textContent = statusText;
+        if (statusText) {
+            statusText.textContent = statusTextContent;
         }
+        
+        console.log(`EWOG: Updated counter for ${field.id}: ${currentLength}/${maxLength} (${status})`);
+    }
+    
+    /**
+     * Get field limits based on field type
+     */
+    getFieldLimits(field) {
+        const fieldType = field.dataset.fieldType || (field.id.includes('title') ? 'title' : 'description');
+        
+        const limits = {
+            title: {
+                min: 30,
+                max: 60,
+                optimal: 40
+            },
+            description: {
+                min: 120,
+                max: 155,
+                optimal: 140
+            }
+        };
+        
+        // Use localized limits if available
+        if (typeof ewogModernMeta !== 'undefined' && ewogModernMeta.limits) {
+            const localLimits = ewogModernMeta.limits;
+            if (fieldType === 'title') {
+                return {
+                    min: localLimits.title_min || limits.title.min,
+                    max: localLimits.title_max || limits.title.max,
+                    optimal: localLimits.title_optimal || limits.title.optimal
+                };
+            } else {
+                return {
+                    min: localLimits.desc_min || limits.description.min,
+                    max: localLimits.desc_max || limits.description.max,
+                    optimal: localLimits.desc_optimal || limits.description.optimal
+                };
+            }
+        }
+        
+        return limits[fieldType] || limits.title;
+    }
+    
+    /**
+     * Get localized status text
+     */
+    getStatusText(key) {
+        const strings = {
+            optimal: 'Optimal length',
+            good: 'Good - could be longer',
+            too_short: 'Too short - add more content',
+            too_long: 'Too long - reduce content',
+            required: 'Field is required'
+        };
+        
+        // Use localized strings if available
+        if (typeof ewogModernMeta !== 'undefined' && ewogModernMeta.strings) {
+            return ewogModernMeta.strings[key] || strings[key];
+        }
+        
+        return strings[key];
+    }
+    
+    /**
+     * Validate field
+     */
+    validateField(field) {
+        const limits = this.getFieldLimits(field);
+        const currentLength = field.value.length;
+        
+        let isValid = true;
+        let message = '';
+        
+        if (currentLength === 0) {
+            isValid = false;
+            message = this.getStatusText('required');
+        } else if (currentLength < limits.min) {
+            isValid = false;
+            message = this.getStatusText('too_short');
+        } else if (currentLength > limits.max) {
+            isValid = false;
+            message = this.getStatusText('too_long');
+        }
+        
+        return { isValid, message };
     }
     
     /**
      * Initialize preview
      */
     initializePreview() {
-        this.refreshPreview();
+        if (this.elements.previewContainer) {
+            this.refreshPreview();
+        }
     }
     
     /**
@@ -474,9 +596,9 @@ class EWOGModernMetaBox {
         }
         
         const mediaUploader = wp.media({
-            title: ewogModernMeta.strings.chooseImage,
+            title: this.getLocalizedString('chooseImage') || 'Choose Image',
             button: {
-                text: ewogModernMeta.strings.useImage
+                text: this.getLocalizedString('useImage') || 'Use this Image'
             },
             multiple: false,
             library: {
@@ -589,7 +711,7 @@ class EWOGModernMetaBox {
         
         const button = this.elements.analyzeButton;
         const originalText = button.textContent;
-        button.textContent = ewogModernMeta.strings.analyzing;
+        button.textContent = this.getLocalizedString('analyzing') || 'Analyzing...';
         button.disabled = true;
         
         try {
@@ -967,7 +1089,7 @@ class EWOGModernMetaBox {
      * Reset to defaults
      */
     async resetToDefaults() {
-        if (!confirm(ewogModernMeta.strings.confirm_reset)) {
+        if (!confirm(this.getLocalizedString('confirm_reset') || 'Are you sure you want to reset all settings to defaults?')) {
             return;
         }
         
@@ -1147,6 +1269,16 @@ class EWOGModernMetaBox {
     }
     
     /**
+     * Get localized string
+     */
+    getLocalizedString(key) {
+        if (typeof ewogModernMeta !== 'undefined' && ewogModernMeta.strings && ewogModernMeta.strings[key]) {
+            return ewogModernMeta.strings[key];
+        }
+        return null;
+    }
+    
+    /**
      * Get next tag index
      */
     getNextTagIndex() {
@@ -1211,6 +1343,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.querySelector('.ewog-modern-metabox')) {
             const options = window.ewogModernMeta || {};
             window.ewogMetaBox = new EWOGModernMetaBox(options);
+            
+            console.log('EWOG Meta Box fully initialized with working character counters');
         }
     }
 });
