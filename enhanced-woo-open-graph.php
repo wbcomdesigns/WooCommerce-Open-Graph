@@ -83,14 +83,24 @@ class Enhanced_Woo_Open_Graph {
      * Load plugin dependencies
      */
     private function load_dependencies() {
-        require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-settings.php';
-        require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-meta-tags.php';
-        require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-schema.php';
-        require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-sitemap.php';
-        require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-social-share.php';
-        require_once EWOG_PLUGIN_DIR . 'admin/class-ewog-admin.php';
-        require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-meta-boxes.php';
-
+        $includes_dir = EWOG_PLUGIN_DIR . 'includes/';
+        $admin_dir = EWOG_PLUGIN_DIR . 'admin/';
+        
+        // Check if files exist before requiring
+        $required_files = array(
+            $includes_dir . 'class-ewog-settings.php',
+            $includes_dir . 'class-ewog-meta-tags.php',
+            $includes_dir . 'class-ewog-schema.php',
+            $includes_dir . 'class-ewog-sitemap.php',
+            $includes_dir . 'class-ewog-social-share.php',
+            $admin_dir . 'class-ewog-admin.php'
+        );
+        
+        foreach ($required_files as $file) {
+            if (file_exists($file)) {
+                require_once $file;
+            }
+        }
     }
     
     /**
@@ -103,14 +113,28 @@ class Enhanced_Woo_Open_Graph {
             return;
         }
         
-        // Initialize components
-        $this->settings = EWOG_Settings::get_instance();
-        EWOG_Meta_Tags::get_instance();
-        EWOG_Schema::get_instance();
-        EWOG_Sitemap::get_instance();
-        EWOG_Social_Share::get_instance();
+        // Initialize components only if classes exist
+        if (class_exists('EWOG_Settings')) {
+            $this->settings = EWOG_Settings::get_instance();
+        }
         
-        if (is_admin()) {
+        if (class_exists('EWOG_Meta_Tags')) {
+            EWOG_Meta_Tags::get_instance();
+        }
+        
+        if (class_exists('EWOG_Schema')) {
+            EWOG_Schema::get_instance();
+        }
+        
+        if (class_exists('EWOG_Sitemap')) {
+            EWOG_Sitemap::get_instance();
+        }
+        
+        if (class_exists('EWOG_Social_Share')) {
+            EWOG_Social_Share::get_instance();
+        }
+        
+        if (is_admin() && class_exists('EWOG_Admin')) {
             EWOG_Admin::get_instance();
         }
         
@@ -487,9 +511,14 @@ class Enhanced_Woo_Open_Graph {
                 return new WP_Error('invalid_data', __('Invalid import data', EWOG_TEXT_DOMAIN));
             }
             
-            // Validate settings
-            $admin = EWOG_Admin::get_instance();
-            $sanitized_settings = $admin->sanitize_settings($data['settings']);
+            // Validate settings - only update if EWOG_Admin class exists
+            if (class_exists('EWOG_Admin')) {
+                $admin = EWOG_Admin::get_instance();
+                $sanitized_settings = $admin->sanitize_settings($data['settings']);
+            } else {
+                // Basic sanitization if admin class is not available
+                $sanitized_settings = array_map('sanitize_text_field', $data['settings']);
+            }
             
             // Update settings
             update_option('ewog_settings', $sanitized_settings);
@@ -511,14 +540,6 @@ Enhanced_Woo_Open_Graph::get_instance();
 function ewog() {
     return Enhanced_Woo_Open_Graph::get_instance();
 }
-
-// Declare WooCommerce compatibility
-add_action('before_woocommerce_init', function() {
-    if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('cart_checkout_blocks', __FILE__, true);
-    }
-});
 
 /**
  * Backward compatibility functions
