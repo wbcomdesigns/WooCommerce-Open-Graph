@@ -1,0 +1,491 @@
+/**
+ * Enhanced Woo Open Graph - Admin Styles
+ * Modern admin interface design
+ */
+
+/* Main Admin Container */
+.ewog-admin-wrap {
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+.ewog-admin-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ewog-admin-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.ewog-admin-header p {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+/* Content Layout */
+.ewog-admin-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 30px;
+}
+
+/* Form Styling */
+.ewog-admin-content form {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e1e8ed;
+}
+
+/* Settings Sections */
+.form-table th {
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 20px 10px 20px 0;
+    width: 200px;
+}
+
+.form-table td {
+    padding: 20px 10px;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+/* Section Headers */
+.ewog-admin-content h2 {
+    background: #f8f9fa;
+    margin: 30px -30px 20px -30px;
+    padding: 15px 30px;
+    border-left: 4px solid #667eea;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    position: sticky;
+    top: 32px;
+    z-index: 10;
+}
+
+.ewog-admin-content h2:first-child {
+    margin-top: -30px;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Input Styling */
+input[type="text"],
+input[type="url"],
+input[type="email"],
+select,
+textarea {
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    max-width: 400px;
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+input[type="email"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    accent-color: #667eea;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #495057;
+    cursor: pointer;
+}
+
+/* Description Text */
+.description {
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+/* Image Upload Field */
+.ewog-image-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ewog-image-field input[type="text"] {
+    margin-bottom: 0;
+}
+
+.ewog-upload-image,
+.ewog-remove-image {
+    align-self: flex-start;
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s ease;
+}
+
+.ewog-upload-image:hover {
+    background: #5a67d8;
+}
+
+.ewog-remove-image {
+    background: #e53e3e;
+    margin-top: 10px;
+}
+
+.ewog-remove-image:hover {
+    background: #c53030;
+}
+
+.ewog-image-preview img {
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    max-width: 200px;
+    height: auto;
+}
+
+/* Submit Button */
+.button-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.button-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+/* Sidebar */
+.ewog-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ewog-sidebar-box {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e1e8ed;
+}
+
+.ewog-sidebar-box h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 10px;
+}
+
+.ewog-sidebar-box p {
+    color: #6c757d;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.ewog-sidebar-box ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ewog-sidebar-box li {
+    margin-bottom: 8px;
+}
+
+.ewog-sidebar-box a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.ewog-sidebar-box a:hover {
+    color: #5a67d8;
+    text-decoration: underline;
+}
+
+.button-secondary {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.button-secondary:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Status Indicators */
+.ewog-status-enabled {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.ewog-status-disabled {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.ewog-status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.ewog-status-indicator.enabled {
+    background: #28a745;
+}
+
+.ewog-status-indicator.disabled {
+    background: #dc3545;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .ewog-admin-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .ewog-sidebar {
+        order: -1;
+    }
+    
+    .ewog-sidebar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .ewog-admin-wrap {
+        margin: 10px;
+    }
+    
+    .ewog-admin-header {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .ewog-admin-header h1 {
+        font-size: 24px;
+    }
+    
+    .ewog-admin-content form {
+        padding: 20px;
+        margin: 0 -10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+    
+    .ewog-admin-content h2 {
+        margin-left: -20px;
+        margin-right: -20px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    .form-table th,
+    .form-table td {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+    }
+    
+    .form-table th {
+        border-bottom: none;
+        margin-bottom: 5px;
+    }
+    
+    input[type="text"],
+    input[type="url"],
+    input[type="email"],
+    select,
+    textarea {
+        max-width: 100%;
+    }
+    
+    .ewog-sidebar {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .ewog-sidebar-box {
+        padding: 20px;
+    }
+}
+
+/* Loading States */
+.ewog-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.ewog-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Success/Error Messages */
+.ewog-message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.ewog-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.ewog-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.ewog-message.warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+/* Tooltips */
+.ewog-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.ewog-tooltip::after {
+    content: "?";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: #6c757d;
+    color: white;
+    border-radius: 50%;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    margin-left: 5px;
+}
+
+.ewog-tooltip:hover::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 5px;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .ewog-admin-content form {
+        background: #1a1a1a;
+        border-color: #333;
+    }
+    
+    .ewog-sidebar-box {
+        background: #1a1a1a;
+        border-color: #333;
+    }
+    
+    .form-table th {
+        color: #e1e8ed;
+    }
+    
+    .form-table td {
+        border-bottom-color: #333;
+    }
+    
+    input[type="text"],
+    input[type="url"],
+    input[type="email"],
+    select,
+    textarea {
+        background: #2c2c2c;
+        border-color: #444;
+        color: #e1e8ed;
+    }
+    
+    label {
+        color: #e1e8ed;
+    }
+    
+    .description {
+        color: #adb5bd;
+    }
+}
