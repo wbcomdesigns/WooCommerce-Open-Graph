@@ -44,37 +44,37 @@ class EWOG_Sitemap {
     }
     
     public function add_sitemap_rewrite_rules() {
-        // Product sitemaps (paginated)
+        // Product sitemaps
         add_rewrite_rule(
-            '^product-sitemap\.xml,
+            'product-sitemap\.xml$',
             'index.php?ewog_sitemap=products',
             'top'
         );
         
         add_rewrite_rule(
-            '^product-sitemap-([0-9]+)\.xml,
+            'product-sitemap-([0-9]+)\.xml$',
             'index.php?ewog_sitemap=products&ewog_sitemap_page=$matches[1]',
             'top'
         );
         
         // Category sitemaps
         add_rewrite_rule(
-            '^product-category-sitemap\.xml,
+            'product-category-sitemap\.xml$',
             'index.php?ewog_sitemap=categories',
             'top'
         );
         
         // Brand sitemaps
         add_rewrite_rule(
-            '^product-brand-sitemap\.xml,
+            'product-brand-sitemap\.xml$',
             'index.php?ewog_sitemap=brands',
             'top'
         );
         
-        // Main sitemap index
+        // Main sitemap
         add_rewrite_rule(
-            '^ewog-sitemap\.xml,
-            'index.php?ewog_sitemap=index',
+            'ewog-sitemap\.xml$',
+            'index.php?ewog_sitemap=main_index',
             'top'
         );
         
@@ -94,11 +94,14 @@ class EWOG_Sitemap {
         header('X-Robots-Tag: noindex, follow', true);
         
         switch ($sitemap) {
-            case 'sitemap_index':
+            case 'main_index':
                 $this->generate_sitemap_index();
                 break;
             case 'products':
-                $page = get_query_var('ewog_sitemap_page') ?: 1;
+                $page = get_query_var('ewog_sitemap_page');
+                if (empty($page)) {
+                    $page = 1;
+                }
                 $this->generate_product_sitemap($page);
                 break;
             case 'categories':
@@ -142,15 +145,6 @@ class EWOG_Sitemap {
     public function generate_all_sitemaps() {
         // Clear any existing scheduled events
         wp_clear_scheduled_hook('ewog_generate_sitemaps');
-        
-        // Generate sitemaps
-        $this->generate_sitemap_index();
-        $this->generate_product_sitemap();
-        $this->generate_category_sitemap();
-        
-        if ($this->has_product_brands()) {
-            $this->generate_brand_sitemap();
-        }
         
         // Update last generation time
         update_option('ewog_sitemap_last_generated', time());
@@ -481,8 +475,8 @@ class EWOG_Sitemap {
             if ($image_data && $attachment) {
                 $images[] = array(
                     'url' => $image_data[0],
-                    'title' => $attachment->post_title ?: $product->get_name(),
-                    'caption' => $attachment->post_excerpt ?: ''
+                    'title' => $attachment->post_title ? $attachment->post_title : $product->get_name(),
+                    'caption' => $attachment->post_excerpt ? $attachment->post_excerpt : ''
                 );
             }
         }
@@ -496,8 +490,8 @@ class EWOG_Sitemap {
             if ($image_data && $attachment) {
                 $images[] = array(
                     'url' => $image_data[0],
-                    'title' => $attachment->post_title ?: $product->get_name(),
-                    'caption' => $attachment->post_excerpt ?: ''
+                    'title' => $attachment->post_title ? $attachment->post_title : $product->get_name(),
+                    'caption' => $attachment->post_excerpt ? $attachment->post_excerpt : ''
                 );
             }
         }
@@ -660,3 +654,4 @@ class EWOG_Sitemap {
         
         return $output;
     }
+}
