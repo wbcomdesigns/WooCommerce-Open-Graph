@@ -94,7 +94,7 @@ class EWOG_Sitemap {
         header('X-Robots-Tag: noindex, follow', true);
         
         switch ($sitemap) {
-            case 'index':
+            case 'sitemap_index':
                 $this->generate_sitemap_index();
                 break;
             case 'products':
