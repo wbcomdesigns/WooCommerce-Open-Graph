@@ -1,538 +1,629 @@
 /**
- * Enhanced Woo Open Graph - JavaScript functionality
- * Modern ES6+ code with proper error handling and accessibility
+ * Enhanced Woo Open Graph - Admin JavaScript (Improved)
+ * File: assets/js/admin.js
+ * 
+ * Enhanced version maintaining existing jQuery structure
  */
 
-class EWOGSocialShare {
-    constructor() {
-        this.init();
-    }
+(function($) {
+    'use strict';
 
-    init() {
-        this.bindEvents();
-        this.initAccessibility();
-    }
-
-    bindEvents() {
-        // Copy link functionality
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.ewog-share-copy')) {
-                e.preventDefault();
-                this.copyLink(e.target.closest('.ewog-share-copy'));
-            }
-        });
-
-        // Track social share clicks
-        document.addEventListener('click', (e) => {
-            const shareBtn = e.target.closest('.ewog-share-btn:not(.ewog-share-copy)');
-            if (shareBtn) {
-                this.trackShare(shareBtn);
-            }
-        });
-
-        // Handle keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            const shareBtn = e.target.closest('.ewog-share-btn');
-            if (shareBtn && (e.key === 'Enter' || e.key === ' ')) {
-                e.preventDefault();
-                shareBtn.click();
-            }
-        });
-    }
-
-    async copyLink(button) {
-        const url = button.dataset.url;
+    /**
+     * Main admin functionality
+     */
+    const ewogAdmin = {
         
-        if (!url) return;
-
-        try {
-            // Modern clipboard API
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(url);
-            } else {
-                // Fallback for older browsers
-                this.fallbackCopyText(url);
-            }
-
-            this.showCopySuccess(button);
-            this.announceToScreenReader(ewogShare.copied);
+        init: function() {
+            this.bindEvents();
+            this.initPlatformCards();
+            this.initCollapsibles();
+            this.initAccessibility();
+        },
+        
+        bindEvents: function() {
+            // Platform card interactions
+            $(document).on('click', '.ewog-platform-card', this.handlePlatformClick);
             
-        } catch (err) {
-            console.error('Failed to copy link:', err);
-            this.showCopyError(button);
-            this.announceToScreenReader(ewogShare.copyFailed);
-        }
-    }
-
-    fallbackCopyText(text) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-            document.execCommand('copy');
-        } finally {
-            document.body.removeChild(textArea);
-        }
-    }
-
-    showCopySuccess(button) {
-        const originalText = button.querySelector('.ewog-share-text');
-        const originalContent = originalText ? originalText.textContent : '';
-        
-        button.classList.add('copied');
-        
-        if (originalText) {
-            originalText.textContent = ewogShare.copied;
-        }
-
-        setTimeout(() => {
-            button.classList.remove('copied');
-            if (originalText) {
-                originalText.textContent = originalContent;
-            }
-        }, 2000);
-    }
-
-    showCopyError(button) {
-        button.style.background = '#dc3545';
-        button.style.borderColor = '#dc3545';
-        button.style.color = 'white';
-
-        setTimeout(() => {
-            button.style.background = '';
-            button.style.borderColor = '';
-            button.style.color = '';
-        }, 2000);
-    }
-
-    trackShare(button) {
-        const platform = button.dataset.platform;
-        
-        if (!platform) return;
-
-        // Google Analytics 4 tracking
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'share', {
-                method: platform,
-                content_type: 'product',
-                item_id: this.getCurrentProductId()
-            });
-        }
-
-        // Custom tracking event
-        if (typeof jQuery !== 'undefined') {
-            jQuery(document).trigger('ewog_social_share', {
-                platform: platform,
-                url: window.location.href,
-                product_id: this.getCurrentProductId()
-            });
-        }
-
-        // Console log for debugging
-        console.log(`Shared on ${platform}:`, window.location.href);
-    }
-
-    getCurrentProductId() {
-        // Try to get product ID from various sources
-        const bodyClasses = document.body.className;
-        const productIdMatch = bodyClasses.match(/postid-(\d+)/);
-        
-        if (productIdMatch) {
-            return productIdMatch[1];
-        }
-
-        // Try to get from form data
-        const form = document.querySelector('form.cart');
-        if (form) {
-            const productIdInput = form.querySelector('input[name="product_id"]');
-            if (productIdInput) {
-                return productIdInput.value;
-            }
-        }
-
-        return null;
-    }
-
-    initAccessibility() {
-        // Add ARIA labels to share buttons
-        document.querySelectorAll('.ewog-share-btn').forEach(button => {
-            const platform = button.dataset.platform;
-            const text = button.querySelector('.ewog-share-text');
+            // Quick action buttons
+            $(document).on('click', '.ewog-quick-test', this.handleQuickTest);
+            $(document).on('click', '.ewog-clear-cache', this.handleClearCache);
             
-            if (platform && !button.getAttribute('aria-label')) {
-                const label = text ? 
-                    `Share on ${text.textContent}` : 
-                    `Share on ${platform}`;
-                button.setAttribute('aria-label', label);
-            }
-        });
-
-        // Add role and ARIA attributes to container
-        document.querySelectorAll('.ewog-social-share').forEach(container => {
-            container.setAttribute('role', 'region');
-            container.setAttribute('aria-label', 'Social sharing options');
-        });
-    }
-
-    announceToScreenReader(message) {
-        const announcement = document.createElement('div');
-        announcement.setAttribute('aria-live', 'polite');
-        announcement.setAttribute('aria-atomic', 'true');
-        announcement.className = 'sr-only';
-        announcement.style.position = 'absolute';
-        announcement.style.left = '-10000px';
-        announcement.style.width = '1px';
-        announcement.style.height = '1px';
-        announcement.style.overflow = 'hidden';
-        announcement.textContent = message;
-        
-        document.body.appendChild(announcement);
-        
-        setTimeout(() => {
-            document.body.removeChild(announcement);
-        }, 1000);
-    }
-}
-
-class EWOGAdmin {
-    constructor() {
-        if (document.body.classList.contains('woocommerce_page_enhanced-woo-open-graph')) {
-            this.init();
-        }
-    }
-
-    init() {
-        this.initImageUpload();
-        this.initFormValidation();
-        this.initSettingsToggles();
-    }
-
-    initImageUpload() {
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('ewog-upload-image')) {
-                e.preventDefault();
-                this.openMediaUploader(e.target);
-            }
+            // Tool buttons
+            $(document).on('click', '.ewog-test-facebook', this.handleFacebookTest);
+            $(document).on('click', '.ewog-test-twitter', this.handleTwitterTest);
+            $(document).on('click', '.ewog-test-schema', this.handleSchemaTest);
             
-            if (e.target.classList.contains('ewog-remove-image')) {
-                e.preventDefault();
-                this.removeImage(e.target);
-            }
-        });
-    }
-
-    openMediaUploader(button) {
-        const container = button.closest('.ewog-image-field');
-        const input = container.querySelector('.ewog-image-url');
-        const preview = container.querySelector('.ewog-image-preview');
-
-        if (typeof wp === 'undefined' || !wp.media) {
-            alert('WordPress media library is not available.');
-            return;
-        }
-
-        const mediaUploader = wp.media({
-            title: ewogAdmin.chooseImage,
-            button: {
-                text: ewogAdmin.useImage
-            },
-            multiple: false,
-            library: {
-                type: 'image'
-            }
-        });
-
-        mediaUploader.on('select', () => {
-            const attachment = mediaUploader.state().get('selection').first().toJSON();
+            // Sitemap tools
+            $(document).on('click', '.ewog-generate-sitemap', this.handleGenerateSitemap);
+            $(document).on('click', '.ewog-test-sitemap', this.handleTestSitemap);
             
-            input.value = attachment.url;
-            this.updateImagePreview(container, attachment.url);
+            // Notice dismiss
+            $(document).on('click', '.ewog-message .notice-dismiss', this.dismissNotice);
             
-            // Trigger change event for form validation
-            input.dispatchEvent(new Event('change'));
-        });
-
-        mediaUploader.open();
-    }
-
-    removeImage(button) {
-        const container = button.closest('.ewog-image-field');
-        const input = container.querySelector('.ewog-image-url');
-        const preview = container.querySelector('.ewog-image-preview');
-
-        input.value = '';
-        if (preview) {
-            preview.style.display = 'none';
-        }
-        
-        // Trigger change event for form validation
-        input.dispatchEvent(new Event('change'));
-    }
-
-    updateImagePreview(container, imageUrl) {
-        let preview = container.querySelector('.ewog-image-preview');
-        
-        if (!preview) {
-            preview = document.createElement('div');
-            preview.className = 'ewog-image-preview';
-            container.appendChild(preview);
-        }
-
-        preview.innerHTML = `
-            <img src="${imageUrl}" style="max-width: 200px; height: auto; margin-top: 10px;" />
-            <br><button type="button" class="button ewog-remove-image">Remove Image</button>
-        `;
-        
-        preview.style.display = 'block';
-    }
-
-    initFormValidation() {
-        const form = document.querySelector('form');
-        if (!form) return;
-
-        form.addEventListener('submit', (e) => {
-            const errors = this.validateForm();
+            // Form improvements
+            $('.ewog-settings-form').on('submit', this.handleFormSubmit);
             
-            if (errors.length > 0) {
-                e.preventDefault();
-                this.showValidationErrors(errors);
-            }
-        });
-
-        // Real-time validation
-        form.addEventListener('input', (e) => {
-            if (e.target.type === 'url') {
-                this.validateUrl(e.target);
-            }
-        });
-    }
-
-    validateForm() {
-        const errors = [];
+            // Enhanced toggle interactions
+            $(document).on('change', '.ewog-toggle-input', this.handleToggleChange);
+        },
         
-        // Validate URLs
-        document.querySelectorAll('input[type="url"]').forEach(input => {
-            if (input.value && !this.isValidUrl(input.value)) {
-                errors.push(`Invalid URL: ${input.previousElementSibling.textContent}`);
-            }
-        });
-
-        // Validate Twitter username format
-        const twitterInput = document.querySelector('input[name="ewog_settings[twitter_username]"]');
-        if (twitterInput && twitterInput.value) {
-            const username = twitterInput.value.trim();
-            if (username.startsWith('@')) {
-                twitterInput.value = username.substring(1);
-            }
-            if (!/^[A-Za-z0-9_]{1,15}$/.test(twitterInput.value)) {
-                errors.push('Twitter username must be 1-15 characters (letters, numbers, underscore only)');
-            }
-        }
-
-        return errors;
-    }
-
-    validateUrl(input) {
-        const isValid = !input.value || this.isValidUrl(input.value);
-        
-        input.style.borderColor = isValid ? '' : '#dc3545';
-        
-        let errorMsg = input.parentNode.querySelector('.url-error');
-        if (!isValid && !errorMsg) {
-            errorMsg = document.createElement('span');
-            errorMsg.className = 'url-error description';
-            errorMsg.style.color = '#dc3545';
-            errorMsg.textContent = 'Please enter a valid URL';
-            input.parentNode.appendChild(errorMsg);
-        } else if (isValid && errorMsg) {
-            errorMsg.remove();
-        }
-    }
-
-    isValidUrl(string) {
-        try {
-            new URL(string);
-            return true;
-        } catch (_) {
-            return false;
-        }
-    }
-
-    showValidationErrors(errors) {
-        // Remove existing error messages
-        document.querySelectorAll('.ewog-validation-error').forEach(el => el.remove());
-
-        // Create error container
-        const errorContainer = document.createElement('div');
-        errorContainer.className = 'ewog-message error ewog-validation-error';
-        errorContainer.innerHTML = `
-            <strong>Please fix the following errors:</strong>
-            <ul>${errors.map(error => `<li>${error}</li>`).join('')}</ul>
-        `;
-
-        // Insert at top of form
-        const form = document.querySelector('form');
-        form.insertBefore(errorContainer, form.firstChild);
-
-        // Scroll to errors
-        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    initSettingsToggles() {
-        // Show/hide dependent settings
-        this.toggleDependentSettings();
-
-        document.addEventListener('change', (e) => {
-            if (e.target.type === 'checkbox') {
-                this.toggleDependentSettings();
-            }
-        });
-    }
-
-    toggleDependentSettings() {
-        // Twitter username field visibility
-        const twitterEnabled = document.querySelector('input[name="ewog_settings[enable_twitter]"]');
-        const twitterUsername = document.querySelector('input[name="ewog_settings[twitter_username]"]');
-        
-        if (twitterEnabled && twitterUsername) {
-            const row = twitterUsername.closest('tr');
-            row.style.display = twitterEnabled.checked ? '' : 'none';
-        }
-
-        // Facebook App ID field visibility
-        const facebookEnabled = document.querySelector('input[name="ewog_settings[enable_facebook]"]');
-        const facebookAppId = document.querySelector('input[name="ewog_settings[facebook_app_id]"]');
-        
-        if (facebookEnabled && facebookAppId) {
-            const row = facebookAppId.closest('tr');
-            row.style.display = facebookEnabled.checked ? '' : 'none';
-        }
-
-        // Social share settings visibility
-        const shareEnabled = document.querySelector('input[name="ewog_settings[enable_social_share]"]');
-        const shareSettings = [
-            'share_button_style',
-            'share_button_position'
-        ];
-        
-        shareSettings.forEach(setting => {
-            const field = document.querySelector(`select[name="ewog_settings[${setting}]"]`);
-            if (field && shareEnabled) {
-                const row = field.closest('tr');
-                row.style.display = shareEnabled.checked ? '' : 'none';
-            }
-        });
-    }
-}
-
-// Utility Functions
-const EWOGUtils = {
-    debounce(func, wait, immediate) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                timeout = null;
-                if (!immediate) func.apply(this, args);
-            };
-            const callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) func.apply(this, args);
-        };
-    },
-
-    throttle(func, limit) {
-        let inThrottle;
-        return function() {
-            const args = arguments;
-            const context = this;
-            if (!inThrottle) {
-                func.apply(context, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
-    },
-
-    sanitizeText(text) {
-        const element = document.createElement('div');
-        element.textContent = text;
-        return element.innerHTML;
-    },
-
-    formatUrl(url) {
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            return 'https://' + url;
-        }
-        return url;
-    }
-};
-
-// Performance Optimization
-const EWOGPerformance = {
-    init() {
-        this.lazyLoadImages();
-        this.preloadCriticalResources();
-    },
-
-    lazyLoadImages() {
-        if ('IntersectionObserver' in window) {
-            const imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        img.src = img.dataset.src;
-                        img.classList.remove('lazy');
-                        observer.unobserve(img);
-                    }
+        initPlatformCards: function() {
+            $('.ewog-platform-card').each(function() {
+                const $card = $(this);
+                const $checkbox = $card.find('input[type="checkbox"]');
+                
+                if ($checkbox.prop('checked')) {
+                    $card.addClass('active');
+                }
+                
+                // Add ARIA attributes
+                $card.attr({
+                    'role': 'button',
+                    'tabindex': '0',
+                    'aria-pressed': $checkbox.prop('checked')
                 });
             });
-
-            document.querySelectorAll('img[data-src]').forEach(img => {
-                imageObserver.observe(img);
+        },
+        
+        initCollapsibles: function() {
+            $('.ewog-collapsible summary').on('click', function(e) {
+                const $details = $(this).closest('details');
+                const $icon = $(this).find('.dashicons');
+                
+                setTimeout(function() {
+                    if ($details.prop('open')) {
+                        $icon.removeClass('dashicons-arrow-right-alt2').addClass('dashicons-arrow-down-alt2');
+                    } else {
+                        $icon.removeClass('dashicons-arrow-down-alt2').addClass('dashicons-arrow-right-alt2');
+                    }
+                }, 10);
+            });
+        },
+        
+        initAccessibility: function() {
+            // Keyboard navigation for platform cards
+            $(document).on('keydown', '.ewog-platform-card', function(e) {
+                if (e.which === 13 || e.which === 32) { // Enter or Space
+                    e.preventDefault();
+                    $(this).trigger('click');
+                }
+            });
+            
+            // Escape to dismiss messages
+            $(document).on('keydown', function(e) {
+                if (e.which === 27) { // Escape
+                    $('.ewog-message .notice-dismiss').trigger('click');
+                }
+            });
+            
+            // Focus management
+            $('body').on('mousedown', function() {
+                $('body').removeClass('ewog-keyboard-nav');
+            }).on('keydown', function(e) {
+                if (e.which === 9) { // Tab
+                    $('body').addClass('ewog-keyboard-nav');
+                }
+            });
+        },
+        
+        handlePlatformClick: function(e) {
+            e.preventDefault();
+            
+            const $card = $(this);
+            const $checkbox = $card.find('input[type="checkbox"]');
+            const isChecked = $checkbox.prop('checked');
+            
+            // Toggle checkbox and card state
+            $checkbox.prop('checked', !isChecked);
+            $card.toggleClass('active', !isChecked);
+            $card.attr('aria-pressed', !isChecked);
+            
+            // Visual feedback
+            $card.addClass('ewog-clicked');
+            setTimeout(function() {
+                $card.removeClass('ewog-clicked');
+            }, 200);
+            
+            // Announce to screen readers
+            const platform = $card.find('strong').text();
+            const status = !isChecked ? 'enabled' : 'disabled';
+            ewogAdmin.announceToScreenReader(`${platform} ${status}`);
+        },
+        
+        handleQuickTest: function(e) {
+            e.preventDefault();
+            
+            const $button = $(this);
+            const originalText = $button.text();
+            
+            ewogAdmin.setButtonLoading($button, ewogAdmin.getLocalizedText('testing'));
+            
+            $.ajax({
+                url: ewogAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'ewog_quick_test',
+                    nonce: ewogAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        ewogAdmin.showMessage('success', response.data.message);
+                        ewogAdmin.displayTestResults(response.data);
+                    } else {
+                        ewogAdmin.showMessage('error', response.data.message || 'Test failed');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('EWOG Quick Test Error:', error);
+                    ewogAdmin.showMessage('error', 'Test failed: ' + error);
+                },
+                complete: function() {
+                    ewogAdmin.setButtonNormal($button, originalText);
+                }
+            });
+        },
+        
+        handleClearCache: function(e) {
+            e.preventDefault();
+            
+            const $button = $(this);
+            const originalText = $button.text();
+            
+            ewogAdmin.setButtonLoading($button, ewogAdmin.getLocalizedText('clearing'));
+            
+            $.ajax({
+                url: ewogAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'ewog_clear_cache',
+                    nonce: ewogAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        ewogAdmin.showMessage('success', response.data.message);
+                    } else {
+                        ewogAdmin.showMessage('error', response.data.message || 'Clear cache failed');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('EWOG Clear Cache Error:', error);
+                    ewogAdmin.showMessage('error', 'Clear cache failed: ' + error);
+                },
+                complete: function() {
+                    ewogAdmin.setButtonNormal($button, originalText);
+                }
+            });
+        },
+        
+        handleFacebookTest: function(e) {
+            e.preventDefault();
+            ewogAdmin.openValidationWindow('https://developers.facebook.com/tools/debug/', 'Facebook Debugger');
+        },
+        
+        handleTwitterTest: function(e) {
+            e.preventDefault();
+            ewogAdmin.openValidationWindow('https://cards-dev.twitter.com/validator', 'Twitter Card Validator');
+        },
+        
+        handleSchemaTest: function(e) {
+            e.preventDefault();
+            
+            const $button = $(this);
+            const originalText = $button.text();
+            
+            ewogAdmin.setButtonLoading($button, ewogAdmin.getLocalizedText('testing'));
+            
+            $.ajax({
+                url: ewogAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'ewog_validate_schema',
+                    nonce: ewogAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        ewogAdmin.openValidationWindow(response.data.test_url, 'Google Rich Results Test');
+                        ewogAdmin.showMessage('info', response.data.message);
+                    } else {
+                        ewogAdmin.showMessage('error', response.data.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('EWOG Schema Test Error:', error);
+                    ewogAdmin.showMessage('error', 'Schema validation failed: ' + error);
+                },
+                complete: function() {
+                    ewogAdmin.setButtonNormal($button, originalText);
+                }
+            });
+        },
+        
+        handleGenerateSitemap: function(e) {
+            e.preventDefault();
+            
+            const $button = $(this);
+            const originalText = $button.text();
+            
+            ewogAdmin.setButtonLoading($button, ewogAdmin.getLocalizedText('generating'));
+            
+            $.ajax({
+                url: ewogAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'ewog_generate_sitemap',
+                    nonce: ewogAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        ewogAdmin.showMessage('success', response.data.message);
+                        ewogAdmin.updateSitemapInfo(response.data);
+                    } else {
+                        ewogAdmin.showMessage('error', response.data.message || 'Sitemap generation failed');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('EWOG Generate Sitemap Error:', error);
+                    ewogAdmin.showMessage('error', 'Sitemap generation failed: ' + error);
+                },
+                complete: function() {
+                    ewogAdmin.setButtonNormal($button, originalText);
+                }
+            });
+        },
+        
+        handleTestSitemap: function(e) {
+            e.preventDefault();
+            
+            const $button = $(this);
+            const originalText = $button.text();
+            
+            ewogAdmin.setButtonLoading($button, ewogAdmin.getLocalizedText('testing'));
+            
+            $.ajax({
+                url: ewogAdmin.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'ewog_test_sitemap',
+                    nonce: ewogAdmin.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        ewogAdmin.showMessage('success', response.data.message);
+                    } else {
+                        ewogAdmin.showMessage('error', response.data.message || 'Sitemap test failed');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('EWOG Test Sitemap Error:', error);
+                    ewogAdmin.showMessage('error', 'Sitemap test failed: ' + error);
+                },
+                complete: function() {
+                    ewogAdmin.setButtonNormal($button, originalText);
+                }
+            });
+        },
+        
+        handleFormSubmit: function(e) {
+            const $form = $(this);
+            const $submitButton = $form.find('input[type="submit"]');
+            const originalValue = $submitButton.val();
+            
+            // Validate form
+            if (!ewogAdmin.validateForm($form)) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Show saving state
+            $submitButton.val(ewogAdmin.getLocalizedText('saving')).prop('disabled', true);
+            
+            // Re-enable after delay (form will reload page normally)
+            setTimeout(function() {
+                $submitButton.val(originalValue).prop('disabled', false);
+            }, 3000);
+        },
+        
+        handleToggleChange: function(e) {
+            const $toggle = $(this);
+            const $wrapper = $toggle.closest('.ewog-toggle-wrapper');
+            
+            if ($toggle.prop('checked')) {
+                $wrapper.addClass('active');
+            } else {
+                $wrapper.removeClass('active');
+            }
+        },
+        
+        validateForm: function($form) {
+            let isValid = true;
+            const errors = [];
+            
+            // Check if at least one feature is enabled
+            const checkedFeatures = $form.find('.ewog-toggle-input:checked, .ewog-platform-card input:checked').length;
+            
+            if (checkedFeatures === 0) {
+                errors.push('Please enable at least one feature or platform.');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                ewogAdmin.showMessage('error', 'Please fix the following errors:<br>' + errors.join('<br>'));
+            }
+            
+            return isValid;
+        },
+        
+        // Utility functions
+        setButtonLoading: function($button, text) {
+            $button.addClass('ewog-loading')
+                   .prop('disabled', true)
+                   .data('original-text', $button.text())
+                   .text(text || 'Loading...');
+        },
+        
+        setButtonNormal: function($button, text) {
+            $button.removeClass('ewog-loading')
+                   .prop('disabled', false)
+                   .text(text || $button.data('original-text') || 'Button');
+        },
+        
+        showMessage: function(type, message) {
+            // Remove existing messages
+            $('.ewog-message').fadeOut(300, function() {
+                $(this).remove();
+            });
+            
+            // Map type to WordPress notice classes
+            const noticeClass = type === 'success' ? 'notice-success' : 
+                               type === 'error' ? 'notice-error' : 
+                               type === 'warning' ? 'notice-warning' : 
+                               'notice-info';
+            
+            // Create message HTML
+            const messageHtml = `
+                <div class="notice ${noticeClass} is-dismissible ewog-message">
+                    <p>${ewogAdmin.escapeHtml(message)}</p>
+                    <button type="button" class="notice-dismiss">
+                        <span class="screen-reader-text">Dismiss this notice.</span>
+                    </button>
+                </div>
+            `;
+            
+            // Insert message
+            $('.ewog-admin-wrap h1').after(messageHtml);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(function() {
+                $('.ewog-message').fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+            
+            // Scroll to message smoothly
+            $('html, body').animate({
+                scrollTop: $('.ewog-message').offset().top - 50
+            }, 300);
+        },
+        
+        displayTestResults: function(data) {
+            const resultsHtml = `
+                <div class="ewog-test-results-content">
+                    <h4>Test Results</h4>
+                    <p><strong>Test Product:</strong> <a href="${data.product_url}" target="_blank">View Product Page</a></p>
+                    <div class="ewog-test-links">
+                        <a href="${data.facebook_test}" target="_blank" class="button button-primary">
+                            <span class="dashicons dashicons-facebook"></span> Test on Facebook
+                        </a>
+                        <a href="${data.twitter_test}" target="_blank" class="button button-primary">
+                            <span class="dashicons dashicons-twitter"></span> Test on Twitter
+                        </a>
+                        <a href="${data.schema_test}" target="_blank" class="button button-primary">
+                            <span class="dashicons dashicons-search"></span> Test Schema
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            $('.ewog-test-results').html(resultsHtml).addClass('show');
+        },
+        
+        updateSitemapInfo: function(data) {
+            if (data.timestamp) {
+                const timestampText = `<strong>Last Generated:</strong><br>${data.timestamp}`;
+                $('.ewog-sitemap-status p:first').html(timestampText);
+            }
+        },
+        
+        openValidationWindow: function(url, title) {
+            const width = 1000;
+            const height = 700;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            const features = `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no`;
+            
+            window.open(url, title.replace(/\s+/g, '_'), features);
+            
+            ewogAdmin.announceToScreenReader(`Opening ${title} in new window`);
+        },
+        
+        dismissNotice: function(e) {
+            e.preventDefault();
+            $(this).closest('.ewog-message').fadeOut(300, function() {
+                $(this).remove();
+            });
+        },
+        
+        escapeHtml: function(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) {
+                return map[m];
+            });
+        },
+        
+        announceToScreenReader: function(message) {
+            const $announcement = $('<div>')
+                .attr({
+                    'aria-live': 'polite',
+                    'aria-atomic': 'true'
+                })
+                .addClass('screen-reader-text')
+                .text(message);
+            
+            $('body').append($announcement);
+            
+            setTimeout(function() {
+                $announcement.remove();
+            }, 1000);
+        },
+        
+        getLocalizedText: function(key) {
+            const texts = {
+                testing: 'Testing...',
+                generating: 'Generating...',
+                clearing: 'Clearing...',
+                saving: 'Saving...'
+            };
+            
+            // Try to get from localized vars if available
+            if (typeof ewogAdmin.i18n !== 'undefined' && ewogAdmin.i18n[key]) {
+                return ewogAdmin.i18n[key];
+            }
+            
+            return texts[key] || key;
+        },
+        
+        // Properties for AJAX (will be set by PHP)
+        ajaxUrl: ajaxurl || '/wp-admin/admin-ajax.php',
+        nonce: '',
+        i18n: {}
+    };
+    
+    // Enhanced error handling
+    const errorHandler = {
+        init: function() {
+            // Global AJAX error handler
+            $(document).ajaxError(function(event, xhr, settings, thrownError) {
+                if (settings.url && settings.url.indexOf('admin-ajax.php') !== -1) {
+                    console.error('EWOG AJAX Error:', {
+                        url: settings.url,
+                        status: xhr.status,
+                        error: thrownError,
+                        response: xhr.responseText
+                    });
+                    
+                    // Show user-friendly error based on status
+                    let errorMessage = 'An error occurred. Please try again.';
+                    
+                    if (xhr.status === 0) {
+                        errorMessage = 'Network error. Please check your connection.';
+                    } else if (xhr.status >= 500) {
+                        errorMessage = 'Server error. Please try again later.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Permission denied. Please refresh the page.';
+                    }
+                    
+                    ewogAdmin.showMessage('error', errorMessage);
+                }
+            });
+            
+            // Global JavaScript error handler
+            window.addEventListener('error', function(e) {
+                if (e.filename && e.filename.includes('admin.js')) {
+                    console.error('EWOG JavaScript Error:', e.error);
+                }
             });
         }
-    },
-
-    preloadCriticalResources() {
-        // Preload critical CSS and JS for better performance
-        const criticalResources = [
-            { rel: 'preload', href: '/wp-content/plugins/enhanced-woo-open-graph/assets/css/social-share.css', as: 'style' }
-        ];
-
-        criticalResources.forEach(resource => {
-            const link = document.createElement('link');
-            Object.assign(link, resource);
-            document.head.appendChild(link);
+    };
+    
+    // Performance monitoring
+    const performanceMonitor = {
+        init: function() {
+            if (window.performance && window.performance.timing) {
+                $(window).on('load', function() {
+                    setTimeout(function() {
+                        const perfData = window.performance.timing;
+                        const loadTime = perfData.loadEventEnd - perfData.navigationStart;
+                        
+                        if (loadTime > 3000) {
+                            console.warn('EWOG Admin: Page load time is high:', loadTime + 'ms');
+                        }
+                    }, 1000);
+                });
+            }
+        }
+    };
+    
+    // Responsive handling
+    const responsiveHandler = {
+        init: function() {
+            this.handleResponsiveTables();
+            $(window).on('resize', this.debounce(this.handleResponsiveTables, 250));
+        },
+        
+        handleResponsiveTables: function() {
+            $('.form-table').each(function() {
+                const $table = $(this);
+                if ($table.width() > $table.parent().width()) {
+                    $table.addClass('ewog-responsive-table');
+                } else {
+                    $table.removeClass('ewog-responsive-table');
+                }
+            });
+        },
+        
+        debounce: function(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
+    };
+    
+    // Initialize when DOM is ready
+    $(document).ready(function() {
+        // Set AJAX URL and nonce if provided by localized script
+        if (typeof ewogAdminVars !== 'undefined') {
+            ewogAdmin.ajaxUrl = ewogAdminVars.ajaxUrl;
+            ewogAdmin.nonce = ewogAdminVars.nonce;
+            ewogAdmin.i18n = ewogAdminVars;
+        }
+        
+        // Initialize all components
+        ewogAdmin.init();
+        errorHandler.init();
+        performanceMonitor.init();
+        responsiveHandler.init();
+        
+        // Add enhanced class for styling hooks
+        $('body').addClass('ewog-admin-enhanced');
+        
+        // Smooth scrolling for internal links
+        $('a[href^="#"]').on('click', function(e) {
+            const target = $(this.getAttribute('href'));
+            if (target.length) {
+                e.preventDefault();
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 50
+                }, 300);
+            }
         });
-    }
-};
+        
+        console.log('EWOG Admin Enhanced: Initialized successfully');
+    });
+    
+    // Make admin object available globally
+    window.ewogAdmin = ewogAdmin;
 
-// Initialize everything when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    new EWOGSocialShare();
-    new EWOGAdmin();
-    EWOGPerformance.init();
-});
-
-// Handle page visibility changes for analytics
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        // Page became visible - could track engagement
-        console.log('EWOG: Page became visible');
-    }
-});
-
-// Export for potential external use
-window.EWOG = {
-    SocialShare: EWOGSocialShare,
-    Admin: EWOGAdmin,
-    Utils: EWOGUtils,
-    Performance: EWOGPerformance
-};
+})(jQuery);
