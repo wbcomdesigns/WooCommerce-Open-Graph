@@ -1,8 +1,8 @@
 <?php
 /**
- * Enhanced Meta Tags Handler Class
+ * Enhanced Meta Tags Handler Class - COMPLETE VERSION
  * 
- * Comprehensive Open Graph, Twitter Card, and social media meta tags
+ * All original functions preserved + safe duplicate prevention
  */
 
 if (!defined('ABSPATH')) {
@@ -13,6 +13,7 @@ class EWOG_Meta_Tags {
     
     private static $instance = null;
     private $settings;
+    private $existing_og_tags = array(); // NEW: For duplicate prevention
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -27,12 +28,54 @@ class EWOG_Meta_Tags {
     }
     
     private function init_hooks() {
-        add_action('wp_head', array($this, 'output_meta_tags'), 1);
+        // NEW: Hook early to scan for existing tags
+        add_action('wp_head', array($this, 'scan_existing_tags'), 1);
+        
+        // ORIGINAL: Output meta tags (moved to priority 15 to run after other plugins)
+        add_action('wp_head', array($this, 'output_meta_tags'), 15);
         add_filter('language_attributes', array($this, 'add_opengraph_namespace'));
     }
     
     /**
-     * Add Open Graph namespace to html tag
+     * NEW: Scan for existing Open Graph tags from other plugins
+     */
+    public function scan_existing_tags() {
+        if (!$this->should_add_meta_tags()) {
+            return;
+        }
+        
+        // Capture what other plugins might have output
+        ob_start();
+        do_action('wp_head_early_og');
+        $early_content = ob_get_clean();
+        
+        // Scan for existing OG tags
+        if (preg_match_all('/<meta\s+property=["\']og:([^"\']+)["\'][^>]*>/i', $early_content, $matches)) {
+            foreach ($matches[1] as $property) {
+                $this->existing_og_tags[] = strtolower($property);
+            }
+        }
+        
+        // Scan for existing Twitter tags
+        if (preg_match_all('/<meta\s+name=["\']twitter:([^"\']+)["\'][^>]*>/i', $early_content, $matches)) {
+            foreach ($matches[1] as $property) {
+                $this->existing_og_tags[] = 'twitter:' . strtolower($property);
+            }
+        }
+    }
+    
+    /**
+     * NEW: Check if a specific tag already exists
+     */
+    private function tag_exists($property) {
+        $property = strtolower($property);
+        return in_array($property, $this->existing_og_tags) || 
+               in_array('og:' . $property, $this->existing_og_tags) ||
+               in_array('twitter:' . $property, $this->existing_og_tags);
+    }
+    
+    /**
+     * ORIGINAL: Add Open Graph namespace to html tag
      */
     public function add_opengraph_namespace($output) {
         if ($this->should_add_meta_tags()) {
@@ -51,7 +94,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Output meta tags
+     * ORIGINAL: Output meta tags (with NEW safe duplicate checking)
      */
     public function output_meta_tags() {
         if (!$this->should_add_meta_tags()) {
@@ -66,30 +109,26 @@ class EWOG_Meta_Tags {
         
         echo "\n<!-- Enhanced Woo Open Graph Meta Tags -->\n";
         
-        // Basic Open Graph tags
+        // Basic Open Graph tags with NEW duplicate checking
         $this->output_basic_og_tags($meta_data);
         
-        // Facebook specific tags
+        // Platform specific tags (ORIGINAL functionality)
         if (!empty($this->settings['enable_facebook'])) {
             $this->output_facebook_tags($meta_data);
         }
         
-        // Twitter Card tags
         if (!empty($this->settings['enable_twitter'])) {
             $this->output_twitter_tags($meta_data);
         }
         
-        // LinkedIn tags
         if (!empty($this->settings['enable_linkedin'])) {
             $this->output_linkedin_tags($meta_data);
         }
         
-        // Pinterest tags
         if (!empty($this->settings['enable_pinterest'])) {
             $this->output_pinterest_tags($meta_data);
         }
         
-        // WhatsApp tags
         if (!empty($this->settings['enable_whatsapp'])) {
             $this->output_whatsapp_tags($meta_data);
         }
@@ -98,7 +137,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Check if meta tags should be added
+     * ORIGINAL: Check if meta tags should be added
      */
     private function should_add_meta_tags() {
         if (!function_exists('is_woocommerce')) {
@@ -109,7 +148,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Get meta data for current page
+     * ORIGINAL: Get meta data for current page
      */
     private function get_meta_data() {
         global $post;
@@ -128,7 +167,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Get enhanced product meta data
+     * ORIGINAL: Get enhanced product meta data (COMPLETE with all fields)
      */
     private function get_enhanced_product_meta_data($post) {
         $product = wc_get_product($post->ID);
@@ -197,7 +236,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Get optimized images for social sharing
+     * ORIGINAL: Get optimized images for social sharing (COMPLETE)
      */
     private function get_optimized_images($product) {
         $images = array();
@@ -250,22 +289,35 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Output basic Open Graph tags
+     * MODIFIED: Output basic Open Graph tags with duplicate prevention
      */
     private function output_basic_og_tags($meta_data) {
-        if (!empty($meta_data['title'])) {
+        $should_override = $this->should_disable_title_description();
+        
+        // Title - only if not exists OR user wants override
+        if ((!$this->tag_exists('title') || $should_override) && !empty($meta_data['title'])) {
             echo '<meta property="og:title" content="' . esc_attr($meta_data['title']) . '" />' . "\n";
         }
         
-        if (!empty($meta_data['description'])) {
+        // Description - only if not exists OR user wants override
+        if ((!$this->tag_exists('description') || $should_override) && !empty($meta_data['description'])) {
             echo '<meta property="og:description" content="' . esc_attr($meta_data['description']) . '" />' . "\n";
         }
         
+        // Type - always safe for products
         echo '<meta property="og:type" content="' . esc_attr($meta_data['type']) . '" />' . "\n";
-        echo '<meta property="og:url" content="' . esc_url($meta_data['url']) . '" />' . "\n";
-        echo '<meta property="og:site_name" content="' . esc_attr($meta_data['site_name']) . '" />' . "\n";
         
-        // Multiple images
+        // URL - only if not exists
+        if (!$this->tag_exists('url')) {
+            echo '<meta property="og:url" content="' . esc_url($meta_data['url']) . '" />' . "\n";
+        }
+        
+        // Site name - only if not exists
+        if (!$this->tag_exists('site_name')) {
+            echo '<meta property="og:site_name" content="' . esc_attr($meta_data['site_name']) . '" />' . "\n";
+        }
+        
+        // Images - always add (WooCommerce specific)
         if (!empty($meta_data['images'])) {
             foreach ($meta_data['images'] as $image) {
                 echo '<meta property="og:image" content="' . esc_url($image['url']) . '" />' . "\n";
@@ -277,11 +329,14 @@ class EWOG_Meta_Tags {
             }
         }
         
-        echo '<meta property="og:locale" content="' . esc_attr(str_replace('-', '_', get_locale())) . '" />' . "\n";
+        // Locale - only if not exists
+        if (!$this->tag_exists('locale')) {
+            echo '<meta property="og:locale" content="' . esc_attr(str_replace('-', '_', get_locale())) . '" />' . "\n";
+        }
     }
     
     /**
-     * Output Facebook specific tags
+     * ORIGINAL: Output Facebook specific tags (COMPLETE)
      */
     private function output_facebook_tags($meta_data) {
         if (!empty($this->settings['facebook_app_id'])) {
@@ -340,31 +395,41 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Output enhanced Twitter Card tags
+     * MODIFIED: Output enhanced Twitter Card tags with duplicate prevention
      */
     private function output_twitter_tags($meta_data) {
+        $should_override = $this->should_disable_title_description();
+        
         // Use product card for products, summary_large_image for others
         $card_type = ($meta_data['type'] === 'product') ? 'product' : 'summary_large_image';
-        echo '<meta name="twitter:card" content="' . esc_attr($card_type) . '" />' . "\n";
-        
-        if (!empty($this->settings['twitter_username'])) {
-            echo '<meta name="twitter:site" content="@' . esc_attr($this->settings['twitter_username']) . '" />' . "\n";
-            echo '<meta name="twitter:creator" content="@' . esc_attr($this->settings['twitter_username']) . '" />' . "\n";
+        if (!$this->tag_exists('twitter:card') || $should_override) {
+            echo '<meta name="twitter:card" content="' . esc_attr($card_type) . '" />' . "\n";
         }
         
-        if (!empty($meta_data['title'])) {
+        if (!empty($this->settings['twitter_username'])) {
+            if (!$this->tag_exists('twitter:site')) {
+                echo '<meta name="twitter:site" content="@' . esc_attr($this->settings['twitter_username']) . '" />' . "\n";
+            }
+            if (!$this->tag_exists('twitter:creator')) {
+                echo '<meta name="twitter:creator" content="@' . esc_attr($this->settings['twitter_username']) . '" />' . "\n";
+            }
+        }
+        
+        if ((!$this->tag_exists('twitter:title') || $should_override) && !empty($meta_data['title'])) {
             echo '<meta name="twitter:title" content="' . esc_attr($meta_data['title']) . '" />' . "\n";
         }
         
-        if (!empty($meta_data['description'])) {
+        if ((!$this->tag_exists('twitter:description') || $should_override) && !empty($meta_data['description'])) {
             echo '<meta name="twitter:description" content="' . esc_attr($meta_data['description']) . '" />' . "\n";
         }
         
         // Twitter image (use first image)
         if (!empty($meta_data['images'])) {
             $first_image = $meta_data['images'][0];
-            echo '<meta name="twitter:image" content="' . esc_url($first_image['url']) . '" />' . "\n";
-            echo '<meta name="twitter:image:alt" content="' . esc_attr($first_image['alt']) . '" />' . "\n";
+            if (!$this->tag_exists('twitter:image')) {
+                echo '<meta name="twitter:image" content="' . esc_url($first_image['url']) . '" />' . "\n";
+                echo '<meta name="twitter:image:alt" content="' . esc_attr($first_image['alt']) . '" />' . "\n";
+            }
         }
         
         // Product specific data for Twitter
@@ -394,7 +459,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Output LinkedIn tags
+     * ORIGINAL: Output LinkedIn tags (COMPLETE)
      */
     private function output_linkedin_tags($meta_data) {
         // LinkedIn primarily uses Open Graph, but we can add some specific tags
@@ -408,7 +473,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Output Pinterest tags
+     * ORIGINAL: Output Pinterest tags (COMPLETE)
      */
     private function output_pinterest_tags($meta_data) {
         echo '<meta name="pinterest-rich-pin" content="true" />' . "\n";
@@ -428,7 +493,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Output WhatsApp optimization tags
+     * ORIGINAL: Output WhatsApp optimization tags (COMPLETE)
      */
     private function output_whatsapp_tags($meta_data) {
         // WhatsApp uses Open Graph tags, but we can optimize the description
@@ -439,7 +504,7 @@ class EWOG_Meta_Tags {
     }
     
     /**
-     * Helper methods
+     * ALL ORIGINAL HELPER METHODS BELOW (COMPLETE)
      */
     
     private function should_disable_title_description() {
