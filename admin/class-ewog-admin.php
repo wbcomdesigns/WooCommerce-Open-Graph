@@ -1,8 +1,8 @@
 <?php
 /**
- * Admin Settings Class
+ * Enhanced Admin Settings Class
  * 
- * Modern admin interface with better UX and organization
+ * Modern admin interface with comprehensive settings
  */
 
 if (!defined('ABSPATH')) {
@@ -30,6 +30,11 @@ class EWOG_Admin {
         add_action('admin_init', array($this, 'register_settings'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_filter('plugin_action_links_' . plugin_basename(EWOG_PLUGIN_FILE), array($this, 'add_action_links'));
+        
+        // AJAX handlers
+        add_action('wp_ajax_ewog_test_sitemap', array($this, 'ajax_test_sitemap'));
+        add_action('wp_ajax_ewog_generate_sitemap', array($this, 'ajax_generate_sitemap'));
+        add_action('wp_ajax_ewog_validate_schema', array($this, 'ajax_validate_schema'));
     }
     
     /**
@@ -52,19 +57,43 @@ class EWOG_Admin {
     public function register_settings() {
         register_setting('ewog_settings_group', 'ewog_settings', array($this, 'sanitize_settings'));
         
-        // General Settings Section
+        // Schema Settings Section
         add_settings_section(
-            'ewog_general_section',
-            __('General Settings', EWOG_TEXT_DOMAIN),
-            array($this, 'general_section_callback'),
+            'ewog_schema_section',
+            __('Schema.org Structured Data', EWOG_TEXT_DOMAIN),
+            array($this, 'schema_section_callback'),
+            'ewog_settings'
+        );
+        
+        // Open Graph Settings Section
+        add_settings_section(
+            'ewog_opengraph_section',
+            __('Open Graph Meta Tags', EWOG_TEXT_DOMAIN),
+            array($this, 'opengraph_section_callback'),
             'ewog_settings'
         );
         
         // Social Platforms Section
         add_settings_section(
             'ewog_platforms_section',
-            __('Social Platforms', EWOG_TEXT_DOMAIN),
+            __('Social Media Platforms', EWOG_TEXT_DOMAIN),
             array($this, 'platforms_section_callback'),
+            'ewog_settings'
+        );
+        
+        // Sitemap Settings Section
+        add_settings_section(
+            'ewog_sitemap_section',
+            __('XML Sitemaps', EWOG_TEXT_DOMAIN),
+            array($this, 'sitemap_section_callback'),
+            'ewog_settings'
+        );
+        
+        // Social Sharing Section
+        add_settings_section(
+            'ewog_sharing_section',
+            __('Social Sharing Buttons', EWOG_TEXT_DOMAIN),
+            array($this, 'sharing_section_callback'),
             'ewog_settings'
         );
         
@@ -76,14 +105,6 @@ class EWOG_Admin {
             'ewog_settings'
         );
         
-        // Social Sharing Section
-        add_settings_section(
-            'ewog_sharing_section',
-            __('Social Sharing', EWOG_TEXT_DOMAIN),
-            array($this, 'sharing_section_callback'),
-            'ewog_settings'
-        );
-        
         $this->add_settings_fields();
     }
     
@@ -91,16 +112,85 @@ class EWOG_Admin {
      * Add settings fields
      */
     private function add_settings_fields() {
-        // General Settings
+        // Schema Settings
+        $this->add_schema_settings_fields();
+        
+        // Open Graph Settings
+        $this->add_opengraph_settings_fields();
+        
+        // Social Platform Settings
+        $this->add_platform_settings_fields();
+        
+        // Sitemap Settings
+        $this->add_sitemap_settings_fields();
+        
+        // Social Sharing Settings
+        $this->add_sharing_settings_fields();
+        
+        // Advanced Settings
+        $this->add_advanced_settings_fields();
+    }
+    
+    private function add_schema_settings_fields() {
+        add_settings_field(
+            'enable_schema',
+            __('Enable Schema Markup', EWOG_TEXT_DOMAIN),
+            array($this, 'checkbox_field'),
+            'ewog_settings',
+            'ewog_schema_section',
+            array(
+                'id' => 'enable_schema',
+                'description' => __('Add comprehensive Schema.org structured data for better SEO', EWOG_TEXT_DOMAIN)
+            )
+        );
+        
+        add_settings_field(
+            'enable_enhanced_schema',
+            __('Enhanced Product Schema', EWOG_TEXT_DOMAIN),
+            array($this, 'checkbox_field'),
+            'ewog_settings',
+            'ewog_schema_section',
+            array(
+                'id' => 'enable_enhanced_schema',
+                'description' => __('Include advanced product properties (GTIN, MPN, brand, specifications)', EWOG_TEXT_DOMAIN)
+            )
+        );
+        
+        add_settings_field(
+            'enable_breadcrumb_schema',
+            __('Breadcrumb Schema', EWOG_TEXT_DOMAIN),
+            array($this, 'checkbox_field'),
+            'ewog_settings',
+            'ewog_schema_section',
+            array(
+                'id' => 'enable_breadcrumb_schema',
+                'description' => __('Add breadcrumb navigation schema markup', EWOG_TEXT_DOMAIN)
+            )
+        );
+        
+        add_settings_field(
+            'enable_organization_schema',
+            __('Organization Schema', EWOG_TEXT_DOMAIN),
+            array($this, 'checkbox_field'),
+            'ewog_settings',
+            'ewog_schema_section',
+            array(
+                'id' => 'enable_organization_schema',
+                'description' => __('Add organization and store information schema', EWOG_TEXT_DOMAIN)
+            )
+        );
+    }
+    
+    private function add_opengraph_settings_fields() {
         add_settings_field(
             'disable_title_description',
             __('Override Other Plugins', EWOG_TEXT_DOMAIN),
             array($this, 'checkbox_field'),
             'ewog_settings',
-            'ewog_general_section',
+            'ewog_opengraph_section',
             array(
                 'id' => 'disable_title_description',
-                'description' => __('Disable title and description from other SEO plugins (Yoast, RankMath, etc.)', EWOG_TEXT_DOMAIN)
+                'description' => __('Override title and description from other SEO plugins', EWOG_TEXT_DOMAIN)
             )
         );
         
@@ -109,7 +199,7 @@ class EWOG_Admin {
             __('Image Size', EWOG_TEXT_DOMAIN),
             array($this, 'select_field'),
             'ewog_settings',
-            'ewog_general_section',
+            'ewog_opengraph_section',
             array(
                 'id' => 'image_size',
                 'options' => array(
@@ -127,30 +217,31 @@ class EWOG_Admin {
             __('Fallback Image', EWOG_TEXT_DOMAIN),
             array($this, 'image_field'),
             'ewog_settings',
-            'ewog_general_section',
+            'ewog_opengraph_section',
             array(
                 'id' => 'fallback_image',
                 'description' => __('Default image when product has no featured image', EWOG_TEXT_DOMAIN)
             )
         );
-        
-        // Social Platforms
+    }
+    
+    private function add_platform_settings_fields() {
         $platforms = array(
             'facebook' => array(
                 'label' => __('Facebook', EWOG_TEXT_DOMAIN),
-                'description' => __('Enable Facebook Open Graph tags', EWOG_TEXT_DOMAIN)
+                'description' => __('Enable Facebook Open Graph tags with enhanced product data', EWOG_TEXT_DOMAIN)
             ),
             'twitter' => array(
                 'label' => __('Twitter', EWOG_TEXT_DOMAIN),
-                'description' => __('Enable Twitter Card tags', EWOG_TEXT_DOMAIN)
+                'description' => __('Enable Twitter Card tags with product information', EWOG_TEXT_DOMAIN)
             ),
             'linkedin' => array(
                 'label' => __('LinkedIn', EWOG_TEXT_DOMAIN),
-                'description' => __('Enable LinkedIn specific tags', EWOG_TEXT_DOMAIN)
+                'description' => __('Enable LinkedIn specific optimization', EWOG_TEXT_DOMAIN)
             ),
             'pinterest' => array(
                 'label' => __('Pinterest', EWOG_TEXT_DOMAIN),
-                'description' => __('Enable Pinterest Rich Pins', EWOG_TEXT_DOMAIN)
+                'description' => __('Enable Pinterest Rich Pins with product data', EWOG_TEXT_DOMAIN)
             ),
             'whatsapp' => array(
                 'label' => __('WhatsApp', EWOG_TEXT_DOMAIN),
@@ -181,7 +272,7 @@ class EWOG_Admin {
             'ewog_platforms_section',
             array(
                 'id' => 'facebook_app_id',
-                'description' => __('Your Facebook App ID for better analytics', EWOG_TEXT_DOMAIN)
+                'description' => __('Your Facebook App ID for better analytics and insights', EWOG_TEXT_DOMAIN)
             )
         );
         
@@ -193,24 +284,50 @@ class EWOG_Admin {
             'ewog_platforms_section',
             array(
                 'id' => 'twitter_username',
-                'description' => __('Twitter username (without @)', EWOG_TEXT_DOMAIN)
+                'description' => __('Twitter username (without @) for attribution', EWOG_TEXT_DOMAIN)
             )
         );
-        
-        // Advanced Settings
+    }
+    
+    private function add_sitemap_settings_fields() {
         add_settings_field(
-            'enable_schema',
-            __('Enable Schema Markup', EWOG_TEXT_DOMAIN),
+            'enable_product_sitemap',
+            __('Product Sitemaps', EWOG_TEXT_DOMAIN),
             array($this, 'checkbox_field'),
             'ewog_settings',
-            'ewog_advanced_section',
+            'ewog_sitemap_section',
             array(
-                'id' => 'enable_schema',
-                'description' => __('Add structured data for better SEO', EWOG_TEXT_DOMAIN)
+                'id' => 'enable_product_sitemap',
+                'description' => __('Generate comprehensive XML sitemaps for products with images', EWOG_TEXT_DOMAIN)
             )
         );
         
-        // Social Sharing Settings
+        add_settings_field(
+            'sitemap_products_per_page',
+            __('Products per Sitemap', EWOG_TEXT_DOMAIN),
+            array($this, 'number_field'),
+            'ewog_settings',
+            'ewog_sitemap_section',
+            array(
+                'id' => 'sitemap_products_per_page',
+                'min' => 100,
+                'max' => 1000,
+                'default' => 500,
+                'description' => __('Number of products per sitemap file (recommended: 500)', EWOG_TEXT_DOMAIN)
+            )
+        );
+        
+        add_settings_field(
+            'sitemap_test_button',
+            __('Sitemap Management', EWOG_TEXT_DOMAIN),
+            array($this, 'sitemap_management_field'),
+            'ewog_settings',
+            'ewog_sitemap_section',
+            array()
+        );
+    }
+    
+    private function add_sharing_settings_fields() {
         add_settings_field(
             'enable_social_share',
             __('Enable Social Share Buttons', EWOG_TEXT_DOMAIN),
@@ -236,7 +353,7 @@ class EWOG_Admin {
                     'classic' => __('Classic', EWOG_TEXT_DOMAIN),
                     'minimal' => __('Minimal', EWOG_TEXT_DOMAIN)
                 ),
-                'description' => __('Choose the style for share buttons', EWOG_TEXT_DOMAIN)
+                'description' => __('Choose the visual style for share buttons', EWOG_TEXT_DOMAIN)
             )
         );
         
@@ -254,28 +371,71 @@ class EWOG_Admin {
                     'after_summary' => __('After Product Summary', EWOG_TEXT_DOMAIN),
                     'after_tabs' => __('After Product Tabs', EWOG_TEXT_DOMAIN)
                 ),
-                'description' => __('Where to display the share buttons', EWOG_TEXT_DOMAIN)
+                'description' => __('Where to display the share buttons on product pages', EWOG_TEXT_DOMAIN)
             )
+        );
+    }
+    
+    private function add_advanced_settings_fields() {
+        add_settings_field(
+            'cache_meta_tags',
+            __('Cache Meta Tags', EWOG_TEXT_DOMAIN),
+            array($this, 'checkbox_field'),
+            'ewog_settings',
+            'ewog_advanced_section',
+            array(
+                'id' => 'cache_meta_tags',
+                'description' => __('Cache generated meta tags for better performance', EWOG_TEXT_DOMAIN)
+            )
+        );
+        
+        add_settings_field(
+            'debug_mode',
+            __('Debug Mode', EWOG_TEXT_DOMAIN),
+            array($this, 'checkbox_field'),
+            'ewog_settings',
+            'ewog_advanced_section',
+            array(
+                'id' => 'debug_mode',
+                'description' => __('Enable debug mode for troubleshooting (adds HTML comments)', EWOG_TEXT_DOMAIN)
+            )
+        );
+        
+        add_settings_field(
+            'schema_validation',
+            __('Schema Validation', EWOG_TEXT_DOMAIN),
+            array($this, 'schema_validation_field'),
+            'ewog_settings',
+            'ewog_advanced_section',
+            array()
         );
     }
     
     /**
      * Section callbacks
      */
-    public function general_section_callback() {
-        echo '<p>' . __('Configure general Open Graph settings for your WooCommerce store.', EWOG_TEXT_DOMAIN) . '</p>';
+    public function schema_section_callback() {
+        echo '<p>' . __('Configure Schema.org structured data to help search engines understand your products better and display rich snippets in search results.', EWOG_TEXT_DOMAIN) . '</p>';
+    }
+    
+    public function opengraph_section_callback() {
+        echo '<p>' . __('Configure Open Graph meta tags for optimal social media sharing appearance across all platforms.', EWOG_TEXT_DOMAIN) . '</p>';
     }
     
     public function platforms_section_callback() {
-        echo '<p>' . __('Enable or disable Open Graph tags for specific social media platforms.', EWOG_TEXT_DOMAIN) . '</p>';
+        echo '<p>' . __('Enable or disable specific social media platforms and configure platform-specific settings.', EWOG_TEXT_DOMAIN) . '</p>';
     }
     
-    public function advanced_section_callback() {
-        echo '<p>' . __('Advanced settings for power users and developers.', EWOG_TEXT_DOMAIN) . '</p>';
+    public function sitemap_section_callback() {
+        echo '<p>' . __('Generate comprehensive XML sitemaps specifically optimized for WooCommerce products, categories, and brands.', EWOG_TEXT_DOMAIN) . '</p>';
     }
     
     public function sharing_section_callback() {
-        echo '<p>' . __('Configure social sharing buttons for your products.', EWOG_TEXT_DOMAIN) . '</p>';
+        echo '<p>' . __('Configure social sharing buttons to encourage customers to share your products on social media.', EWOG_TEXT_DOMAIN) . '</p>';
+    }
+    
+    public function advanced_section_callback() {
+        echo '<p>' . __('Advanced settings for performance optimization and debugging.', EWOG_TEXT_DOMAIN) . '</p>';
     }
     
     /**
@@ -285,9 +445,9 @@ class EWOG_Admin {
         $settings = get_option('ewog_settings', array());
         $value = isset($settings[$args['id']]) ? $settings[$args['id']] : false;
         
-        echo '<label>';
+        echo '<label class="ewog-checkbox-label">';
         echo '<input type="checkbox" name="ewog_settings[' . esc_attr($args['id']) . ']" value="1" ' . checked(1, $value, false) . ' />';
-        echo ' ' . esc_html($args['description']);
+        echo '<span class="ewog-checkbox-text">' . esc_html($args['description']) . '</span>';
         echo '</label>';
     }
     
@@ -296,6 +456,19 @@ class EWOG_Admin {
         $value = isset($settings[$args['id']]) ? $settings[$args['id']] : '';
         
         echo '<input type="text" name="ewog_settings[' . esc_attr($args['id']) . ']" value="' . esc_attr($value) . '" class="regular-text" />';
+        if (isset($args['description'])) {
+            echo '<p class="description">' . esc_html($args['description']) . '</p>';
+        }
+    }
+    
+    public function number_field($args) {
+        $settings = get_option('ewog_settings', array());
+        $value = isset($settings[$args['id']]) ? $settings[$args['id']] : $args['default'];
+        
+        $min = isset($args['min']) ? 'min="' . esc_attr($args['min']) . '"' : '';
+        $max = isset($args['max']) ? 'max="' . esc_attr($args['max']) . '"' : '';
+        
+        echo '<input type="number" name="ewog_settings[' . esc_attr($args['id']) . ']" value="' . esc_attr($value) . '" ' . $min . ' ' . $max . ' class="small-text" />';
         if (isset($args['description'])) {
             echo '<p class="description">' . esc_html($args['description']) . '</p>';
         }
@@ -339,6 +512,44 @@ class EWOG_Admin {
         echo '</div>';
     }
     
+    public function sitemap_management_field($args) {
+        $settings = get_option('ewog_settings', array());
+        $last_generated = get_option('ewog_sitemap_last_generated', 0);
+        
+        echo '<div class="ewog-sitemap-management">';
+        
+        if ($last_generated) {
+            echo '<p><strong>' . __('Last Generated:', EWOG_TEXT_DOMAIN) . '</strong> ' . date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $last_generated) . '</p>';
+        }
+        
+        echo '<p>';
+        echo '<button type="button" class="button ewog-generate-sitemap" data-action="generate">' . __('Generate Now', EWOG_TEXT_DOMAIN) . '</button> ';
+        echo '<button type="button" class="button ewog-test-sitemap" data-action="test">' . __('Test Sitemap', EWOG_TEXT_DOMAIN) . '</button>';
+        echo '</p>';
+        
+        if (!empty($settings['enable_product_sitemap'])) {
+            echo '<p class="description">';
+            echo __('Sitemap URLs:', EWOG_TEXT_DOMAIN) . '<br>';
+            echo '<code>' . home_url('/ewog-sitemap.xml') . '</code> (Main Index)<br>';
+            echo '<code>' . home_url('/product-sitemap.xml') . '</code> (Products)<br>';
+            echo '<code>' . home_url('/product-category-sitemap.xml') . '</code> (Categories)';
+            echo '</p>';
+        }
+        
+        echo '<div class="ewog-sitemap-results"></div>';
+        echo '</div>';
+    }
+    
+    public function schema_validation_field($args) {
+        echo '<div class="ewog-schema-validation">';
+        echo '<p>';
+        echo '<button type="button" class="button ewog-validate-schema">' . __('Test Schema Markup', EWOG_TEXT_DOMAIN) . '</button>';
+        echo '</p>';
+        echo '<p class="description">' . __('Test your Schema.org markup with Google\'s Rich Results Test', EWOG_TEXT_DOMAIN) . '</p>';
+        echo '<div class="ewog-schema-results"></div>';
+        echo '</div>';
+    }
+    
     /**
      * Admin page
      */
@@ -348,11 +559,11 @@ class EWOG_Admin {
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             
             <div class="ewog-admin-header">
-                <p><?php _e('Optimize your WooCommerce store for social media sharing with enhanced Open Graph meta tags.', EWOG_TEXT_DOMAIN); ?></p>
+                <p><?php _e('Enhance your WooCommerce store with comprehensive Schema.org markup, optimized Open Graph tags, and advanced XML sitemaps.', EWOG_TEXT_DOMAIN); ?></p>
             </div>
             
             <div class="ewog-admin-content">
-                <form action="options.php" method="post">
+                <form action="options.php" method="post" class="ewog-settings-form">
                     <?php
                     settings_fields('ewog_settings_group');
                     do_settings_sections('ewog_settings');
@@ -362,24 +573,157 @@ class EWOG_Admin {
                 
                 <div class="ewog-sidebar">
                     <div class="ewog-sidebar-box">
-                        <h3><?php _e('Quick Test', EWOG_TEXT_DOMAIN); ?></h3>
-                        <p><?php _e('Test your Open Graph tags with these tools:', EWOG_TEXT_DOMAIN); ?></p>
+                        <h3><?php _e('Quick Validation', EWOG_TEXT_DOMAIN); ?></h3>
+                        <p><?php _e('Test your markup with these tools:', EWOG_TEXT_DOMAIN); ?></p>
                         <ul>
                             <li><a href="https://developers.facebook.com/tools/debug/" target="_blank"><?php _e('Facebook Debugger', EWOG_TEXT_DOMAIN); ?></a></li>
                             <li><a href="https://cards-dev.twitter.com/validator" target="_blank"><?php _e('Twitter Card Validator', EWOG_TEXT_DOMAIN); ?></a></li>
+                            <li><a href="https://search.google.com/test/rich-results" target="_blank"><?php _e('Google Rich Results Test', EWOG_TEXT_DOMAIN); ?></a></li>
                             <li><a href="https://www.linkedin.com/post-inspector/" target="_blank"><?php _e('LinkedIn Post Inspector', EWOG_TEXT_DOMAIN); ?></a></li>
                         </ul>
                     </div>
                     
                     <div class="ewog-sidebar-box">
-                        <h3><?php _e('Need Help?', EWOG_TEXT_DOMAIN); ?></h3>
-                        <p><?php _e('Check out our documentation and support resources.', EWOG_TEXT_DOMAIN); ?></p>
-                        <a href="#" class="button button-secondary"><?php _e('View Documentation', EWOG_TEXT_DOMAIN); ?></a>
+                        <h3><?php _e('Documentation', EWOG_TEXT_DOMAIN); ?></h3>
+                        <p><?php _e('Learn more about optimizing your store:', EWOG_TEXT_DOMAIN); ?></p>
+                        <ul>
+                            <li><a href="#" target="_blank"><?php _e('Setup Guide', EWOG_TEXT_DOMAIN); ?></a></li>
+                            <li><a href="#" target="_blank"><?php _e('Schema.org Guide', EWOG_TEXT_DOMAIN); ?></a></li>
+                            <li><a href="#" target="_blank"><?php _e('Open Graph Best Practices', EWOG_TEXT_DOMAIN); ?></a></li>
+                            <li><a href="#" target="_blank"><?php _e('Sitemap Optimization', EWOG_TEXT_DOMAIN); ?></a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="ewog-sidebar-box">
+                        <h3><?php _e('Plugin Status', EWOG_TEXT_DOMAIN); ?></h3>
+                        <?php $this->display_plugin_status(); ?>
                     </div>
                 </div>
             </div>
         </div>
         <?php
+    }
+    
+    private function display_plugin_status() {
+        $settings = get_option('ewog_settings', array());
+        
+        echo '<div class="ewog-status-grid">';
+        
+        // Schema Status
+        $schema_enabled = !empty($settings['enable_schema']);
+        echo '<div class="ewog-status-item">';
+        echo '<span class="ewog-status-indicator ' . ($schema_enabled ? 'enabled' : 'disabled') . '"></span>';
+        echo '<span>' . __('Schema Markup', EWOG_TEXT_DOMAIN) . '</span>';
+        echo '</div>';
+        
+        // Open Graph Status
+        $og_enabled = !empty($settings['enable_facebook']) || !empty($settings['enable_twitter']);
+        echo '<div class="ewog-status-item">';
+        echo '<span class="ewog-status-indicator ' . ($og_enabled ? 'enabled' : 'disabled') . '"></span>';
+        echo '<span>' . __('Open Graph', EWOG_TEXT_DOMAIN) . '</span>';
+        echo '</div>';
+        
+        // Sitemap Status
+        $sitemap_enabled = !empty($settings['enable_product_sitemap']);
+        echo '<div class="ewog-status-item">';
+        echo '<span class="ewog-status-indicator ' . ($sitemap_enabled ? 'enabled' : 'disabled') . '"></span>';
+        echo '<span>' . __('Sitemaps', EWOG_TEXT_DOMAIN) . '</span>';
+        echo '</div>';
+        
+        // Social Sharing Status
+        $sharing_enabled = !empty($settings['enable_social_share']);
+        echo '<div class="ewog-status-item">';
+        echo '<span class="ewog-status-indicator ' . ($sharing_enabled ? 'enabled' : 'disabled') . '"></span>';
+        echo '<span>' . __('Social Sharing', EWOG_TEXT_DOMAIN) . '</span>';
+        echo '</div>';
+        
+        echo '</div>';
+    }
+    
+    /**
+     * AJAX Handlers
+     */
+    public function ajax_test_sitemap() {
+        check_ajax_referer('ewog_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_woocommerce')) {
+            wp_die(__('Unauthorized', EWOG_TEXT_DOMAIN));
+        }
+        
+        $sitemap_url = home_url('/ewog-sitemap.xml');
+        $response = wp_remote_get($sitemap_url);
+        
+        if (is_wp_error($response)) {
+            wp_send_json_error(array(
+                'message' => __('Failed to fetch sitemap: ', EWOG_TEXT_DOMAIN) . $response->get_error_message()
+            ));
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $code = wp_remote_retrieve_response_code($response);
+        
+        if ($code !== 200) {
+            wp_send_json_error(array(
+                'message' => sprintf(__('Sitemap returned HTTP %d', EWOG_TEXT_DOMAIN), $code)
+            ));
+        }
+        
+        if (strpos($body, '<sitemapindex') === false && strpos($body, '<urlset') === false) {
+            wp_send_json_error(array(
+                'message' => __('Invalid sitemap format', EWOG_TEXT_DOMAIN)
+            ));
+        }
+        
+        wp_send_json_success(array(
+            'message' => __('Sitemap is working correctly!', EWOG_TEXT_DOMAIN),
+            'url' => $sitemap_url
+        ));
+    }
+    
+    public function ajax_generate_sitemap() {
+        check_ajax_referer('ewog_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_woocommerce')) {
+            wp_die(__('Unauthorized', EWOG_TEXT_DOMAIN));
+        }
+        
+        $sitemap = EWOG_Sitemap::get_instance();
+        $sitemap->generate_all_sitemaps();
+        
+        wp_send_json_success(array(
+            'message' => __('Sitemaps generated successfully!', EWOG_TEXT_DOMAIN),
+            'timestamp' => current_time('mysql')
+        ));
+    }
+    
+    public function ajax_validate_schema() {
+        check_ajax_referer('ewog_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_woocommerce')) {
+            wp_die(__('Unauthorized', EWOG_TEXT_DOMAIN));
+        }
+        
+        // Get a sample product URL for testing
+        $products = get_posts(array(
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'posts_per_page' => 1
+        ));
+        
+        if (empty($products)) {
+            wp_send_json_error(array(
+                'message' => __('No published products found for testing', EWOG_TEXT_DOMAIN)
+            ));
+        }
+        
+        $product_url = get_permalink($products[0]->ID);
+        $test_url = 'https://search.google.com/test/rich-results?url=' . urlencode($product_url);
+        
+        wp_send_json_success(array(
+            'message' => __('Click the link below to test your Schema markup:', EWOG_TEXT_DOMAIN),
+            'test_url' => $test_url,
+            'product_url' => $product_url
+        ));
     }
     
     /**
@@ -407,8 +751,13 @@ class EWOG_Admin {
         );
         
         wp_localize_script('ewog-admin', 'ewogAdmin', array(
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('ewog_admin_nonce'),
             'chooseImage' => __('Choose Image', EWOG_TEXT_DOMAIN),
-            'useImage' => __('Use this Image', EWOG_TEXT_DOMAIN)
+            'useImage' => __('Use this Image', EWOG_TEXT_DOMAIN),
+            'generating' => __('Generating...', EWOG_TEXT_DOMAIN),
+            'testing' => __('Testing...', EWOG_TEXT_DOMAIN),
+            'validating' => __('Validating...', EWOG_TEXT_DOMAIN)
         ));
     }
     
@@ -431,7 +780,9 @@ class EWOG_Admin {
         $checkboxes = array(
             'disable_title_description', 'enable_facebook', 'enable_twitter', 
             'enable_linkedin', 'enable_pinterest', 'enable_whatsapp', 
-            'enable_schema', 'enable_social_share'
+            'enable_schema', 'enable_enhanced_schema', 'enable_breadcrumb_schema',
+            'enable_organization_schema', 'enable_product_sitemap', 'enable_social_share',
+            'cache_meta_tags', 'debug_mode'
         );
         
         foreach ($checkboxes as $checkbox) {
@@ -441,6 +792,15 @@ class EWOG_Admin {
         // Text fields
         $sanitized['facebook_app_id'] = sanitize_text_field($input['facebook_app_id'] ?? '');
         $sanitized['twitter_username'] = sanitize_text_field($input['twitter_username'] ?? '');
+        
+        // Number fields
+        $sanitized['sitemap_products_per_page'] = intval($input['sitemap_products_per_page'] ?? 500);
+        if ($sanitized['sitemap_products_per_page'] < 100) {
+            $sanitized['sitemap_products_per_page'] = 100;
+        }
+        if ($sanitized['sitemap_products_per_page'] > 1000) {
+            $sanitized['sitemap_products_per_page'] = 1000;
+        }
         
         // Select fields
         $sanitized['image_size'] = sanitize_text_field($input['image_size'] ?? 'large');
