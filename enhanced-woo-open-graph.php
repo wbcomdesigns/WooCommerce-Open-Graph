@@ -89,6 +89,8 @@ class Enhanced_Woo_Open_Graph {
         require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-sitemap.php';
         require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-social-share.php';
         require_once EWOG_PLUGIN_DIR . 'admin/class-ewog-admin.php';
+        require_once EWOG_PLUGIN_DIR . 'includes/class-ewog-meta-boxes.php';
+
     }
     
     /**
