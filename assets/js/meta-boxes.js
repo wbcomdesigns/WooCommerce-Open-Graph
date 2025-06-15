@@ -1,15 +1,7 @@
 /**
- * Ultra Modern Enhanced Meta Boxes JavaScript
+ * Enhanced WooCommerce Open Graph - WordPress Default Meta Box JavaScript
  * 
- * Features:
- * - Real-time preview updates
- * - Smart character counting with visual feedback
- * - Advanced image handling and analysis
- * - Tab interface management
- * - Field validation and status indicators
- * - Custom tags management with suggestions
- * - Platform-specific social media previews
- * - Accessibility and keyboard navigation
+ * All functionality preserved with WordPress native styling compatibility
  * 
  * @package Enhanced_Woo_Open_Graph
  * @version 2.0.0
@@ -45,7 +37,7 @@ class EWOGModernMetaBox {
         this.initializePreview();
         this.setupAccessibility();
         
-        console.log('EWOG Modern Meta Box initialized');
+        console.log('EWOG Meta Box initialized with WordPress styling');
     }
     
     /**
@@ -156,20 +148,6 @@ class EWOGModernMetaBox {
             });
         }
         
-        if (this.elements.removeButton) {
-            this.elements.removeButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.removeImage();
-            });
-        }
-        
-        if (this.elements.analyzeButton) {
-            this.elements.analyzeButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.analyzeImage();
-            });
-        }
-        
         if (this.elements.useFeaturedButton) {
             this.elements.useFeaturedButton.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -224,6 +202,16 @@ class EWOGModernMetaBox {
                 e.preventDefault();
                 this.handleActionButton(e.target);
             }
+            
+            if (e.target.matches('.ewog-remove-image')) {
+                e.preventDefault();
+                this.removeImage();
+            }
+            
+            if (e.target.matches('.ewog-analyze-image')) {
+                e.preventDefault();
+                this.analyzeImage();
+            }
         });
         
         // Reset button
@@ -251,12 +239,13 @@ class EWOGModernMetaBox {
     }
     
     /**
-     * Switch tab
+     * Switch tab - WordPress native style
      */
     switchTab(tabId) {
         // Update tab buttons
         this.elements.tabButtons.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tabId);
+            btn.setAttribute('aria-selected', btn.dataset.tab === tabId);
         });
         
         // Update tab contents
@@ -287,7 +276,7 @@ class EWOGModernMetaBox {
     }
     
     /**
-     * Update character counter with visual feedback
+     * Update character counter with WordPress-style visual feedback
      */
     updateCharacterCounter(field) {
         const wrapper = field.closest('.ewog-field-wrapper');
@@ -312,7 +301,7 @@ class EWOGModernMetaBox {
         // Update progress bar
         bar.style.width = `${Math.min(percentage, 100)}%`;
         
-        // Determine status
+        // Determine status using WordPress color scheme
         let status = 'optimal';
         let statusText = ewogModernMeta.strings.optimal;
         
@@ -336,10 +325,12 @@ class EWOGModernMetaBox {
             statusText = ewogModernMeta.strings.good;
         }
         
-        // Apply status classes
+        // Apply status classes with WordPress colors
         counter.className = `ewog-char-counter ${status}`;
         statusElement.className = `ewog-field-status ${status}`;
-        field.className = field.className.replace(/\b(success|error|warning)\b/g, '') + ` ${status}`;
+        
+        // Remove existing status classes and add new one
+        field.className = field.className.replace(/\b(success|error|warning|optimal|good)\b/g, '') + ` ${status}`;
         
         // Update status text
         const statusTextElement = statusElement.querySelector('.ewog-status-text');
@@ -371,7 +362,7 @@ class EWOGModernMetaBox {
     switchPreviewPlatform(platform) {
         this.currentPlatform = platform;
         
-        // Update platform buttons
+        // Update platform buttons with WordPress styling
         this.elements.platformButtons.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.platform === platform);
         });
@@ -474,7 +465,7 @@ class EWOGModernMetaBox {
     }
     
     /**
-     * Open media uploader
+     * Open WordPress media uploader
      */
     openMediaUploader() {
         if (typeof wp === 'undefined' || !wp.media) {
@@ -514,7 +505,7 @@ class EWOGModernMetaBox {
     }
     
     /**
-     * Update image preview
+     * Update image preview with WordPress styling
      */
     updateImagePreview(imageUrl, attachment = null) {
         const container = document.querySelector('.ewog-image-preview-container');
@@ -578,11 +569,11 @@ class EWOGModernMetaBox {
             if (response.success && response.data.image) {
                 this.setImage(response.data.image);
             } else {
-                alert('No featured image available');
+                this.showWordPressNotice('No featured image available', 'error');
             }
         } catch (error) {
             console.error('Error getting featured image:', error);
-            alert('Failed to get featured image');
+            this.showWordPressNotice('Failed to get featured image', 'error');
         }
     }
     
@@ -592,7 +583,7 @@ class EWOGModernMetaBox {
     async analyzeImage() {
         const imageUrl = this.elements.imageField?.value;
         if (!imageUrl) {
-            alert('No image to analyze');
+            this.showWordPressNotice('No image to analyze', 'warning');
             return;
         }
         
@@ -609,11 +600,11 @@ class EWOGModernMetaBox {
             if (response.success) {
                 this.showImageAnalysis(response.data);
             } else {
-                alert('Image analysis failed: ' + (response.data.message || 'Unknown error'));
+                this.showWordPressNotice('Image analysis failed: ' + (response.data.message || 'Unknown error'), 'error');
             }
         } catch (error) {
             console.error('Image analysis error:', error);
-            alert('Image analysis failed');
+            this.showWordPressNotice('Image analysis failed', 'error');
         } finally {
             button.textContent = originalText;
             button.disabled = false;
@@ -720,8 +711,7 @@ class EWOGModernMetaBox {
      */
     async optimizeContent(field) {
         // Placeholder for AI optimization
-        // This would integrate with an AI service to optimize the content
-        alert('AI optimization feature coming soon!');
+        this.showWordPressNotice('AI optimization feature coming soon!', 'info');
     }
     
     /**
@@ -818,11 +808,11 @@ class EWOGModernMetaBox {
             if (response.success) {
                 this.showTagSuggestions(response.data);
             } else {
-                alert('Failed to get tag suggestions');
+                this.showWordPressNotice('Failed to get tag suggestions', 'error');
             }
         } catch (error) {
             console.error('Error getting tag suggestions:', error);
-            alert('Failed to get tag suggestions');
+            this.showWordPressNotice('Failed to get tag suggestions', 'error');
         } finally {
             button.textContent = originalText;
             button.disabled = false;
@@ -946,10 +936,10 @@ class EWOGModernMetaBox {
         
         navigator.clipboard.writeText(JSON.stringify(settings, null, 2))
             .then(() => {
-                alert('Settings copied to clipboard!');
+                this.showWordPressNotice('Settings copied to clipboard!', 'success');
             })
             .catch(() => {
-                alert('Failed to copy settings');
+                this.showWordPressNotice('Failed to copy settings', 'error');
             });
     }
     
@@ -1004,10 +994,11 @@ class EWOGModernMetaBox {
                 }
                 
                 this.schedulePreviewUpdate();
+                this.showWordPressNotice('Settings reset to defaults', 'success');
             }
         } catch (error) {
             console.error('Error resetting to defaults:', error);
-            alert('Failed to reset to defaults');
+            this.showWordPressNotice('Failed to reset to defaults', 'error');
         }
     }
     
@@ -1106,6 +1097,53 @@ class EWOGModernMetaBox {
         }
         
         return await response.json();
+    }
+    
+    /**
+     * Show WordPress-style admin notice
+     */
+    showWordPressNotice(message, type = 'info') {
+        const noticeClasses = {
+            'success': 'notice-success',
+            'error': 'notice-error',
+            'warning': 'notice-warning',
+            'info': 'notice-info'
+        };
+        
+        const notice = document.createElement('div');
+        notice.className = `notice ${noticeClasses[type]} is-dismissible`;
+        notice.innerHTML = `<p>${message}</p>`;
+        
+        // Insert after the page title
+        const pageTitle = document.querySelector('.wrap h1');
+        if (pageTitle) {
+            pageTitle.parentNode.insertBefore(notice, pageTitle.nextSibling);
+        } else {
+            // Fallback: insert at the beginning of the main content
+            const wrap = document.querySelector('.wrap');
+            if (wrap) {
+                wrap.insertBefore(notice, wrap.firstChild);
+            }
+        }
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notice.parentNode) {
+                notice.parentNode.removeChild(notice);
+            }
+        }, 5000);
+        
+        // Make dismissible
+        const dismissButton = document.createElement('button');
+        dismissButton.type = 'button';
+        dismissButton.className = 'notice-dismiss';
+        dismissButton.innerHTML = '<span class="screen-reader-text">Dismiss this notice.</span>';
+        dismissButton.addEventListener('click', () => {
+            if (notice.parentNode) {
+                notice.parentNode.removeChild(notice);
+            }
+        });
+        notice.appendChild(dismissButton);
     }
     
     /**
