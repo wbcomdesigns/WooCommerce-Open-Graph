@@ -22,6 +22,22 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+add_action('before_woocommerce_init', function() {
+    if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+            'custom_order_tables',
+            __FILE__,
+            true
+        );
+        
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+            'cart_checkout_blocks',
+            __FILE__,
+            true
+        );
+    }
+});
+
 // Define plugin constants
 define('EWOG_VERSION', '2.0.0');
 define('EWOG_PLUGIN_FILE', __FILE__);
@@ -80,7 +96,7 @@ class Enhanced_Woo_Open_Graph {
     }
     
     /**
-     * Load plugin dependencies
+     * Load plugin dependencies - FIXED TO INCLUDE META BOXES
      */
     private function load_dependencies() {
         $includes_dir = EWOG_PLUGIN_DIR . 'includes/';
@@ -93,6 +109,7 @@ class Enhanced_Woo_Open_Graph {
             $includes_dir . 'class-ewog-schema.php',
             $includes_dir . 'class-ewog-sitemap.php',
             $includes_dir . 'class-ewog-social-share.php',
+            $includes_dir . 'class-ewog-meta-boxes.php', // ADDED THIS LINE
             $admin_dir . 'class-ewog-admin.php'
         );
         
@@ -104,7 +121,7 @@ class Enhanced_Woo_Open_Graph {
     }
     
     /**
-     * Initialize plugin
+     * Initialize plugin - FIXED TO INCLUDE META BOXES
      */
     public function init() {
         // Check if WooCommerce is active
@@ -132,6 +149,11 @@ class Enhanced_Woo_Open_Graph {
         
         if (class_exists('EWOG_Social_Share')) {
             EWOG_Social_Share::get_instance();
+        }
+        
+        // ADDED META BOXES INITIALIZATION
+        if (class_exists('EWOG_Meta_Boxes')) {
+            EWOG_Meta_Boxes::get_instance();
         }
         
         if (is_admin() && class_exists('EWOG_Admin')) {

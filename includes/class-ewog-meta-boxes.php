@@ -1,6 +1,6 @@
 <?php
 /**
- * Enhanced WooCommerce Open Graph Meta Boxes
+ * Enhanced WooCommerce Open Graph Meta Boxes - SYNTAX ERROR FIXED
  * 
  * Provides admin interface for per-product Open Graph control
  */
@@ -51,6 +51,52 @@ class EWOG_Meta_Boxes {
         add_action('wp_ajax_ewog_generate_og_preview', array($this, 'ajax_generate_og_preview'));
         add_action('wp_ajax_ewog_validate_og_image', array($this, 'ajax_validate_og_image'));
         add_action('wp_ajax_ewog_test_social_share', array($this, 'ajax_test_social_share'));
+        
+        // Additional AJAX handlers that might be needed
+        add_action('wp_ajax_ewog_refresh_preview', array($this, 'ajax_generate_og_preview'));
+        add_action('wp_ajax_ewog_test_sharing', array($this, 'ajax_test_social_share'));
+        
+        // Add product list columns
+        add_filter('manage_product_posts_columns', array($this, 'add_product_columns'));
+        add_action('manage_product_posts_custom_column', array($this, 'populate_product_columns'), 10, 2);
+    }
+    
+    /**
+     * Add columns to product list
+     */
+    public function add_product_columns($columns) {
+        $new_columns = array();
+        
+        foreach ($columns as $key => $value) {
+            $new_columns[$key] = $value;
+            
+            // Add our column after the title
+            if ($key === 'name') {
+                $new_columns['ewog_status'] = __('OG Status', EWOG_TEXT_DOMAIN);
+            }
+        }
+        
+        return $new_columns;
+    }
+    
+    /**
+     * Populate custom columns
+     */
+    public function populate_product_columns($column, $post_id) {
+        if ($column === 'ewog_status') {
+            $disable_og = get_post_meta($post_id, '_ewog_disable_og', true);
+            $custom_title = get_post_meta($post_id, '_ewog_og_title', true);
+            $custom_description = get_post_meta($post_id, '_ewog_og_description', true);
+            $custom_image = get_post_meta($post_id, '_ewog_og_image', true);
+            
+            if ($disable_og) {
+                echo '<span class="ewog-status-disabled" title="' . esc_attr__('Open Graph disabled', EWOG_TEXT_DOMAIN) . '">⚫</span>';
+            } elseif ($custom_title || $custom_description || $custom_image) {
+                echo '<span class="ewog-status-custom" title="' . esc_attr__('Custom Open Graph settings', EWOG_TEXT_DOMAIN) . '">🟡</span>';
+            } else {
+                echo '<span class="ewog-status-auto" title="' . esc_attr__('Auto-generated Open Graph', EWOG_TEXT_DOMAIN) . '">🟢</span>';
+            }
+        }
     }
     
     /**
@@ -210,22 +256,6 @@ class EWOG_Meta_Boxes {
                 <button type="button" class="button ewog-add-custom-tag"><?php _e('Add Custom Tag', EWOG_TEXT_DOMAIN); ?></button>
             </div>
         </div>
-        
-        <style>
-        .ewog-meta-box-container { padding: 10px 0; }
-        .ewog-meta-table th { width: 200px; vertical-align: top; padding-top: 15px; }
-        .ewog-meta-table td { padding: 10px 0; }
-        .ewog-toggle { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .ewog-char-count { font-weight: bold; color: #666; float: right; }
-        .ewog-char-count.warning { color: #d63384; }
-        .ewog-image-field { max-width: 400px; }
-        .ewog-image-preview img { border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; }
-        .ewog-image-controls { margin: 10px 0; }
-        .ewog-custom-tags-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; }
-        .ewog-custom-tag-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        .ewog-custom-tag-row input[type="text"] { flex: 1; }
-        .ewog-custom-tag-row .button { flex-shrink: 0; }
-        </style>
         <?php
     }
     
@@ -300,25 +330,6 @@ class EWOG_Meta_Boxes {
                 </button>
             </div>
         </div>
-        
-        <style>
-        .ewog-social-preview-container { padding: 10px; }
-        .ewog-preview-tabs { display: flex; margin-bottom: 15px; border-bottom: 1px solid #ddd; }
-        .ewog-preview-tab { 
-            padding: 8px 15px; 
-            border: none; 
-            background: none; 
-            cursor: pointer; 
-            border-bottom: 2px solid transparent;
-        }
-        .ewog-preview-tab.active { 
-            border-bottom-color: #0073aa; 
-            font-weight: 600; 
-        }
-        .ewog-preview-content { min-height: 200px; margin-bottom: 15px; }
-        .ewog-preview-actions { text-align: center; }
-        .ewog-preview-actions .button { margin: 0 5px; }
-        </style>
         <?php
     }
     
@@ -329,8 +340,6 @@ class EWOG_Meta_Boxes {
         // Get advanced settings
         $twitter_card = get_post_meta($post->ID, '_ewog_twitter_card', true) ?: 'summary_large_image';
         $fb_app_id = get_post_meta($post->ID, '_ewog_fb_app_id', true);
-        $article_author = get_post_meta($post->ID, '_ewog_article_author', true);
-        $article_section = get_post_meta($post->ID, '_ewog_article_section', true);
         $product_availability = get_post_meta($post->ID, '_ewog_product_availability', true);
         $product_condition = get_post_meta($post->ID, '_ewog_product_condition', true) ?: 'new';
         $product_brand = get_post_meta($post->ID, '_ewog_product_brand', true);
@@ -495,41 +504,61 @@ class EWOG_Meta_Boxes {
     public function enqueue_admin_scripts($hook) {
         global $post_type;
         
-        if ($post_type !== 'product' || !in_array($hook, array('post.php', 'post-new.php'))) {
+        if ($post_type !== 'product') {
+            return;
+        }
+        
+        // Only load on product pages
+        if (!in_array($hook, array('post.php', 'post-new.php', 'edit.php'))) {
             return;
         }
         
         wp_enqueue_media();
         
-        wp_enqueue_script(
-            'ewog-meta-boxes',
-            EWOG_PLUGIN_URL . 'assets/js/meta-boxes.js',
-            array('jquery', 'wp-media-utils'),
-            EWOG_VERSION,
-            true
-        );
+        // Check if files exist before enqueuing
+        if (file_exists(EWOG_PLUGIN_DIR . 'assets/js/meta-boxes.js')) {
+            wp_enqueue_script(
+                'ewog-meta-boxes',
+                EWOG_PLUGIN_URL . 'assets/js/meta-boxes.js',
+                array('jquery', 'wp-media-utils'),
+                EWOG_VERSION,
+                true
+            );
+            
+            wp_localize_script('ewog-meta-boxes', 'ewogMetaBoxes', array(
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('ewog_meta_boxes_nonce'),
+                'strings' => array(
+                    'chooseImage' => __('Choose Image', EWOG_TEXT_DOMAIN),
+                    'useImage' => __('Use this Image', EWOG_TEXT_DOMAIN),
+                    'removeImage' => __('Remove Image', EWOG_TEXT_DOMAIN),
+                    'validating' => __('Validating...', EWOG_TEXT_DOMAIN),
+                    'validImage' => __('✓ Valid Open Graph image', EWOG_TEXT_DOMAIN),
+                    'invalidImage' => __('⚠ Image may not be optimal for social sharing', EWOG_TEXT_DOMAIN),
+                    'refreshing' => __('Refreshing preview...', EWOG_TEXT_DOMAIN),
+                    'testing' => __('Testing...', EWOG_TEXT_DOMAIN)
+                )
+            ));
+        }
         
-        wp_enqueue_style(
-            'ewog-meta-boxes',
-            EWOG_PLUGIN_URL . 'assets/css/meta-boxes.css',
-            array(),
-            EWOG_VERSION
-        );
+        if (file_exists(EWOG_PLUGIN_DIR . 'assets/css/meta-boxes.css')) {
+            wp_enqueue_style(
+                'ewog-meta-boxes',
+                EWOG_PLUGIN_URL . 'assets/css/meta-boxes.css',
+                array(),
+                EWOG_VERSION
+            );
+        }
         
-        wp_localize_script('ewog-meta-boxes', 'ewogMetaBoxes', array(
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('ewog_meta_boxes_nonce'),
-            'strings' => array(
-                'chooseImage' => __('Choose Image', EWOG_TEXT_DOMAIN),
-                'useImage' => __('Use this Image', EWOG_TEXT_DOMAIN),
-                'removeImage' => __('Remove Image', EWOG_TEXT_DOMAIN),
-                'validating' => __('Validating...', EWOG_TEXT_DOMAIN),
-                'validImage' => __('✓ Valid Open Graph image', EWOG_TEXT_DOMAIN),
-                'invalidImage' => __('⚠ Image may not be optimal for social sharing', EWOG_TEXT_DOMAIN),
-                'refreshing' => __('Refreshing preview...', EWOG_TEXT_DOMAIN),
-                'testing' => __('Testing...', EWOG_TEXT_DOMAIN)
-            )
-        ));
+        // Also load product list styles
+        if ($hook === 'edit.php' && file_exists(EWOG_PLUGIN_DIR . 'assets/css/product-list.css')) {
+            wp_enqueue_style(
+                'ewog-product-list',
+                EWOG_PLUGIN_URL . 'assets/css/product-list.css',
+                array(),
+                EWOG_VERSION
+            );
+        }
     }
     
     /**
@@ -552,9 +581,9 @@ class EWOG_Meta_Boxes {
         
         // Generate preview HTML
         $preview_html = $this->generate_preview_html($platform, array(
-            'title' => $title,
-            'description' => $description,
-            'image' => $image,
+            'title' => $title ?: get_the_title($post_id),
+            'description' => $description ?: get_post_meta($post_id, '_yoast_wpseo_metadesc', true),
+            'image' => $image ?: wp_get_attachment_image_src(get_post_thumbnail_id($post_id), 'large')[0],
             'url' => get_permalink($post_id)
         ));
         
@@ -582,12 +611,32 @@ class EWOG_Meta_Boxes {
     }
     
     /**
+     * AJAX: Test social sharing
+     */
+    public function ajax_test_social_share() {
+        check_ajax_referer('ewog_meta_boxes_nonce', 'nonce');
+        
+        $post_id = intval($_POST['post_id'] ?? 0);
+        
+        if (!$post_id || !current_user_can('edit_post', $post_id)) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $product_url = get_permalink($post_id);
+        
+        wp_send_json_success(array(
+            'message' => __('Opening Facebook Debugger...', EWOG_TEXT_DOMAIN),
+            'debugger_url' => 'https://developers.facebook.com/tools/debug/?q=' . urlencode($product_url)
+        ));
+    }
+    
+    /**
      * Generate preview HTML for different platforms
      */
     private function generate_preview_html($platform, $data) {
         $title = $data['title'] ?: 'Product Title';
         $description = $data['description'] ?: 'Product description...';
-        $image = $data['image'] ?: wc_placeholder_img_src();
+        $image = $data['image'] ?: (function_exists('wc_placeholder_img_src') ? wc_placeholder_img_src() : '');
         $url = $data['url'];
         $domain = parse_url($url, PHP_URL_HOST);
         
@@ -677,7 +726,7 @@ class EWOG_Meta_Boxes {
      * Validate Open Graph image
      */
     private function validate_og_image($image_url) {
-        $response = wp_remote_head($image_url);
+        $response = wp_remote_head($image_url, array('timeout' => 10));
         
         if (is_wp_error($response)) {
             return array(
@@ -694,8 +743,8 @@ class EWOG_Meta_Boxes {
         $issues = array();
         $warnings = array();
         
-        // Check content type
-        if (!str_starts_with($content_type, 'image/')) {
+        // Check content type - use PHP 7.4+ compatible version
+        if (strpos($content_type, 'image/') !== 0) {
             $issues[] = 'URL does not point to an image';
         }
         
