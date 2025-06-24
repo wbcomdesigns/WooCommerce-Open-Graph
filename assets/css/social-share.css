@@ -1,9 +1,12 @@
 /**
  * Enhanced Woo Open Graph - Social Share Styles
- * Modern, responsive design with multiple style options
+ * Clean, modern design with multiple style options
+ * 
+ * @package Enhanced_Woo_Open_Graph
+ * @version 2.0.0
  */
 
-/* Base Styles */
+/* === BASE STYLES === */
 .ewog-social-share {
     margin: 20px 0;
     padding: 15px 0;
@@ -27,7 +30,7 @@
     align-items: center;
 }
 
-/* Base Button Styles */
+/* === BASE BUTTON STYLES === */
 .ewog-share-btn {
     display: inline-flex;
     align-items: center;
@@ -42,6 +45,7 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    line-height: 1.2;
 }
 
 .ewog-share-btn:hover {
@@ -63,7 +67,11 @@
     transform: scale(1.1);
 }
 
-/* Modern Style (Default) */
+.ewog-share-text {
+    white-space: nowrap;
+}
+
+/* === MODERN STYLE (DEFAULT) === */
 .ewog-style-modern .ewog-share-btn {
     background: #f8f9fa;
     color: #495057;
@@ -75,7 +83,7 @@
     border-color: #adb5bd;
 }
 
-/* Platform-specific colors for modern style */
+/* Platform-specific hover colors for modern style */
 .ewog-style-modern .ewog-share-facebook:hover {
     background: #1877f2;
     color: white;
@@ -118,7 +126,7 @@
     border-color: #28a745;
 }
 
-/* Classic Style */
+/* === CLASSIC STYLE === */
 .ewog-style-classic .ewog-share-btn {
     border-radius: 0;
     padding: 10px 16px;
@@ -168,15 +176,15 @@
     box-shadow: none;
 }
 
-/* Minimal Style */
+/* === MINIMAL STYLE === */
 .ewog-style-minimal .ewog-share-btn {
     background: transparent;
     color: #6c757d;
     border: none;
-    padding: 6px;
+    padding: 8px;
     border-radius: 50%;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     justify-content: center;
 }
 
@@ -191,7 +199,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Copy Button Success State */
+/* === COPY BUTTON STATES === */
 .ewog-share-copy.copied {
     background: #28a745 !important;
     color: white !important;
@@ -219,7 +227,22 @@
     }
 }
 
-/* Responsive Design */
+/* === LOADING STATES === */
+.ewog-share-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.ewog-share-btn.loading svg {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* === RESPONSIVE DESIGN === */
 @media (max-width: 768px) {
     .ewog-share-buttons {
         justify-content: center;
@@ -265,28 +288,14 @@
     .ewog-style-classic .ewog-share-btn {
         max-width: calc(33.333% - 4px);
     }
-}
-
-/* Loading Animation */
-.ewog-share-btn.loading {
-    pointer-events: none;
-    opacity: 0.7;
-}
-
-.ewog-share-btn.loading svg {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
+    
+    .ewog-style-minimal .ewog-share-btn {
+        width: 36px;
+        height: 36px;
     }
 }
 
-/* Accessibility */
+/* === ACCESSIBILITY === */
 .ewog-share-btn:focus {
     outline: 2px solid #007cba;
     outline-offset: 2px;
@@ -296,7 +305,26 @@
     outline: none;
 }
 
-/* Dark Mode Support */
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .ewog-share-btn {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .ewog-share-btn,
+    .ewog-share-btn svg {
+        transition: none;
+    }
+    
+    .ewog-share-btn.loading svg {
+        animation: none;
+    }
+}
+
+/* === DARK MODE SUPPORT === */
 @media (prefers-color-scheme: dark) {
     .ewog-social-share {
         border-top-color: #333;
@@ -327,7 +355,7 @@
     }
 }
 
-/* Print Styles */
+/* === PRINT STYLES === */
 @media print {
     .ewog-social-share {
         display: none;

@@ -1,8 +1,10 @@
 <?php
 /**
- * Social Share Class - FIXED VERSION
+ * Enhanced Woo Open Graph Social Share Class
+ * Clean social sharing with working copy functionality
  * 
- * Modern social sharing buttons with working copy functionality
+ * @package Enhanced_Woo_Open_Graph
+ * @version 2.0.0
  */
 
 if (!defined('ABSPATH')) {
@@ -33,6 +35,10 @@ class EWOG_Social_Share {
         
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_shortcode('ewog_social_share', array($this, 'social_share_shortcode'));
+        
+        // AJAX handler for tracking
+        add_action('wp_ajax_ewog_track_share', array($this, 'ajax_track_share'));
+        add_action('wp_ajax_nopriv_ewog_track_share', array($this, 'ajax_track_share'));
     }
     
     /**
@@ -71,7 +77,7 @@ class EWOG_Social_Share {
     }
     
     /**
-     * Render share buttons with working copy functionality
+     * Render share buttons
      */
     public function render_share_buttons($product) {
         $style = !empty($this->settings['share_button_style']) ? $this->settings['share_button_style'] : 'modern';
@@ -95,17 +101,35 @@ class EWOG_Social_Share {
             </div>
             <div class="ewog-share-buttons">
                 <?php 
-                $this->render_share_button('facebook', $share_data);
-                $this->render_share_button('twitter', $share_data);
-                $this->render_share_button('linkedin', $share_data);
-                $this->render_share_button('pinterest', $share_data);
-                $this->render_share_button('whatsapp', $share_data);
-                $this->render_share_button('email', $share_data);
+                $enabled_platforms = $this->get_enabled_platforms();
+                
+                foreach ($enabled_platforms as $platform) {
+                    $this->render_share_button($platform, $share_data);
+                }
+                
+                // Always show copy button
                 $this->render_copy_link_button($share_data);
                 ?>
             </div>
         </div>
         <?php
+    }
+    
+    /**
+     * Get enabled platforms
+     */
+    private function get_enabled_platforms() {
+        $platforms = array();
+        
+        $available_platforms = array('facebook', 'twitter', 'linkedin', 'pinterest', 'whatsapp', 'email');
+        
+        foreach ($available_platforms as $platform) {
+            if (!empty($this->settings['enable_' . $platform])) {
+                $platforms[] = $platform;
+            }
+        }
+        
+        return $platforms;
     }
     
     /**
@@ -135,7 +159,7 @@ class EWOG_Social_Share {
     }
     
     /**
-     * Render copy link button with proper data attributes
+     * Render copy link button
      */
     private function render_copy_link_button($share_data) {
         ?>
@@ -191,7 +215,7 @@ class EWOG_Social_Share {
     }
     
     /**
-     * Get platform configuration with proper icons
+     * Get platform configuration with SVG icons
      */
     private function get_platform_config() {
         return array(
@@ -223,7 +247,7 @@ class EWOG_Social_Share {
     }
     
     /**
-     * Enqueue scripts and styles with proper localization
+     * Enqueue scripts and styles
      */
     public function enqueue_scripts() {
         if (!is_product()) {
@@ -238,36 +262,24 @@ class EWOG_Social_Share {
             EWOG_VERSION
         );
         
-        // Enqueue main JavaScript file
+        // Enqueue JavaScript
         wp_enqueue_script(
             'ewog-social-share',
-            EWOG_PLUGIN_URL . 'assets/js/admin.js', // Use the main admin.js file
-            array('jquery'),
+            EWOG_PLUGIN_URL . 'assets/js/social-share.js',
+            array(),
             EWOG_VERSION,
             true
         );
         
-        // Localize script with translations and settings
+        // Localize script
         wp_localize_script('ewog-social-share', 'ewogShare', array(
             'copied' => __('Link copied!', EWOG_TEXT_DOMAIN),
             'copyFailed' => __('Failed to copy link', EWOG_TEXT_DOMAIN),
             'copyLink' => __('Copy link', EWOG_TEXT_DOMAIN),
-            'shareRegion' => __('Social sharing options', EWOG_TEXT_DOMAIN),
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('ewog_share_nonce'),
-            'isSecure' => is_ssl(),
             'debug' => defined('WP_DEBUG') && WP_DEBUG
         ));
-        
-        // Add inline script for immediate initialization
-        wp_add_inline_script('ewog-social-share', '
-            document.addEventListener("DOMContentLoaded", function() {
-                if (typeof window.EWOG !== "undefined" && window.EWOG.init) {
-                    window.EWOG.init();
-                    console.log("EWOG Social Share initialized");
-                }
-            });
-        ');
     }
     
     /**
@@ -277,7 +289,6 @@ class EWOG_Social_Share {
         global $product;
         
         if (!$product) {
-            // Try to get product from post ID
             global $post;
             if ($post && $post->post_type === 'product') {
                 $product = wc_get_product($post->ID);
@@ -294,7 +305,7 @@ class EWOG_Social_Share {
     }
     
     /**
-     * AJAX handler for tracking shares (optional)
+     * AJAX handler for tracking shares
      */
     public function ajax_track_share() {
         check_ajax_referer('ewog_share_nonce', 'nonce');
@@ -304,83 +315,17 @@ class EWOG_Social_Share {
         $url = esc_url_raw($_POST['url'] ?? '');
         
         if ($platform && $product_id) {
-            // Track the share event
+            // Fire action for other plugins to hook into
             do_action('ewog_social_share_tracked', $platform, $product_id, $url);
             
-            // Optional: Store in database for analytics
-            $this->store_share_event($platform, $product_id, $url);
+            // Log if debug mode is enabled
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log("EWOG: Share tracked - Platform: {$platform}, Product: {$product_id}, URL: {$url}");
+            }
         }
         
         wp_send_json_success(array(
             'message' => __('Share tracked successfully', EWOG_TEXT_DOMAIN)
         ));
-    }
-    
-    /**
-     * Store share event for analytics (optional)
-     */
-    private function store_share_event($platform, $product_id, $url) {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'ewog_share_stats';
-        
-        // Create table if it doesn't exist
-        $this->maybe_create_share_stats_table();
-        
-        $wpdb->insert(
-            $table_name,
-            array(
-                'product_id' => $product_id,
-                'platform' => $platform,
-                'url' => $url,
-                'user_ip' => $this->get_user_ip(),
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-                'share_date' => current_time('mysql')
-            ),
-            array('%d', '%s', '%s', '%s', '%s', '%s')
-        );
-    }
-    
-    /**
-     * Maybe create share stats table
-     */
-    private function maybe_create_share_stats_table() {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'ewog_share_stats';
-        
-        if ($wpdb->get_var("SHOW TABLES LIKE '{$table_name}'") != $table_name) {
-            $charset_collate = $wpdb->get_charset_collate();
-            
-            $sql = "CREATE TABLE {$table_name} (
-                id bigint(20) NOT NULL AUTO_INCREMENT,
-                product_id bigint(20) NOT NULL,
-                platform varchar(50) NOT NULL,
-                url text NOT NULL,
-                user_ip varchar(45) NOT NULL,
-                user_agent text,
-                share_date datetime DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (id),
-                KEY product_id (product_id),
-                KEY platform (platform),
-                KEY share_date (share_date)
-            ) {$charset_collate};";
-            
-            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-            dbDelta($sql);
-        }
-    }
-    
-    /**
-     * Get user IP address
-     */
-    private function get_user_ip() {
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            return $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            return $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
-            return $_SERVER['REMOTE_ADDR'] ?? '';
-        }
     }
 }

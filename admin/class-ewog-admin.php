@@ -1,8 +1,10 @@
 <?php
 /**
- * Final Clean WordPress-Native Admin Interface
+ * Enhanced Woo Open Graph Admin Class
+ * Clean WordPress-native admin interface
  * 
- * Complete admin page with all options organized cleanly
+ * @package Enhanced_Woo_Open_Graph
+ * @version 2.0.0
  */
 
 if (!defined('ABSPATH')) {
@@ -30,7 +32,7 @@ class EWOG_Admin {
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_filter('plugin_action_links_' . plugin_basename(EWOG_PLUGIN_FILE), array($this, 'add_action_links'));
         
-        // AJAX handlers for sitemap management
+        // AJAX handlers
         add_action('wp_ajax_ewog_generate_sitemap', array($this, 'ajax_generate_sitemap'));
         add_action('wp_ajax_ewog_test_sitemap', array($this, 'ajax_test_sitemap'));
     }
@@ -206,16 +208,15 @@ class EWOG_Admin {
     
     public function admin_page() {
         ?>
-        <div class="wrap">
-            <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
-            
+        <div class="wrap ewog-admin-wrap">
             <div class="ewog-admin-header">
+                <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
                 <p class="description"><?php _e('Configure how your WooCommerce products appear when shared on social media platforms. This plugin works alongside your existing SEO plugin to fill any gaps.', EWOG_TEXT_DOMAIN); ?></p>
             </div>
             
             <div class="ewog-admin-layout">
                 <div class="ewog-main-content">
-                    <form method="post" action="options.php">
+                    <form method="post" action="options.php" class="ewog-settings-form">
                         <?php
                         settings_fields('ewog_settings_group');
                         do_settings_sections('ewog_settings');
@@ -225,42 +226,65 @@ class EWOG_Admin {
                 </div>
                 
                 <div class="ewog-sidebar">
-                    <div class="ewog-status-box">
-                        <h3><?php _e('Current Status', EWOG_TEXT_DOMAIN); ?></h3>
-                        <?php $this->display_quick_status(); ?>
+                    <div class="ewog-sidebar-box">
+                        <div class="ewog-card-header">
+                            <h3><span class="dashicons dashicons-dashboard"></span> <?php _e('Current Status', EWOG_TEXT_DOMAIN); ?></h3>
+                        </div>
+                        <div class="ewog-card-body">
+                            <?php $this->display_quick_status(); ?>
+                        </div>
                     </div>
                     
-                    <div class="ewog-help-box">
-                        <h3><?php _e('Testing Tools', EWOG_TEXT_DOMAIN); ?></h3>
-                        <p><?php _e('Test how your products look when shared:', EWOG_TEXT_DOMAIN); ?></p>
-                        <ul>
-                            <li><a href="https://developers.facebook.com/tools/debug/" target="_blank"><?php _e('Facebook Debugger', EWOG_TEXT_DOMAIN); ?></a></li>
-                            <li><a href="https://cards-dev.twitter.com/validator" target="_blank"><?php _e('Twitter Validator', EWOG_TEXT_DOMAIN); ?></a></li>
-                            <li><a href="https://search.google.com/test/rich-results" target="_blank"><?php _e('Google Rich Results', EWOG_TEXT_DOMAIN); ?></a></li>
-                            <li><a href="https://www.linkedin.com/post-inspector/" target="_blank"><?php _e('LinkedIn Inspector', EWOG_TEXT_DOMAIN); ?></a></li>
-                        </ul>
+                    <div class="ewog-sidebar-box">
+                        <div class="ewog-card-header">
+                            <h3><span class="dashicons dashicons-external"></span> <?php _e('Testing Tools', EWOG_TEXT_DOMAIN); ?></h3>
+                        </div>
+                        <div class="ewog-card-body">
+                            <p><?php _e('Test how your products look when shared:', EWOG_TEXT_DOMAIN); ?></p>
+                            <a href="https://developers.facebook.com/tools/debug/" target="_blank" class="ewog-btn-block">
+                                <span class="dashicons dashicons-facebook"></span>
+                                <?php _e('Facebook Debugger', EWOG_TEXT_DOMAIN); ?>
+                            </a>
+                            <a href="https://cards-dev.twitter.com/validator" target="_blank" class="ewog-btn-block">
+                                <span class="dashicons dashicons-twitter"></span>
+                                <?php _e('Twitter Validator', EWOG_TEXT_DOMAIN); ?>
+                            </a>
+                            <a href="https://search.google.com/test/rich-results" target="_blank" class="ewog-btn-block">
+                                <span class="dashicons dashicons-google"></span>
+                                <?php _e('Google Rich Results', EWOG_TEXT_DOMAIN); ?>
+                            </a>
+                            <a href="https://www.linkedin.com/post-inspector/" target="_blank" class="ewog-btn-block">
+                                <span class="dashicons dashicons-linkedin"></span>
+                                <?php _e('LinkedIn Inspector', EWOG_TEXT_DOMAIN); ?>
+                            </a>
+                        </div>
                     </div>
                     
-                    <div class="ewog-info-box">
-                        <h3><?php _e('Plugin Information', EWOG_TEXT_DOMAIN); ?></h3>
-                        <ul>
-                            <li><strong><?php _e('Version:', EWOG_TEXT_DOMAIN); ?></strong> <?php echo EWOG_VERSION; ?></li>
-                            <li><strong><?php _e('Compatible with:', EWOG_TEXT_DOMAIN); ?></strong> Yoast, RankMath, SEOPress</li>
-                            <li><strong><?php _e('Auto-generates:', EWOG_TEXT_DOMAIN); ?></strong> <?php _e('Schema, Open Graph, Twitter Cards', EWOG_TEXT_DOMAIN); ?></li>
-                        </ul>
-                        
-                        <h4><?php _e('Important Notes', EWOG_TEXT_DOMAIN); ?></h4>
-                        <ul>
-                            <li><?php _e('Uses product featured images automatically', EWOG_TEXT_DOMAIN); ?></li>
-                            <li><?php _e('Individual products can have custom titles/descriptions', EWOG_TEXT_DOMAIN); ?></li>
-                            <li><?php _e('Works alongside existing SEO plugins', EWOG_TEXT_DOMAIN); ?></li>
-                        </ul>
+                    <div class="ewog-sidebar-box">
+                        <div class="ewog-card-header">
+                            <h3><span class="dashicons dashicons-info"></span> <?php _e('Plugin Information', EWOG_TEXT_DOMAIN); ?></h3>
+                        </div>
+                        <div class="ewog-card-body">
+                            <p><strong><?php _e('Version:', EWOG_TEXT_DOMAIN); ?></strong> <?php echo EWOG_VERSION; ?></p>
+                            <p><strong><?php _e('Compatible with:', EWOG_TEXT_DOMAIN); ?></strong> Yoast, RankMath, SEOPress</p>
+                            <p><strong><?php _e('Auto-generates:', EWOG_TEXT_DOMAIN); ?></strong> <?php _e('Schema, Open Graph, Twitter Cards', EWOG_TEXT_DOMAIN); ?></p>
+                            
+                            <hr>
+                            
+                            <h4><?php _e('Important Notes', EWOG_TEXT_DOMAIN); ?></h4>
+                            <ul>
+                                <li><?php _e('Uses product featured images automatically', EWOG_TEXT_DOMAIN); ?></li>
+                                <li><?php _e('Individual products can have custom titles/descriptions', EWOG_TEXT_DOMAIN); ?></li>
+                                <li><?php _e('Works alongside existing SEO plugins', EWOG_TEXT_DOMAIN); ?></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
         <script>
+        // Sitemap generation functions
         function ewogGenerateSitemap(button) {
             button.disabled = true;
             button.textContent = '<?php _e('Generating...', EWOG_TEXT_DOMAIN); ?>';
@@ -315,6 +339,7 @@ class EWOG_Admin {
             });
         }
         
+        // Image selector function
         function ewogSelectImage(button) {
             if (typeof wp === "undefined" || !wp.media) {
                 alert("WordPress media library not available");
@@ -340,6 +365,11 @@ class EWOG_Admin {
                     var img = document.createElement("img");
                     img.src = attachment.url;
                     img.className = "ewog-image-preview";
+                    img.style.maxWidth = "80px";
+                    img.style.height = "auto";
+                    img.style.border = "1px solid #ddd";
+                    img.style.borderRadius = "3px";
+                    img.style.marginTop = "10px";
                     button.parentNode.appendChild(img);
                 }
             });
@@ -347,150 +377,6 @@ class EWOG_Admin {
             mediaUploader.open();
         }
         </script>
-        
-        <style>
-        .ewog-admin-header {
-            background: #fff;
-            padding: 15px 20px;
-            border: 1px solid #c3c4c7;
-            border-radius: 4px;
-            margin: 20px 0;
-        }
-        .ewog-admin-layout {
-            display: flex;
-            gap: 20px;
-        }
-        .ewog-main-content {
-            flex: 2;
-            min-width: 0;
-        }
-        .ewog-sidebar {
-            flex: 0 0 300px;
-        }
-        .ewog-status-box,
-        .ewog-help-box,
-        .ewog-info-box {
-            background: #fff;
-            border: 1px solid #c3c4c7;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .ewog-status-box h3,
-        .ewog-help-box h3,
-        .ewog-info-box h3 {
-            margin-top: 0;
-            border-bottom: 1px solid #f0f0f1;
-            padding-bottom: 10px;
-        }
-        .ewog-status-item {
-            margin: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 0;
-        }
-        .ewog-status-icon {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            flex-shrink: 0;
-        }
-        .ewog-status-icon.enabled {
-            background: #00a32a;
-        }
-        .ewog-status-icon.disabled {
-            background: #ddd;
-        }
-        .ewog-status-label {
-            flex: 1;
-            font-weight: 500;
-        }
-        .ewog-status-text {
-            font-size: 12px;
-            color: #666;
-        }
-        .ewog-image-field {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .ewog-image-preview {
-            max-width: 80px;
-            height: auto;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-        }
-        .ewog-sitemap-info {
-            margin-top: 10px;
-            padding: 12px;
-            background: #f9f9f9;
-            border-left: 4px solid #00a32a;
-            border-radius: 0 3px 3px 0;
-        }
-        .ewog-sitemap-info ul {
-            margin: 8px 0;
-            padding-left: 20px;
-        }
-        .ewog-sitemap-info p {
-            margin: 8px 0;
-        }
-        #ewog-sitemap-results {
-            margin-top: 10px;
-        }
-        .ewog-help-box ul,
-        .ewog-info-box ul {
-            margin: 10px 0;
-            padding-left: 20px;
-        }
-        .ewog-help-box li,
-        .ewog-info-box li {
-            margin: 4px 0;
-        }
-        .ewog-info-box h4 {
-            margin: 15px 0 5px 0;
-            font-size: 13px;
-            text-transform: uppercase;
-            color: #666;
-        }
-        .form-table th {
-            width: 200px;
-            font-weight: 600;
-        }
-        .form-table td {
-            padding: 15px 10px;
-        }
-        .form-table .description {
-            margin-top: 5px;
-            color: #666;
-        }
-        .form-table tbody:before {
-            content: "";
-            display: block;
-            height: 10px;
-        }
-        h2:not(:first-child) {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #f0f0f1;
-        }
-        @media (max-width: 1200px) {
-            .ewog-admin-layout {
-                flex-direction: column;
-            }
-            .ewog-sidebar {
-                flex: none;
-            }
-        }
-        @media (max-width: 782px) {
-            .ewog-image-field {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-        </style>
         <?php
     }
     
@@ -584,7 +470,7 @@ class EWOG_Admin {
         $settings = get_option('ewog_settings', array());
         $value = isset($settings[$args['id']]) ? $settings[$args['id']] : '';
         
-        echo '<div class="ewog-image-field">';
+        echo '<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">';
         echo '<input type="url" ';
         echo 'name="ewog_settings[' . esc_attr($args['id']) . ']" ';
         echo 'value="' . esc_attr($value) . '" ';
@@ -594,7 +480,7 @@ class EWOG_Admin {
         echo '<button type="button" class="button" onclick="ewogSelectImage(this)">' . __('Choose Image', EWOG_TEXT_DOMAIN) . '</button>';
         
         if ($value) {
-            echo '<img src="' . esc_url($value) . '" class="ewog-image-preview" />';
+            echo '<img src="' . esc_url($value) . '" class="ewog-image-preview" style="max-width: 80px; height: auto; border: 1px solid #ddd; border-radius: 3px;" />';
         }
         echo '</div>';
         
@@ -614,7 +500,7 @@ class EWOG_Admin {
         echo '</label>';
         
         if ($value) {
-            echo '<div class="ewog-sitemap-info">';
+            echo '<div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 4px solid #00a32a; border-radius: 0 3px 3px 0;">';
             
             if ($last_generated) {
                 echo '<p><strong>' . __('Last Generated:', EWOG_TEXT_DOMAIN) . '</strong> ' . date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $last_generated) . '</p>';
@@ -641,8 +527,8 @@ class EWOG_Admin {
         $settings = get_option('ewog_settings', array());
         
         // Core Features
-        echo '<div class="ewog-status-group">';
-        echo '<h4>' . __('Core Features', EWOG_TEXT_DOMAIN) . '</h4>';
+        echo '<div style="margin-bottom: 20px;">';
+        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Core Features', EWOG_TEXT_DOMAIN) . '</h4>';
         $core_features = array(
             'enable_schema' => __('Schema Markup', EWOG_TEXT_DOMAIN),
             'enable_facebook' => __('Facebook', EWOG_TEXT_DOMAIN),
@@ -656,8 +542,8 @@ class EWOG_Admin {
         echo '</div>';
         
         // Additional Platforms
-        echo '<div class="ewog-status-group">';
-        echo '<h4>' . __('Additional Platforms', EWOG_TEXT_DOMAIN) . '</h4>';
+        echo '<div style="margin-bottom: 20px;">';
+        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Additional Platforms', EWOG_TEXT_DOMAIN) . '</h4>';
         $additional_platforms = array(
             'enable_linkedin' => __('LinkedIn', EWOG_TEXT_DOMAIN),
             'enable_pinterest' => __('Pinterest', EWOG_TEXT_DOMAIN),
@@ -671,8 +557,8 @@ class EWOG_Admin {
         echo '</div>';
         
         // Tools
-        echo '<div class="ewog-status-group">';
-        echo '<h4>' . __('Tools', EWOG_TEXT_DOMAIN) . '</h4>';
+        echo '<div>';
+        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Tools', EWOG_TEXT_DOMAIN) . '</h4>';
         $tools = array(
             'enable_social_share' => __('Share Buttons', EWOG_TEXT_DOMAIN),
             'enable_product_sitemap' => __('XML Sitemaps', EWOG_TEXT_DOMAIN),
@@ -706,7 +592,17 @@ class EWOG_Admin {
         if ('woocommerce_page_enhanced-woo-open-graph' !== $hook) {
             return;
         }
+        
+        // Enqueue media library for image selection
         wp_enqueue_media();
+        
+        // Enqueue clean admin styles
+        wp_enqueue_style(
+            'ewog-admin',
+            EWOG_PLUGIN_URL . 'assets/css/admin.css',
+            array(),
+            EWOG_VERSION
+        );
     }
     
     public function ajax_generate_sitemap() {
