@@ -11,7 +11,7 @@
  * Text Domain: woo-open-graph
  * Domain Path: /languages
  * Requires at least: 5.0
- * Tested up to: 6.4
+ * Tested up to: 6.8.1
  * Requires PHP: 7.4
  * WC requires at least: 4.0
  * WC tested up to: 8.5
