@@ -22,6 +22,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// WooCommerce compatibility declarations
 add_action('before_woocommerce_init', function() {
     if (class_exists('\Automattic\WooCommerce\Utilities\FeaturesUtil')) {
         \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
@@ -46,22 +47,15 @@ define('WOG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WOG_TEXT_DOMAIN', 'woo-open-graph');
 
 /**
- * Main Woo Open Graph Class
+ * Main plugin class
  */
 class Woo_Open_Graph {
     
-    /**
-     * Instance of this class
-     */
     private static $instance = null;
-    
-    /**
-     * Plugin settings
-     */
     private $settings;
     
     /**
-     * Get instance
+     * Get singleton instance
      */
     public static function get_instance() {
         if (null === self::$instance) {
@@ -71,7 +65,7 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Constructor
+     * Initialize plugin
      */
     private function __construct() {
         $this->init_hooks();
@@ -79,7 +73,7 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Initialize hooks
+     * Set up WordPress hooks
      */
     private function init_hooks() {
         register_activation_hook(__FILE__, array($this, 'activate'));
@@ -87,22 +81,17 @@ class Woo_Open_Graph {
         
         add_action('plugins_loaded', array($this, 'init'));
         add_action('init', array($this, 'load_textdomain'));
-        
-        // Add robots.txt sitemap entries
         add_filter('robots_txt', array($this, 'add_sitemap_to_robots'), 10, 2);
-        
-        // Add rewrite rules flush on activation
         add_action('wp_loaded', array($this, 'flush_rewrite_rules_maybe'));
     }
     
     /**
-     * Load plugin dependencies
+     * Load required class files
      */
     private function load_dependencies() {
         $includes_dir = WOG_PLUGIN_DIR . 'includes/';
         $admin_dir = WOG_PLUGIN_DIR . 'admin/';
         
-        // Check if files exist before requiring
         $required_files = array(
             $includes_dir . 'class-wog-settings.php',
             $includes_dir . 'class-wog-meta-tags.php',
@@ -121,16 +110,16 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Initialize plugin
+     * Initialize plugin components after WordPress and WooCommerce are loaded
      */
     public function init() {
-        // Check if WooCommerce is active
+        // Check WooCommerce dependency
         if (!$this->is_woocommerce_active()) {
             add_action('admin_notices', array($this, 'woocommerce_missing_notice'));
             return;
         }
         
-        // Initialize components only if classes exist
+        // Initialize components
         if (class_exists('WOG_Settings')) {
             $this->settings = WOG_Settings::get_instance();
         }
@@ -159,28 +148,27 @@ class Woo_Open_Graph {
             WOG_Admin::get_instance();
         }
         
-        // Add custom hooks
         $this->add_custom_hooks();
     }
     
     /**
-     * Add custom hooks for extensibility
+     * Set up custom hooks for cache clearing and extensibility
      */
     private function add_custom_hooks() {
-        // Allow other plugins to hook into our functionality
         do_action('wog_init', $this);
         
-        // Product save hooks for cache clearing
-        add_action('woocommerce_update_product', array($this, 'clear_product_cache'));
-        add_action('woocommerce_new_product', array($this, 'clear_product_cache'));
+        // Clear WordPress object cache when products/terms are updated
+        add_action('woocommerce_update_product', array($this, 'clear_product_object_cache'));
+        add_action('woocommerce_new_product', array($this, 'clear_product_object_cache'));
+        add_action('woocommerce_delete_product', array($this, 'clear_product_object_cache'));
         
-        // Term update hooks
-        add_action('edited_product_cat', array($this, 'clear_category_cache'));
-        add_action('created_product_cat', array($this, 'clear_category_cache'));
+        add_action('edited_product_cat', array($this, 'clear_category_object_cache'));
+        add_action('created_product_cat', array($this, 'clear_category_object_cache'));
+        add_action('delete_product_cat', array($this, 'clear_category_object_cache'));
     }
     
     /**
-     * Load text domain
+     * Load translation files
      */
     public function load_textdomain() {
         load_plugin_textdomain(
@@ -191,14 +179,14 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Check if WooCommerce is active
+     * Check if WooCommerce is installed and active
      */
     private function is_woocommerce_active() {
         return class_exists('WooCommerce');
     }
     
     /**
-     * WooCommerce missing notice
+     * Show admin notice when WooCommerce is missing
      */
     public function woocommerce_missing_notice() {
         ?>
@@ -216,7 +204,7 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Plugin activation
+     * Plugin activation setup
      */
     public function activate() {
         if (!$this->is_woocommerce_active()) {
@@ -228,15 +216,12 @@ class Woo_Open_Graph {
             );
         }
         
-        // Set default options
+        // Set default plugin options
         $default_options = array(
-            // Schema settings
             'enable_schema' => true,
             'enable_enhanced_schema' => true,
             'enable_breadcrumb_schema' => true,
             'enable_organization_schema' => true,
-            
-            // Open Graph settings
             'enable_facebook' => true,
             'enable_twitter' => true,
             'enable_linkedin' => true,
@@ -247,81 +232,35 @@ class Woo_Open_Graph {
             'fallback_image' => '',
             'facebook_app_id' => '',
             'twitter_username' => '',
-            
-            // Sitemap settings
             'enable_product_sitemap' => true,
             'sitemap_products_per_page' => 500,
-            
-            // Social sharing settings
             'enable_social_share' => true,
             'share_button_style' => 'modern',
             'share_button_position' => 'after_add_to_cart',
-            
-            // Advanced settings
-            'cache_meta_tags' => true,
             'debug_mode' => false
         );
         
         add_option('wog_settings', $default_options);
-        
-        // Set plugin version
         add_option('wog_version', WOG_VERSION);
-        
-        // Set activation flag for rewrite rules flush
         add_option('wog_flush_rewrite_rules', true);
         
-        // Schedule sitemap generation
+        // Schedule daily sitemap generation
         if (!wp_next_scheduled('wog_generate_sitemaps')) {
             wp_schedule_event(time(), 'daily', 'wog_generate_sitemaps');
         }
-        
-        // Create cache table if caching is enabled
-        $this->create_cache_table();
     }
     
     /**
-     * Plugin deactivation
+     * Plugin deactivation cleanup
      */
     public function deactivate() {
-        // Clear scheduled events
         wp_clear_scheduled_hook('wog_generate_sitemaps');
-        
-        // Flush rewrite rules
         flush_rewrite_rules();
-        
-        // Clean up transients
         $this->cleanup_transients();
     }
     
     /**
-     * Create cache table for meta tags
-     */
-    private function create_cache_table() {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'wog_meta_cache';
-        
-        $charset_collate = $wpdb->get_charset_collate();
-        
-        $sql = "CREATE TABLE $table_name (
-            id bigint(20) NOT NULL AUTO_INCREMENT,
-            post_id bigint(20) NOT NULL,
-            meta_type varchar(50) NOT NULL,
-            meta_content longtext NOT NULL,
-            created_at datetime DEFAULT CURRENT_TIMESTAMP,
-            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            KEY post_id (post_id),
-            KEY meta_type (meta_type),
-            UNIQUE KEY post_meta_type (post_id, meta_type)
-        ) $charset_collate;";
-        
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-    }
-    
-    /**
-     * Flush rewrite rules if needed
+     * Flush rewrite rules if needed after activation
      */
     public function flush_rewrite_rules_maybe() {
         if (get_option('wog_flush_rewrite_rules')) {
@@ -331,7 +270,7 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Add sitemap to robots.txt
+     * Add sitemap URL to robots.txt
      */
     public function add_sitemap_to_robots($output, $public) {
         if ('1' == $public) {
@@ -346,23 +285,20 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Clear product cache
+     * Clear WordPress object cache for a product
      */
-    public function clear_product_cache($product_id) {
-        $settings = get_option('wog_settings', array());
-        
-        if (!empty($settings['cache_meta_tags'])) {
-            global $wpdb;
-            
-            $table_name = $wpdb->prefix . 'wog_meta_cache';
-            $wpdb->delete(
-                $table_name,
-                array('post_id' => $product_id),
-                array('%d')
-            );
+    public function clear_product_object_cache($product_id) {
+        if (!$product_id) {
+            return;
         }
         
-        // Clear related transients
+        wp_cache_delete($product_id, 'posts');
+        wp_cache_delete($product_id, 'post_meta');
+        
+        if (function_exists('wc_delete_product_transients')) {
+            wc_delete_product_transients($product_id);
+        }
+        
         delete_transient('wog_product_meta_' . $product_id);
         delete_transient('wog_product_schema_' . $product_id);
         
@@ -370,23 +306,25 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Clear category cache
+     * Clear WordPress object cache for a category
      */
-    public function clear_category_cache($term_id) {
-        // Clear category-related transients
+    public function clear_category_object_cache($term_id) {
+        if (!$term_id) {
+            return;
+        }
+        
+        wp_cache_delete($term_id, 'terms');
         delete_transient('wog_category_meta_' . $term_id);
-        delete_transient('wog_category_products_' . $term_id);
         
         do_action('wog_category_cache_cleared', $term_id);
     }
     
     /**
-     * Cleanup transients on deactivation
+     * Clean up plugin transients
      */
     private function cleanup_transients() {
         global $wpdb;
         
-        // Delete all plugin transients
         $wpdb->query(
             "DELETE FROM {$wpdb->options} 
              WHERE option_name LIKE '_transient_wog_%' 
@@ -417,7 +355,7 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Log debug messages
+     * Log debug messages to error log
      */
     public function debug_log($message, $data = null) {
         if ($this->is_debug_mode() && function_exists('error_log')) {
@@ -432,58 +370,7 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Get cache from database
-     */
-    public function get_cache($post_id, $meta_type) {
-        $settings = get_option('wog_settings', array());
-        
-        if (empty($settings['cache_meta_tags'])) {
-            return false;
-        }
-        
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wog_meta_cache';
-        
-        $cached = $wpdb->get_var($wpdb->prepare(
-            "SELECT meta_content FROM $table_name 
-             WHERE post_id = %d AND meta_type = %s 
-             AND updated_at > DATE_SUB(NOW(), INTERVAL 1 DAY)",
-            $post_id,
-            $meta_type
-        ));
-        
-        return $cached ? maybe_unserialize($cached) : false;
-    }
-    
-    /**
-     * Set cache in database
-     */
-    public function set_cache($post_id, $meta_type, $data) {
-        $settings = get_option('wog_settings', array());
-        
-        if (empty($settings['cache_meta_tags'])) {
-            return false;
-        }
-        
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'wog_meta_cache';
-        
-        $wpdb->replace(
-            $table_name,
-            array(
-                'post_id' => $post_id,
-                'meta_type' => $meta_type,
-                'meta_content' => maybe_serialize($data),
-                'updated_at' => current_time('mysql')
-            ),
-            array('%d', '%s', '%s', '%s')
-        );
-        
-        return true;
-    }
-    
-    /**
-     * Get system info for debugging
+     * Get system information for debugging
      */
     public function get_system_info() {
         global $wpdb;
@@ -508,7 +395,7 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Export settings for backup/migration
+     * Export plugin settings as base64 encoded JSON
      */
     public function export_settings() {
         $settings = get_option('wog_settings', array());
@@ -522,7 +409,7 @@ class Woo_Open_Graph {
     }
     
     /**
-     * Import settings from backup
+     * Import plugin settings from base64 encoded JSON
      */
     public function import_settings($import_data) {
         try {
@@ -532,16 +419,13 @@ class Woo_Open_Graph {
                 return new WP_Error('invalid_data', __('Invalid import data', WOG_TEXT_DOMAIN));
             }
             
-            // Validate settings - only update if WOG_Admin class exists
             if (class_exists('WOG_Admin')) {
                 $admin = WOG_Admin::get_instance();
                 $sanitized_settings = $admin->sanitize_settings($data['settings']);
             } else {
-                // Basic sanitization if admin class is not available
                 $sanitized_settings = array_map('sanitize_text_field', $data['settings']);
             }
             
-            // Update settings
             update_option('wog_settings', $sanitized_settings);
             
             return true;
@@ -550,29 +434,37 @@ class Woo_Open_Graph {
             return new WP_Error('import_error', $e->getMessage());
         }
     }
+    
+    // Legacy method names for backward compatibility
+    public function clear_product_cache($product_id) {
+        $this->clear_product_object_cache($product_id);
+    }
+    
+    public function clear_category_cache($term_id) {
+        $this->clear_category_object_cache($term_id);
+    }
 }
 
 // Initialize the plugin
 Woo_Open_Graph::get_instance();
 
 /**
- * Global function to get plugin instance
+ * Get plugin instance
  */
 function wog() {
     return Woo_Open_Graph::get_instance();
 }
 
 /**
- * Backward compatibility functions
+ * Get plugin settings
  */
-if (!function_exists('wog_get_settings')) {
-    function wog_get_settings() {
-        return wog()->get_settings();
-    }
+function wog_get_settings() {
+    return wog()->get_settings();
 }
 
-if (!function_exists('wog_debug_log')) {
-    function wog_debug_log($message, $data = null) {
-        wog()->debug_log($message, $data);
-    }
+/**
+ * Log debug message
+ */
+function wog_debug_log($message, $data = null) {
+    wog()->debug_log($message, $data);
 }

@@ -1,9 +1,9 @@
 <?php
 /**
- * Enhanced Woo Open Graph Social Share Class
- * Clean social sharing with working copy functionality
+ * Social Share Handler Class
+ * Manages social sharing buttons and functionality
  * 
- * @package Enhanced_Woo_Open_Graph
+ * @package Woo_Open_Graph
  * @version 2.0.0
  */
 
@@ -16,6 +16,9 @@ class WOG_Social_Share {
     private static $instance = null;
     private $settings;
     
+    /**
+     * Get singleton instance
+     */
     public static function get_instance() {
         if (null === self::$instance) {
             self::$instance = new self();
@@ -23,11 +26,17 @@ class WOG_Social_Share {
         return self::$instance;
     }
     
+    /**
+     * Initialize the class
+     */
     private function __construct() {
         $this->settings = get_option('wog_settings', array());
         $this->init_hooks();
     }
     
+    /**
+     * Set up WordPress hooks
+     */
     private function init_hooks() {
         if (!empty($this->settings['enable_social_share'])) {
             $this->add_share_buttons();
@@ -36,7 +45,6 @@ class WOG_Social_Share {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_shortcode('wog_social_share', array($this, 'social_share_shortcode'));
         
-        // AJAX handler for tracking
         add_action('wp_ajax_wog_track_share', array($this, 'ajax_track_share'));
         add_action('wp_ajax_nopriv_wog_track_share', array($this, 'ajax_track_share'));
     }
@@ -57,14 +65,14 @@ class WOG_Social_Share {
             case 'after_tabs':
                 add_action('woocommerce_after_single_product_summary', array($this, 'display_share_buttons'), 25);
                 break;
-            default: // after_add_to_cart
+            default:
                 add_action('woocommerce_after_add_to_cart_button', array($this, 'display_share_buttons'));
                 break;
         }
     }
     
     /**
-     * Display share buttons
+     * Display share buttons on product pages
      */
     public function display_share_buttons() {
         global $product;
@@ -77,15 +85,31 @@ class WOG_Social_Share {
     }
     
     /**
-     * Render share buttons
+     * Render share buttons HTML
      */
     public function render_share_buttons($product) {
         $style = !empty($this->settings['share_button_style']) ? $this->settings['share_button_style'] : 'modern';
         $title = get_the_title($product->get_id());
         $url = get_permalink($product->get_id());
-        $description = wp_trim_words(wp_strip_all_tags($product->get_short_description()), 20);
-        $image_data = wp_get_attachment_image_src($product->get_image_id(), 'large');
-        $image = $image_data ? $image_data[0] : '';
+        
+        // Get product description
+        $description = '';
+        $short_desc = $product->get_short_description();
+        if (!empty($short_desc)) {
+            $description = wp_trim_words(wp_strip_all_tags($short_desc), 20, '...');
+        } else {
+            $long_desc = $product->get_description();
+            if (!empty($long_desc)) {
+                $description = wp_trim_words(wp_strip_all_tags($long_desc), 15, '...');
+            }
+        }
+        
+        // Get product image
+        $image = '';
+        if ($product->get_image_id()) {
+            $image_data = wp_get_attachment_image_src($product->get_image_id(), 'large');
+            $image = $image_data ? $image_data[0] : '';
+        }
         
         $share_data = array(
             'url' => $url,
@@ -107,7 +131,6 @@ class WOG_Social_Share {
                     $this->render_share_button($platform, $share_data);
                 }
                 
-                // Always show copy button
                 $this->render_copy_link_button($share_data);
                 ?>
             </div>
@@ -116,7 +139,7 @@ class WOG_Social_Share {
     }
     
     /**
-     * Get enabled platforms
+     * Get list of enabled social platforms
      */
     private function get_enabled_platforms() {
         $platforms = array();
@@ -178,36 +201,54 @@ class WOG_Social_Share {
     }
     
     /**
-     * Build share URL for platform
+     * Build share URL for each platform
      */
     private function build_share_url($platform, $share_data) {
-        $url = rawurlencode($share_data['url']);
-        $title = rawurlencode($share_data['title']);
-        $description = rawurlencode($share_data['description']);
-        $image = rawurlencode($share_data['image']);
+        $url = esc_url($share_data['url']);
+        $title = sanitize_text_field($share_data['title']);
+        $description = sanitize_text_field($share_data['description']);
+        $image = esc_url($share_data['image']);
+        
+        $encoded_url = urlencode($url);
+        $encoded_title = urlencode($title);
+        $encoded_description = urlencode($description);
+        $encoded_image = urlencode($image);
         
         switch ($platform) {
             case 'facebook':
-                return "https://www.facebook.com/sharer/sharer.php?u={$url}";
+                return "https://www.facebook.com/sharer/sharer.php?u={$encoded_url}";
                 
             case 'twitter':
-                $text = $title . ' - ' . $description;
-                return "https://twitter.com/intent/tweet?url={$url}&text=" . rawurlencode($text);
+                $text = $title;
+                if (!empty($description) && strlen($title) < 100) {
+                    $text .= ' - ' . $description;
+                }
+                $text = wp_trim_words($text, 15, '...');
+                $encoded_text = urlencode($text);
+                return "https://twitter.com/intent/tweet?url={$encoded_url}&text={$encoded_text}";
                 
             case 'linkedin':
-                return "https://www.linkedin.com/sharing/share-offsite/?url={$url}";
+                return "https://www.linkedin.com/sharing/share-offsite/?url={$encoded_url}";
                 
             case 'pinterest':
-                return "https://pinterest.com/pin/create/button/?url={$url}&media={$image}&description={$title}";
+                $pin_description = !empty($description) ? $description : $title;
+                $encoded_pin_desc = urlencode($pin_description);
+                return "https://pinterest.com/pin/create/button/?url={$encoded_url}&media={$encoded_image}&description={$encoded_pin_desc}";
                 
             case 'whatsapp':
-                $text = $title . ' - ' . $share_data['url'];
-                return "https://wa.me/?text=" . rawurlencode($text);
+                $whatsapp_text = $title . ' ' . $url;
+                $encoded_whatsapp = urlencode($whatsapp_text);
+                return "https://wa.me/?text={$encoded_whatsapp}";
                 
             case 'email':
-                $subject = rawurlencode(__('Check out this product', WOG_TEXT_DOMAIN));
-                $body = rawurlencode($title . "\n\n" . $description . "\n\n" . $share_data['url']);
-                return "mailto:?subject={$subject}&body={$body}";
+                $subject = urlencode(__('Check out this product', WOG_TEXT_DOMAIN));
+                $body_text = $title;
+                if (!empty($description)) {
+                    $body_text .= "\n\n" . $description;
+                }
+                $body_text .= "\n\n" . $url;
+                $encoded_body = urlencode($body_text);
+                return "mailto:?subject={$subject}&body={$encoded_body}";
                 
             default:
                 return '#';
@@ -215,7 +256,7 @@ class WOG_Social_Share {
     }
     
     /**
-     * Get platform configuration with SVG icons
+     * Get platform configuration with icons
      */
     private function get_platform_config() {
         return array(
@@ -247,14 +288,13 @@ class WOG_Social_Share {
     }
     
     /**
-     * Enqueue scripts and styles
+     * Enqueue scripts and styles for social sharing
      */
     public function enqueue_scripts() {
         if (!is_product()) {
             return;
         }
         
-        // Enqueue styles
         wp_enqueue_style(
             'wog-social-share',
             WOG_PLUGIN_URL . 'assets/css/social-share.css',
@@ -262,16 +302,14 @@ class WOG_Social_Share {
             WOG_VERSION
         );
         
-        // Enqueue JavaScript
         wp_enqueue_script(
             'wog-social-share',
             WOG_PLUGIN_URL . 'assets/js/social-share.js',
-            array(),
+            array('jquery'),
             WOG_VERSION,
             true
         );
         
-        // Localize script
         wp_localize_script('wog-social-share', 'wogShare', array(
             'copied' => __('Link copied!', WOG_TEXT_DOMAIN),
             'copyFailed' => __('Failed to copy link', WOG_TEXT_DOMAIN),
@@ -283,7 +321,7 @@ class WOG_Social_Share {
     }
     
     /**
-     * Social share shortcode
+     * Social share shortcode handler
      */
     public function social_share_shortcode($atts) {
         global $product;
@@ -305,7 +343,7 @@ class WOG_Social_Share {
     }
     
     /**
-     * AJAX handler for tracking shares
+     * AJAX handler for tracking share events
      */
     public function ajax_track_share() {
         check_ajax_referer('wog_share_nonce', 'nonce');
@@ -315,12 +353,10 @@ class WOG_Social_Share {
         $url = esc_url_raw($_POST['url'] ?? '');
         
         if ($platform && $product_id) {
-            // Fire action for other plugins to hook into
             do_action('wog_social_share_tracked', $platform, $product_id, $url);
             
-            // Log if debug mode is enabled
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log("EWOG: Share tracked - Platform: {$platform}, Product: {$product_id}, URL: {$url}");
+                error_log("WOG: Share tracked - Platform: {$platform}, Product: {$product_id}, URL: {$url}");
             }
         }
         

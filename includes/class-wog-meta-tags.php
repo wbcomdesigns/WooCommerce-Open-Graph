@@ -1,8 +1,10 @@
 <?php
 /**
- * Enhanced Meta Tags Handler Class - COMPLETE VERSION
+ * Meta Tags Handler Class
+ * Generates Open Graph, Twitter Card, and other social media meta tags
  * 
- * All original functions preserved + safe duplicate prevention
+ * @package Woo_Open_Graph
+ * @version 2.0.0
  */
 
 if (!defined('ABSPATH')) {
@@ -13,8 +15,11 @@ class WOG_Meta_Tags {
     
     private static $instance = null;
     private $settings;
-    private $existing_og_tags = array(); // NEW: For duplicate prevention
+    private $existing_og_tags = array();
     
+    /**
+     * Get singleton instance
+     */
     public static function get_instance() {
         if (null === self::$instance) {
             self::$instance = new self();
@@ -22,41 +27,41 @@ class WOG_Meta_Tags {
         return self::$instance;
     }
     
+    /**
+     * Initialize the class
+     */
     private function __construct() {
         $this->settings = get_option('wog_settings', array());
         $this->init_hooks();
     }
     
+    /**
+     * Set up WordPress hooks
+     */
     private function init_hooks() {
-        // NEW: Hook early to scan for existing tags
         add_action('wp_head', array($this, 'scan_existing_tags'), 1);
-        
-        // ORIGINAL: Output meta tags (moved to priority 15 to run after other plugins)
         add_action('wp_head', array($this, 'output_meta_tags'), 15);
         add_filter('language_attributes', array($this, 'add_opengraph_namespace'));
     }
     
     /**
-     * NEW: Scan for existing Open Graph tags from other plugins
+     * Scan for existing Open Graph tags from other plugins
      */
     public function scan_existing_tags() {
         if (!$this->should_add_meta_tags()) {
             return;
         }
         
-        // Capture what other plugins might have output
         ob_start();
         do_action('wp_head_early_og');
         $early_content = ob_get_clean();
         
-        // Scan for existing OG tags
         if (preg_match_all('/<meta\s+property=["\']og:([^"\']+)["\'][^>]*>/i', $early_content, $matches)) {
             foreach ($matches[1] as $property) {
                 $this->existing_og_tags[] = strtolower($property);
             }
         }
         
-        // Scan for existing Twitter tags
         if (preg_match_all('/<meta\s+name=["\']twitter:([^"\']+)["\'][^>]*>/i', $early_content, $matches)) {
             foreach ($matches[1] as $property) {
                 $this->existing_og_tags[] = 'twitter:' . strtolower($property);
@@ -65,7 +70,7 @@ class WOG_Meta_Tags {
     }
     
     /**
-     * NEW: Check if a specific tag already exists
+     * Check if a specific tag already exists
      */
     private function tag_exists($property) {
         $property = strtolower($property);
@@ -75,7 +80,7 @@ class WOG_Meta_Tags {
     }
     
     /**
-     * ORIGINAL: Add Open Graph namespace to html tag
+     * Add Open Graph namespace to html tag
      */
     public function add_opengraph_namespace($output) {
         if ($this->should_add_meta_tags()) {
@@ -94,7 +99,7 @@ class WOG_Meta_Tags {
     }
     
     /**
-     * ORIGINAL: Output meta tags (with NEW safe duplicate checking)
+     * Output meta tags for social media platforms
      */
     public function output_meta_tags() {
         if (!$this->should_add_meta_tags()) {
@@ -107,12 +112,10 @@ class WOG_Meta_Tags {
             return;
         }
         
-        echo "\n<!-- Enhanced Woo Open Graph Meta Tags -->\n";
+        echo "\n<!-- Woo Open Graph Meta Tags -->\n";
         
-        // Basic Open Graph tags with NEW duplicate checking
         $this->output_basic_og_tags($meta_data);
         
-        // Platform specific tags (ORIGINAL functionality)
         if (!empty($this->settings['enable_facebook'])) {
             $this->output_facebook_tags($meta_data);
         }
@@ -133,11 +136,11 @@ class WOG_Meta_Tags {
             $this->output_whatsapp_tags($meta_data);
         }
         
-        echo "<!-- End Enhanced Woo Open Graph Meta Tags -->\n\n";
+        echo "<!-- End Woo Open Graph Meta Tags -->\n\n";
     }
     
     /**
-     * ORIGINAL: Check if meta tags should be added
+     * Check if meta tags should be added to current page
      */
     private function should_add_meta_tags() {
         if (!function_exists('is_woocommerce')) {
@@ -148,13 +151,13 @@ class WOG_Meta_Tags {
     }
     
     /**
-     * ORIGINAL: Get meta data for current page
+     * Get meta data for current page
      */
     private function get_meta_data() {
         global $post;
         
         if (is_product() && $post) {
-            return $this->get_enhanced_product_meta_data($post);
+            return $this->get_product_meta_data($post);
         } elseif (is_product_category()) {
             return $this->get_category_meta_data();
         } elseif (is_product_tag()) {
@@ -167,82 +170,129 @@ class WOG_Meta_Tags {
     }
     
     /**
-     * ORIGINAL: Get enhanced product meta data (COMPLETE with all fields)
+     * Get product meta data with static caching for current request
      */
-    private function get_enhanced_product_meta_data($post) {
+    private function get_product_meta_data($post) {
+        static $product_cache = array();
+        
+        if (isset($product_cache[$post->ID])) {
+            return $product_cache[$post->ID];
+        }
+        
         $product = wc_get_product($post->ID);
         
         if (!$product) {
             return array();
         }
         
-        $title = $this->should_disable_title_description() ? '' : $this->get_optimized_title($product);
-        $description = $this->should_disable_title_description() ? '' : $this->get_optimized_description($product);
-        $images = $this->get_optimized_images($product);
-        $url = get_permalink($post->ID);
-        $site_name = get_bloginfo('name');
+        // Check if user disabled OG for this product
+        $disabled = get_post_meta($post->ID, '_wog_disable_og', true);
+        if ($disabled) {
+            $product_cache[$post->ID] = array();
+            return array();
+        }
+        
+        // Get custom or generated title/description
+        $custom_title = get_post_meta($post->ID, '_wog_og_title', true);
+        $custom_description = get_post_meta($post->ID, '_wog_og_description', true);
+        
+        $title = !empty($custom_title) ? $custom_title : $this->get_optimized_title($product);
+        $description = !empty($custom_description) ? $custom_description : $this->get_optimized_description($product);
         
         $meta_data = array(
             'type' => 'product',
             'title' => $title,
             'description' => $description,
-            'images' => $images,
-            'url' => $url,
-            'site_name' => $site_name,
+            'images' => $this->get_optimized_images($product),
+            'url' => get_permalink($post->ID),
+            'site_name' => get_bloginfo('name'),
             'product' => array(
-                // Basic product info
                 'price' => $product->get_price(),
                 'regular_price' => $product->get_regular_price(),
                 'sale_price' => $product->get_sale_price(),
                 'currency' => get_woocommerce_currency(),
-                'availability' => $this->get_detailed_availability($product),
+                'availability' => $this->get_availability($product),
                 'condition' => $this->get_product_condition($product),
                 'brand' => $this->get_product_brand($product),
                 'category' => $this->get_primary_category($product),
                 'sku' => $product->get_sku(),
                 'weight' => $product->get_weight(),
-                
-                // Enhanced product details
-                'retailer_item_id' => $product->get_sku(),
-                'item_group_id' => $this->get_item_group_id($product),
-                'google_product_category' => $this->get_google_category($product),
-                'product_type' => $this->get_product_type_hierarchy($product),
-                'age_group' => $this->get_age_group($product),
-                'gender' => $this->get_gender($product),
-                'color' => $this->get_dominant_color($product),
-                'size' => $this->get_size_info($product),
-                'material' => $this->get_material_info($product),
-                'pattern' => $this->get_pattern_info($product),
-                'gtin' => $this->get_gtin($product),
-                'mpn' => $this->get_mpn($product),
-                
-                // Shipping and logistics
-                'shipping_cost' => $this->get_shipping_cost($product),
-                'shipping_weight' => $product->get_weight(),
-                'return_policy_days' => $this->get_return_policy_days($product),
-                
-                // Inventory and sales data
-                'inventory_count' => $this->get_inventory_count($product),
-                'sale_price_effective_date' => $this->get_sale_dates($product),
-                'expiration_date' => $this->get_expiration_date($product),
-                
-                // Rating and review data
                 'rating_value' => $product->get_average_rating(),
                 'review_count' => $product->get_review_count()
             )
         );
         
-        return apply_filters('wog_product_meta_data', $meta_data, $product, $post);
+        if (!empty($this->settings['enable_enhanced_schema'])) {
+            $meta_data['product'] = array_merge($meta_data['product'], array(
+                'retailer_item_id' => $product->get_sku(),
+                'item_group_id' => $this->get_item_group_id($product),
+                'color' => $this->get_product_attribute($product, 'color'),
+                'size' => $this->get_product_attribute($product, 'size'),
+                'material' => $this->get_product_attribute($product, 'material'),
+                'gtin' => $this->get_gtin($product),
+                'mpn' => $this->get_mpn($product)
+            ));
+        }
+        
+        $product_cache[$post->ID] = apply_filters('wog_product_meta_data', $meta_data, $product, $post);
+        
+        return $product_cache[$post->ID];
     }
     
     /**
-     * ORIGINAL: Get optimized images for social sharing (COMPLETE)
+     * Get optimized product title
+     */
+    private function get_optimized_title($product) {
+        $title = $product->get_name();
+        
+        $brand = $this->get_product_brand($product);
+        if (!empty($brand)) {
+            $title = $brand . ' ' . $title;
+        }
+        
+        return wp_trim_words($title, 10, '');
+    }
+    
+    /**
+     * Get optimized product description
+     */
+    private function get_optimized_description($product) {
+        $description = $product->get_short_description();
+        if (empty($description)) {
+            $description = $product->get_description();
+        }
+        if (empty($description)) {
+            $description = get_bloginfo('description');
+        }
+        
+        $enhanced_description = wp_strip_all_tags($description);
+        
+        if ($product->get_price()) {
+            $enhanced_description .= ' Price: ' . wc_price($product->get_price());
+        }
+        
+        if ($product->is_in_stock()) {
+            $enhanced_description .= ' ✓ In Stock';
+        }
+        
+        return wp_trim_words($enhanced_description, 35, '...');
+    }
+    
+    /**
+     * Get optimized product images
      */
     private function get_optimized_images($product) {
+        static $image_cache = array();
+        
+        $product_id = $product->get_id();
+        
+        if (isset($image_cache[$product_id])) {
+            return $image_cache[$product_id];
+        }
+        
         $images = array();
         $image_size = !empty($this->settings['image_size']) ? $this->settings['image_size'] : 'large';
         
-        // Featured image
         if ($product->get_image_id()) {
             $image_data = wp_get_attachment_image_src($product->get_image_id(), $image_size);
             if ($image_data) {
@@ -256,22 +306,26 @@ class WOG_Meta_Tags {
             }
         }
         
-        // Gallery images (up to 3 additional images)
-        $gallery_ids = $product->get_gallery_image_ids();
-        foreach (array_slice($gallery_ids, 0, 3) as $image_id) {
-            $image_data = wp_get_attachment_image_src($image_id, $image_size);
-            if ($image_data) {
-                $images[] = array(
-                    'url' => $image_data[0],
-                    'width' => $image_data[1],
-                    'height' => $image_data[2],
-                    'alt' => get_post_meta($image_id, '_wp_attachment_image_alt', true) ?: $product->get_name(),
-                    'type' => get_post_mime_type($image_id)
-                );
+        // Limit gallery images for performance
+        $max_images = apply_filters('wog_max_images_per_product', 3);
+        $remaining_slots = $max_images - count($images);
+        
+        if ($remaining_slots > 0) {
+            $gallery_ids = $product->get_gallery_image_ids();
+            foreach (array_slice($gallery_ids, 0, $remaining_slots) as $image_id) {
+                $image_data = wp_get_attachment_image_src($image_id, $image_size);
+                if ($image_data) {
+                    $images[] = array(
+                        'url' => $image_data[0],
+                        'width' => $image_data[1],
+                        'height' => $image_data[2],
+                        'alt' => get_post_meta($image_id, '_wp_attachment_image_alt', true) ?: $product->get_name(),
+                        'type' => get_post_mime_type($image_id)
+                    );
+                }
             }
         }
         
-        // Fallback image if no images found
         if (empty($images)) {
             $fallback_url = $this->get_fallback_image();
             if ($fallback_url) {
@@ -285,39 +339,34 @@ class WOG_Meta_Tags {
             }
         }
         
+        $image_cache[$product_id] = $images;
         return $images;
     }
     
     /**
-     * MODIFIED: Output basic Open Graph tags with duplicate prevention
+     * Output basic Open Graph tags with duplicate prevention
      */
     private function output_basic_og_tags($meta_data) {
         $should_override = $this->should_disable_title_description();
         
-        // Title - only if not exists OR user wants override
         if ((!$this->tag_exists('title') || $should_override) && !empty($meta_data['title'])) {
             echo '<meta property="og:title" content="' . esc_attr($meta_data['title']) . '" />' . "\n";
         }
         
-        // Description - only if not exists OR user wants override
         if ((!$this->tag_exists('description') || $should_override) && !empty($meta_data['description'])) {
             echo '<meta property="og:description" content="' . esc_attr($meta_data['description']) . '" />' . "\n";
         }
         
-        // Type - always safe for products
         echo '<meta property="og:type" content="' . esc_attr($meta_data['type']) . '" />' . "\n";
         
-        // URL - only if not exists
         if (!$this->tag_exists('url')) {
             echo '<meta property="og:url" content="' . esc_url($meta_data['url']) . '" />' . "\n";
         }
         
-        // Site name - only if not exists
         if (!$this->tag_exists('site_name')) {
             echo '<meta property="og:site_name" content="' . esc_attr($meta_data['site_name']) . '" />' . "\n";
         }
         
-        // Images - always add (WooCommerce specific)
         if (!empty($meta_data['images'])) {
             foreach ($meta_data['images'] as $image) {
                 echo '<meta property="og:image" content="' . esc_url($image['url']) . '" />' . "\n";
@@ -329,21 +378,19 @@ class WOG_Meta_Tags {
             }
         }
         
-        // Locale - only if not exists
         if (!$this->tag_exists('locale')) {
             echo '<meta property="og:locale" content="' . esc_attr(str_replace('-', '_', get_locale())) . '" />' . "\n";
         }
     }
     
     /**
-     * ORIGINAL: Output Facebook specific tags (COMPLETE)
+     * Output Facebook specific tags
      */
     private function output_facebook_tags($meta_data) {
         if (!empty($this->settings['facebook_app_id'])) {
             echo '<meta property="fb:app_id" content="' . esc_attr($this->settings['facebook_app_id']) . '" />' . "\n";
         }
         
-        // Product specific tags for Facebook
         if ($meta_data['type'] === 'product' && !empty($meta_data['product'])) {
             $product = $meta_data['product'];
             
@@ -367,40 +414,15 @@ class WOG_Meta_Tags {
             if (!empty($product['category'])) {
                 echo '<meta property="product:category" content="' . esc_attr($product['category']) . '" />' . "\n";
             }
-            
-            if (!empty($product['retailer_item_id'])) {
-                echo '<meta property="product:retailer_item_id" content="' . esc_attr($product['retailer_item_id']) . '" />' . "\n";
-            }
-            
-            if (!empty($product['item_group_id'])) {
-                echo '<meta property="product:item_group_id" content="' . esc_attr($product['item_group_id']) . '" />' . "\n";
-            }
-            
-            if (!empty($product['color'])) {
-                echo '<meta property="product:color" content="' . esc_attr($product['color']) . '" />' . "\n";
-            }
-            
-            if (!empty($product['size'])) {
-                echo '<meta property="product:size" content="' . esc_attr($product['size']) . '" />' . "\n";
-            }
-            
-            if (!empty($product['gender'])) {
-                echo '<meta property="product:gender" content="' . esc_attr($product['gender']) . '" />' . "\n";
-            }
-            
-            if (!empty($product['age_group'])) {
-                echo '<meta property="product:age_group" content="' . esc_attr($product['age_group']) . '" />' . "\n";
-            }
         }
     }
     
     /**
-     * MODIFIED: Output enhanced Twitter Card tags with duplicate prevention
+     * Output Twitter Card tags with duplicate prevention
      */
     private function output_twitter_tags($meta_data) {
         $should_override = $this->should_disable_title_description();
         
-        // Use product card for products, summary_large_image for others
         $card_type = ($meta_data['type'] === 'product') ? 'product' : 'summary_large_image';
         if (!$this->tag_exists('twitter:card') || $should_override) {
             echo '<meta name="twitter:card" content="' . esc_attr($card_type) . '" />' . "\n";
@@ -423,7 +445,6 @@ class WOG_Meta_Tags {
             echo '<meta name="twitter:description" content="' . esc_attr($meta_data['description']) . '" />' . "\n";
         }
         
-        // Twitter image (use first image)
         if (!empty($meta_data['images'])) {
             $first_image = $meta_data['images'][0];
             if (!$this->tag_exists('twitter:image')) {
@@ -432,7 +453,6 @@ class WOG_Meta_Tags {
             }
         }
         
-        // Product specific data for Twitter
         if ($meta_data['type'] === 'product' && !empty($meta_data['product'])) {
             $product = $meta_data['product'];
             
@@ -445,24 +465,13 @@ class WOG_Meta_Tags {
                 echo '<meta name="twitter:label2" content="Availability" />' . "\n";
                 echo '<meta name="twitter:data2" content="' . esc_attr(ucfirst($product['availability'])) . '" />' . "\n";
             }
-            
-            if (!empty($product['brand'])) {
-                echo '<meta name="twitter:label3" content="Brand" />' . "\n";
-                echo '<meta name="twitter:data3" content="' . esc_attr($product['brand']) . '" />' . "\n";
-            }
-            
-            if (!empty($product['rating_value']) && $product['rating_value'] > 0) {
-                echo '<meta name="twitter:label4" content="Rating" />' . "\n";
-                echo '<meta name="twitter:data4" content="' . esc_attr($product['rating_value'] . '/5 (' . $product['review_count'] . ' reviews)') . '" />' . "\n";
-            }
         }
     }
     
     /**
-     * ORIGINAL: Output LinkedIn tags (COMPLETE)
+     * Output LinkedIn optimization tags
      */
     private function output_linkedin_tags($meta_data) {
-        // LinkedIn primarily uses Open Graph, but we can add some specific tags
         if (!empty($meta_data['title'])) {
             echo '<meta name="linkedin:title" content="' . esc_attr($meta_data['title']) . '" />' . "\n";
         }
@@ -473,7 +482,7 @@ class WOG_Meta_Tags {
     }
     
     /**
-     * ORIGINAL: Output Pinterest tags (COMPLETE)
+     * Output Pinterest Rich Pins tags
      */
     private function output_pinterest_tags($meta_data) {
         echo '<meta name="pinterest-rich-pin" content="true" />' . "\n";
@@ -493,10 +502,9 @@ class WOG_Meta_Tags {
     }
     
     /**
-     * ORIGINAL: Output WhatsApp optimization tags (COMPLETE)
+     * Output WhatsApp optimization tags
      */
     private function output_whatsapp_tags($meta_data) {
-        // WhatsApp uses Open Graph tags, but we can optimize the description
         if (!empty($meta_data['images'])) {
             $first_image = $meta_data['images'][0];
             echo '<meta property="og:image:alt" content="' . esc_attr($first_image['alt']) . '" />' . "\n";
@@ -504,52 +512,14 @@ class WOG_Meta_Tags {
     }
     
     /**
-     * ALL ORIGINAL HELPER METHODS BELOW (COMPLETE)
+     * Helper methods
      */
     
     private function should_disable_title_description() {
         return !empty($this->settings['disable_title_description']);
     }
     
-    private function get_optimized_title($product) {
-        $title = $product->get_name();
-        
-        // Add brand if available
-        $brand = $this->get_product_brand($product);
-        if (!empty($brand)) {
-            $title = $brand . ' ' . $title;
-        }
-        
-        // Truncate for optimal social sharing
-        return wp_trim_words($title, 10, '');
-    }
-    
-    private function get_optimized_description($product) {
-        $description = $product->get_short_description();
-        if (empty($description)) {
-            $description = $product->get_description();
-        }
-        if (empty($description)) {
-            $description = get_bloginfo('description');
-        }
-        
-        // Add key product info
-        $enhanced_description = wp_strip_all_tags($description);
-        
-        // Add price info
-        if ($product->get_price()) {
-            $enhanced_description .= ' Price: ' . wc_price($product->get_price());
-        }
-        
-        // Add availability
-        if ($product->is_in_stock()) {
-            $enhanced_description .= ' ✓ In Stock';
-        }
-        
-        return wp_trim_words($enhanced_description, 35, '...');
-    }
-    
-    private function get_detailed_availability($product) {
+    private function get_availability($product) {
         if ($product->is_in_stock()) {
             if ($product->managing_stock()) {
                 $stock_quantity = $product->get_stock_quantity();
@@ -574,33 +544,55 @@ class WOG_Meta_Tags {
     }
     
     private function get_product_brand($product) {
-        // Check for common brand taxonomies
+        static $brand_cache = array();
+        
+        $product_id = $product->get_id();
+        
+        if (isset($brand_cache[$product_id])) {
+            return $brand_cache[$product_id];
+        }
+        
+        $brand = '';
         $brand_taxonomies = array('product_brand', 'pwb-brand', 'yith_product_brand', 'pa_brand');
         
         foreach ($brand_taxonomies as $taxonomy) {
             if (taxonomy_exists($taxonomy)) {
-                $terms = get_the_terms($product->get_id(), $taxonomy);
+                $terms = get_the_terms($product_id, $taxonomy);
                 if ($terms && !is_wp_error($terms)) {
-                    return $terms[0]->name;
+                    $brand = $terms[0]->name;
+                    break;
                 }
             }
         }
         
-        // Check for brand meta field
-        $brand = get_post_meta($product->get_id(), '_brand', true);
-        return !empty($brand) ? $brand : '';
+        if (empty($brand)) {
+            $brand = get_post_meta($product_id, '_brand', true);
+        }
+        
+        $brand_cache[$product_id] = $brand;
+        return $brand;
     }
     
     private function get_primary_category($product) {
-        $categories = get_the_terms($product->get_id(), 'product_cat');
-        if ($categories && !is_wp_error($categories)) {
-            return $categories[0]->name;
+        static $category_cache = array();
+        
+        $product_id = $product->get_id();
+        
+        if (isset($category_cache[$product_id])) {
+            return $category_cache[$product_id];
         }
-        return '';
+        
+        $categories = get_the_terms($product_id, 'product_cat');
+        $category = '';
+        if ($categories && !is_wp_error($categories)) {
+            $category = $categories[0]->name;
+        }
+        
+        $category_cache[$product_id] = $category;
+        return $category;
     }
     
     private function get_item_group_id($product) {
-        // For variable products, use parent ID
         if ($product->is_type('variation')) {
             return $product->get_parent_id();
         }
@@ -608,77 +600,13 @@ class WOG_Meta_Tags {
         return $product->get_id();
     }
     
-    private function get_google_category($product) {
-        return get_post_meta($product->get_id(), '_google_product_category', true);
-    }
-    
-    private function get_product_type_hierarchy($product) {
-        $categories = get_the_terms($product->get_id(), 'product_cat');
-        if (!$categories || is_wp_error($categories)) {
-            return '';
+    private function get_product_attribute($product, $attribute) {
+        $value = $product->get_attribute('pa_' . $attribute);
+        if (!empty($value)) {
+            return $value;
         }
         
-        $hierarchy = array();
-        $category = $categories[0];
-        $ancestors = get_ancestors($category->term_id, 'product_cat');
-        
-        foreach (array_reverse($ancestors) as $ancestor_id) {
-            $ancestor = get_term($ancestor_id, 'product_cat');
-            $hierarchy[] = $ancestor->name;
-        }
-        
-        $hierarchy[] = $category->name;
-        
-        return implode(' > ', $hierarchy);
-    }
-    
-    private function get_age_group($product) {
-        $age_group = $product->get_attribute('pa_age_group');
-        if (!empty($age_group)) {
-            return $age_group;
-        }
-        
-        return get_post_meta($product->get_id(), '_age_group', true);
-    }
-    
-    private function get_gender($product) {
-        $gender = $product->get_attribute('pa_gender');
-        if (!empty($gender)) {
-            return $gender;
-        }
-        
-        return get_post_meta($product->get_id(), '_gender', true);
-    }
-    
-    private function get_dominant_color($product) {
-        $color = $product->get_attribute('pa_color');
-        if (!empty($color)) {
-            return $color;
-        }
-        
-        return get_post_meta($product->get_id(), '_color', true);
-    }
-    
-    private function get_size_info($product) {
-        $size = $product->get_attribute('pa_size');
-        if (!empty($size)) {
-            return $size;
-        }
-        
-        return get_post_meta($product->get_id(), '_size', true);
-    }
-    
-    private function get_material_info($product) {
-        $material = $product->get_attribute('pa_material');
-        if (!empty($material)) {
-            return $material;
-        }
-        
-        return get_post_meta($product->get_id(), '_material', true);
-    }
-    
-    private function get_pattern_info($product) {
-        return $product->get_attribute('pa_pattern') ?: get_post_meta($product->get_id(), '_pattern', true);
+        return get_post_meta($product->get_id(), '_' . $attribute, true);
     }
     
     private function get_gtin($product) {
@@ -700,47 +628,6 @@ class WOG_Meta_Tags {
             $mpn = get_post_meta($product->get_id(), '_manufacturer_part_number', true);
         }
         return $mpn;
-    }
-    
-    private function get_shipping_cost($product) {
-        // This would need integration with shipping plugins
-        // Return basic shipping info for now
-        return '';
-    }
-    
-    private function get_return_policy_days($product) {
-        return get_post_meta($product->get_id(), '_return_policy_days', true) ?: '30';
-    }
-    
-    private function get_inventory_count($product) {
-        if ($product->managing_stock()) {
-            return $product->get_stock_quantity();
-        }
-        
-        return '';
-    }
-    
-    private function get_sale_dates($product) {
-        $from = get_post_meta($product->get_id(), '_sale_price_dates_from', true);
-        $to = get_post_meta($product->get_id(), '_sale_price_dates_to', true);
-        
-        if (!$from && !$to) {
-            return '';
-        }
-        
-        $dates = array();
-        if ($from) {
-            $dates[] = date('Y-m-d', $from);
-        }
-        if ($to) {
-            $dates[] = date('Y-m-d', $to);
-        }
-        
-        return implode(' - ', $dates);
-    }
-    
-    private function get_expiration_date($product) {
-        return get_post_meta($product->get_id(), '_expiration_date', true);
     }
     
     private function get_fallback_image() {
