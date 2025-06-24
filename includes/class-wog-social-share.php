@@ -1,6 +1,6 @@
 <?php
 /**
- * Social Share Handler Class
+ * Social Share Handler Class - COMPLETE FIXED VERSION
  * Manages social sharing buttons and functionality
  * 
  * @package Woo_Open_Graph
@@ -47,6 +47,9 @@ class WOG_Social_Share {
         
         add_action('wp_ajax_wog_track_share', array($this, 'ajax_track_share'));
         add_action('wp_ajax_nopriv_wog_track_share', array($this, 'ajax_track_share'));
+        
+        // Debug shortcode for testing
+        add_shortcode('wog_debug_urls', array($this, 'debug_urls_shortcode'));
     }
     
     /**
@@ -85,41 +88,32 @@ class WOG_Social_Share {
     }
     
     /**
-     * Render share buttons HTML
+     * Render share buttons HTML - FIXED VERSION
      */
     public function render_share_buttons($product) {
         $style = !empty($this->settings['share_button_style']) ? $this->settings['share_button_style'] : 'modern';
-        $title = get_the_title($product->get_id());
-        $url = get_permalink($product->get_id());
         
-        // Get product description
-        $description = '';
-        $short_desc = $product->get_short_description();
-        if (!empty($short_desc)) {
-            $description = wp_trim_words(wp_strip_all_tags($short_desc), 20, '...');
-        } else {
-            $long_desc = $product->get_description();
-            if (!empty($long_desc)) {
-                $description = wp_trim_words(wp_strip_all_tags($long_desc), 15, '...');
-            }
-        }
-        
-        // Get product image
-        $image = '';
-        if ($product->get_image_id()) {
-            $image_data = wp_get_attachment_image_src($product->get_image_id(), 'large');
-            $image = $image_data ? $image_data[0] : '';
-        }
+        // Get RAW data (no encoding/escaping at this stage)
+        $raw_title = get_the_title($product->get_id());
+        $raw_url = get_permalink($product->get_id());
+        $raw_description = $this->get_clean_product_description($product);
+        $raw_image = $this->get_product_image_url($product);
         
         $share_data = array(
-            'url' => $url,
-            'title' => $title,
-            'description' => $description,
-            'image' => $image
+            'url' => $raw_url,
+            'title' => $raw_title,
+            'description' => $raw_description,
+            'image' => $raw_image
         );
         
         ?>
         <div class="wog-social-share wog-style-<?php echo esc_attr($style); ?>" data-product-id="<?php echo esc_attr($product->get_id()); ?>">
+            <?php 
+            // Debug output if WP_DEBUG is enabled
+            if (defined('WP_DEBUG') && WP_DEBUG && current_user_can('manage_options')) {
+                $this->debug_share_urls($product, $share_data);
+            }
+            ?>
             <div class="wog-share-label">
                 <?php _e('Share this product:', WOG_TEXT_DOMAIN); ?>
             </div>
@@ -156,7 +150,7 @@ class WOG_Social_Share {
     }
     
     /**
-     * Render individual share button
+     * Render individual share button - FIXED VERSION
      */
     private function render_share_button($platform, $share_data) {
         $platforms = $this->get_platform_config();
@@ -167,6 +161,11 @@ class WOG_Social_Share {
         
         $config = $platforms[$platform];
         $url = $this->build_share_url($platform, $share_data);
+        
+        // Debug logging if enabled
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log("WOG Share URL for {$platform}: " . $url);
+        }
         
         ?>
         <a href="<?php echo esc_url($url); ?>" 
@@ -201,58 +200,157 @@ class WOG_Social_Share {
     }
     
     /**
-     * Build share URL for each platform
+     * Build share URL for each platform - COMPLETELY FIXED VERSION
      */
     private function build_share_url($platform, $share_data) {
-        $url = esc_url($share_data['url']);
-        $title = sanitize_text_field($share_data['title']);
-        $description = sanitize_text_field($share_data['description']);
-        $image = esc_url($share_data['image']);
+        // Start with RAW data (no esc_url or sanitize yet to avoid double encoding)
+        $raw_url = $share_data['url'];
+        $raw_title = $share_data['title'];
+        $raw_description = $share_data['description'];
+        $raw_image = $share_data['image'];
         
-        $encoded_url = urlencode($url);
-        $encoded_title = urlencode($title);
-        $encoded_description = urlencode($description);
-        $encoded_image = urlencode($image);
+        // Clean up the text data (but don't URL encode yet)
+        $clean_title = $this->clean_text_for_sharing($raw_title);
+        $clean_description = $this->clean_text_for_sharing($raw_description);
         
         switch ($platform) {
             case 'facebook':
-                return "https://www.facebook.com/sharer/sharer.php?u={$encoded_url}";
+                // Facebook only needs the URL - it will fetch title/description from meta tags
+                return 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($raw_url);
                 
             case 'twitter':
-                $text = $title;
-                if (!empty($description) && strlen($title) < 100) {
-                    $text .= ' - ' . $description;
+                $text = $clean_title;
+                if (!empty($clean_description) && strlen($clean_title) < 100) {
+                    $text .= ' - ' . $clean_description;
                 }
-                $text = wp_trim_words($text, 15, '...');
-                $encoded_text = urlencode($text);
-                return "https://twitter.com/intent/tweet?url={$encoded_url}&text={$encoded_text}";
+                // Limit to Twitter's character limit (minus URL length ~23 chars)
+                $text = $this->truncate_text($text, 250);
+                return 'https://twitter.com/intent/tweet?url=' . rawurlencode($raw_url) . '&text=' . rawurlencode($text);
                 
             case 'linkedin':
-                return "https://www.linkedin.com/sharing/share-offsite/?url={$encoded_url}";
+                // LinkedIn also fetches from meta tags, just needs URL
+                return 'https://www.linkedin.com/sharing/share-offsite/?url=' . rawurlencode($raw_url);
                 
             case 'pinterest':
-                $pin_description = !empty($description) ? $description : $title;
-                $encoded_pin_desc = urlencode($pin_description);
-                return "https://pinterest.com/pin/create/button/?url={$encoded_url}&media={$encoded_image}&description={$encoded_pin_desc}";
+                $pin_description = !empty($clean_description) ? $clean_description : $clean_title;
+                $pin_description = $this->truncate_text($pin_description, 500); // Pinterest limit
+                
+                $pinterest_url = 'https://pinterest.com/pin/create/button/?url=' . rawurlencode($raw_url);
+                if (!empty($raw_image)) {
+                    $pinterest_url .= '&media=' . rawurlencode($raw_image);
+                }
+                $pinterest_url .= '&description=' . rawurlencode($pin_description);
+                
+                return $pinterest_url;
                 
             case 'whatsapp':
-                $whatsapp_text = $title . ' ' . $url;
-                $encoded_whatsapp = urlencode($whatsapp_text);
-                return "https://wa.me/?text={$encoded_whatsapp}";
+                // WhatsApp mobile sharing - keep it simple
+                $whatsapp_text = $clean_title . ' ' . $raw_url;
+                return 'https://wa.me/?text=' . rawurlencode($whatsapp_text);
                 
             case 'email':
-                $subject = urlencode(__('Check out this product', WOG_TEXT_DOMAIN));
-                $body_text = $title;
-                if (!empty($description)) {
-                    $body_text .= "\n\n" . $description;
+                $subject = sprintf(__('Check out: %s', WOG_TEXT_DOMAIN), $clean_title);
+                $body_text = $clean_title;
+                
+                if (!empty($clean_description)) {
+                    $body_text .= "\n\n" . $clean_description;
                 }
-                $body_text .= "\n\n" . $url;
-                $encoded_body = urlencode($body_text);
-                return "mailto:?subject={$subject}&body={$encoded_body}";
+                
+                $body_text .= "\n\n" . __('View product:', WOG_TEXT_DOMAIN) . ' ' . $raw_url;
+                
+                return 'mailto:?subject=' . rawurlencode($subject) . '&body=' . rawurlencode($body_text);
                 
             default:
-                return '#';
+                return esc_url($raw_url);
         }
+    }
+    
+    /**
+     * Clean text for social sharing (no URL encoding)
+     */
+    private function clean_text_for_sharing($text) {
+        if (empty($text)) {
+            return '';
+        }
+        
+        // Decode any existing HTML entities first
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        
+        // Strip all HTML tags
+        $text = wp_strip_all_tags($text);
+        
+        // Remove extra whitespace and normalize
+        $text = trim(preg_replace('/\s+/', ' ', $text));
+        
+        // Remove any existing URL encoding (in case it was pre-encoded)
+        $text = urldecode($text);
+        
+        return $text;
+    }
+    
+    /**
+     * Helper method to truncate text properly
+     */
+    private function truncate_text($text, $max_length) {
+        if (strlen($text) <= $max_length) {
+            return $text;
+        }
+        
+        $truncated = substr($text, 0, $max_length);
+        
+        // Try to break at word boundary
+        $last_space = strrpos($truncated, ' ');
+        if ($last_space !== false && $last_space > ($max_length * 0.75)) {
+            $truncated = substr($truncated, 0, $last_space);
+        }
+        
+        return $truncated . '...';
+    }
+    
+    /**
+     * Get clean product description (no encoding)
+     */
+    private function get_clean_product_description($product) {
+        $description = '';
+        
+        // Try short description first
+        $short_desc = $product->get_short_description();
+        if (!empty($short_desc)) {
+            $description = $short_desc;
+        } else {
+            // Fall back to excerpt from long description
+            $long_desc = $product->get_description();
+            if (!empty($long_desc)) {
+                $description = $long_desc;
+            }
+        }
+        
+        // Clean up but don't encode
+        $description = html_entity_decode($description, ENT_QUOTES, 'UTF-8');
+        $description = wp_strip_all_tags($description);
+        $description = trim(preg_replace('/\s+/', ' ', $description));
+        
+        // Add product price if available
+        if ($product->get_price()) {
+            $price = $product->get_price();
+            $currency = get_woocommerce_currency_symbol();
+            $description = trim($description . ' - ' . $currency . $price);
+        }
+        
+        // Limit length for social sharing
+        return $this->truncate_text($description, 200);
+    }
+    
+    /**
+     * Get product image URL
+     */
+    private function get_product_image_url($product) {
+        if ($product->get_image_id()) {
+            $image_data = wp_get_attachment_image_src($product->get_image_id(), 'large');
+            return $image_data ? $image_data[0] : '';
+        }
+        
+        return '';
     }
     
     /**
@@ -363,5 +461,76 @@ class WOG_Social_Share {
         wp_send_json_success(array(
             'message' => __('Share tracked successfully', WOG_TEXT_DOMAIN)
         ));
+    }
+    
+    /**
+     * Debug URLs shortcode for testing
+     */
+    public function debug_urls_shortcode($atts) {
+        if (!current_user_can('manage_options')) {
+            return '<p style="color: red;">Access denied - admin only</p>';
+        }
+        
+        global $product;
+        if (!$product) {
+            global $post;
+            if ($post && $post->post_type === 'product') {
+                $product = wc_get_product($post->ID);
+            }
+        }
+        
+        if (!$product) {
+            return '<p style="color: red;">No product found on this page</p>';
+        }
+        
+        // Test data
+        $test_data = array(
+            'url' => get_permalink($product->get_id()),
+            'title' => get_the_title($product->get_id()),
+            'description' => $this->get_clean_product_description($product),
+            'image' => $this->get_product_image_url($product)
+        );
+        
+        $output = '<div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border: 1px solid #ddd; font-family: monospace;">';
+        $output .= '<h3>WOG Share URL Debug</h3>';
+        $output .= '<p><strong>Product:</strong> ' . esc_html($test_data['title']) . '</p>';
+        $output .= '<p><strong>Raw URL:</strong> ' . esc_html($test_data['url']) . '</p>';
+        $output .= '<p><strong>Clean Title:</strong> ' . esc_html($this->clean_text_for_sharing($test_data['title'])) . '</p>';
+        $output .= '<p><strong>Clean Description:</strong> ' . esc_html($test_data['description']) . '</p>';
+        
+        $platforms = array('facebook', 'twitter', 'linkedin', 'pinterest', 'whatsapp', 'email');
+        
+        foreach ($platforms as $platform) {
+            $share_url = $this->build_share_url($platform, $test_data);
+            $output .= '<p><strong>' . ucfirst($platform) . ':</strong><br>';
+            $output .= '<code style="word-break: break-all; background: #fff; padding: 5px; display: block; margin: 5px 0;">' . esc_html($share_url) . '</code></p>';
+        }
+        
+        $output .= '</div>';
+        
+        return $output;
+    }
+    
+    /**
+     * Debug method for share URL generation
+     */
+    private function debug_share_urls($product, $share_data) {
+        if (!defined('WP_DEBUG') || !WP_DEBUG || !current_user_can('manage_options')) {
+            return;
+        }
+        
+        echo "<!-- WOG DEBUG: Share URL Generation -->\n";
+        echo "<!-- Raw Title: " . esc_html($share_data['title']) . " -->\n";
+        echo "<!-- Clean Title: " . esc_html($this->clean_text_for_sharing($share_data['title'])) . " -->\n";
+        echo "<!-- Raw URL: " . esc_html($share_data['url']) . " -->\n";
+        echo "<!-- Description: " . esc_html($share_data['description']) . " -->\n";
+        
+        $platforms = array('facebook', 'twitter', 'linkedin', 'pinterest', 'whatsapp');
+        
+        foreach ($platforms as $platform) {
+            $url = $this->build_share_url($platform, $share_data);
+            echo "<!-- {$platform} URL: " . esc_html($url) . " -->\n";
+        }
+        echo "<!-- END WOG DEBUG -->\n";
     }
 }
