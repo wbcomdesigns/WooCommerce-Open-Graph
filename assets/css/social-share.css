@@ -7,14 +7,14 @@
  */
 
 /* === BASE STYLES === */
-.ewog-social-share {
+.wog-social-share {
     margin: 20px 0;
     padding: 15px 0;
     border-top: 1px solid #e1e8ed;
     clear: both;
 }
 
-.ewog-share-label {
+.wog-share-label {
     font-size: 14px;
     font-weight: 600;
     color: #333;
@@ -23,7 +23,7 @@
     letter-spacing: 0.5px;
 }
 
-.ewog-share-buttons {
+.wog-share-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -31,7 +31,7 @@
 }
 
 /* === BASE BUTTON STYLES === */
-.ewog-share-btn {
+.wog-share-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -48,86 +48,86 @@
     line-height: 1.2;
 }
 
-.ewog-share-btn:hover {
+.wog-share-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     text-decoration: none;
 }
 
-.ewog-share-btn:active {
+.wog-share-btn:active {
     transform: translateY(0);
 }
 
-.ewog-share-btn svg {
+.wog-share-btn svg {
     flex-shrink: 0;
     transition: transform 0.2s ease;
 }
 
-.ewog-share-btn:hover svg {
+.wog-share-btn:hover svg {
     transform: scale(1.1);
 }
 
-.ewog-share-text {
+.wog-share-text {
     white-space: nowrap;
 }
 
 /* === MODERN STYLE (DEFAULT) === */
-.ewog-style-modern .ewog-share-btn {
+.wog-style-modern .wog-share-btn {
     background: #f8f9fa;
     color: #495057;
     border: 1px solid #dee2e6;
 }
 
-.ewog-style-modern .ewog-share-btn:hover {
+.wog-style-modern .wog-share-btn:hover {
     background: #fff;
     border-color: #adb5bd;
 }
 
 /* Platform-specific hover colors for modern style */
-.ewog-style-modern .ewog-share-facebook:hover {
+.wog-style-modern .wog-share-facebook:hover {
     background: #1877f2;
     color: white;
     border-color: #1877f2;
 }
 
-.ewog-style-modern .ewog-share-twitter:hover {
+.wog-style-modern .wog-share-twitter:hover {
     background: #1da1f2;
     color: white;
     border-color: #1da1f2;
 }
 
-.ewog-style-modern .ewog-share-linkedin:hover {
+.wog-style-modern .wog-share-linkedin:hover {
     background: #0077b5;
     color: white;
     border-color: #0077b5;
 }
 
-.ewog-style-modern .ewog-share-pinterest:hover {
+.wog-style-modern .wog-share-pinterest:hover {
     background: #bd081c;
     color: white;
     border-color: #bd081c;
 }
 
-.ewog-style-modern .ewog-share-whatsapp:hover {
+.wog-style-modern .wog-share-whatsapp:hover {
     background: #25d366;
     color: white;
     border-color: #25d366;
 }
 
-.ewog-style-modern .ewog-share-email:hover {
+.wog-style-modern .wog-share-email:hover {
     background: #6c757d;
     color: white;
     border-color: #6c757d;
 }
 
-.ewog-style-modern .ewog-share-copy:hover {
+.wog-style-modern .wog-share-copy:hover {
     background: #28a745;
     color: white;
     border-color: #28a745;
 }
 
 /* === CLASSIC STYLE === */
-.ewog-style-classic .ewog-share-btn {
+.wog-style-classic .wog-share-btn {
     border-radius: 0;
     padding: 10px 16px;
     font-weight: 600;
@@ -135,49 +135,49 @@
     letter-spacing: 0.5px;
 }
 
-.ewog-style-classic .ewog-share-facebook {
+.wog-style-classic .wog-share-facebook {
     background: #1877f2;
     color: white;
 }
 
-.ewog-style-classic .ewog-share-twitter {
+.wog-style-classic .wog-share-twitter {
     background: #1da1f2;
     color: white;
 }
 
-.ewog-style-classic .ewog-share-linkedin {
+.wog-style-classic .wog-share-linkedin {
     background: #0077b5;
     color: white;
 }
 
-.ewog-style-classic .ewog-share-pinterest {
+.wog-style-classic .wog-share-pinterest {
     background: #bd081c;
     color: white;
 }
 
-.ewog-style-classic .ewog-share-whatsapp {
+.wog-style-classic .wog-share-whatsapp {
     background: #25d366;
     color: white;
 }
 
-.ewog-style-classic .ewog-share-email {
+.wog-style-classic .wog-share-email {
     background: #6c757d;
     color: white;
 }
 
-.ewog-style-classic .ewog-share-copy {
+.wog-style-classic .wog-share-copy {
     background: #28a745;
     color: white;
 }
 
-.ewog-style-classic .ewog-share-btn:hover {
+.wog-style-classic .wog-share-btn:hover {
     opacity: 0.9;
     transform: none;
     box-shadow: none;
 }
 
 /* === MINIMAL STYLE === */
-.ewog-style-minimal .ewog-share-btn {
+.wog-style-minimal .wog-share-btn {
     background: transparent;
     color: #6c757d;
     border: none;
@@ -188,11 +188,11 @@
     justify-content: center;
 }
 
-.ewog-style-minimal .ewog-share-text {
+.wog-style-minimal .wog-share-text {
     display: none;
 }
 
-.ewog-style-minimal .ewog-share-btn:hover {
+.wog-style-minimal .wog-share-btn:hover {
     background: #f8f9fa;
     color: #495057;
     transform: scale(1.1);
@@ -200,13 +200,13 @@
 }
 
 /* === COPY BUTTON STATES === */
-.ewog-share-copy.copied {
+.wog-share-copy.copied {
     background: #28a745 !important;
     color: white !important;
     border-color: #28a745 !important;
 }
 
-.ewog-share-copy.copied::after {
+.wog-share-copy.copied::after {
     content: "✓";
     position: absolute;
     top: 50%;
@@ -228,12 +228,12 @@
 }
 
 /* === LOADING STATES === */
-.ewog-share-btn.loading {
+.wog-share-btn.loading {
     pointer-events: none;
     opacity: 0.7;
 }
 
-.ewog-share-btn.loading svg {
+.wog-share-btn.loading svg {
     animation: spin 1s linear infinite;
 }
 
@@ -244,112 +244,112 @@
 
 /* === RESPONSIVE DESIGN === */
 @media (max-width: 768px) {
-    .ewog-share-buttons {
+    .wog-share-buttons {
         justify-content: center;
     }
     
-    .ewog-style-modern .ewog-share-btn,
-    .ewog-style-classic .ewog-share-btn {
+    .wog-style-modern .wog-share-btn,
+    .wog-style-classic .wog-share-btn {
         flex: 1;
         justify-content: center;
         min-width: 0;
         max-width: calc(50% - 4px);
     }
     
-    .ewog-style-minimal .ewog-share-btn {
+    .wog-style-minimal .wog-share-btn {
         flex: none;
     }
     
-    .ewog-share-text {
+    .wog-share-text {
         display: none;
     }
     
-    .ewog-style-minimal .ewog-share-text {
+    .wog-style-minimal .wog-share-text {
         display: none;
     }
 }
 
 @media (max-width: 480px) {
-    .ewog-social-share {
+    .wog-social-share {
         margin: 15px 0;
         padding: 10px 0;
     }
     
-    .ewog-share-buttons {
+    .wog-share-buttons {
         gap: 6px;
     }
     
-    .ewog-share-btn {
+    .wog-share-btn {
         padding: 8px;
         font-size: 12px;
     }
     
-    .ewog-style-modern .ewog-share-btn,
-    .ewog-style-classic .ewog-share-btn {
+    .wog-style-modern .wog-share-btn,
+    .wog-style-classic .wog-share-btn {
         max-width: calc(33.333% - 4px);
     }
     
-    .ewog-style-minimal .ewog-share-btn {
+    .wog-style-minimal .wog-share-btn {
         width: 36px;
         height: 36px;
     }
 }
 
 /* === ACCESSIBILITY === */
-.ewog-share-btn:focus {
+.wog-share-btn:focus {
     outline: 2px solid #007cba;
     outline-offset: 2px;
 }
 
-.ewog-share-btn:focus:not(:focus-visible) {
+.wog-share-btn:focus:not(:focus-visible) {
     outline: none;
 }
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
-    .ewog-share-btn {
+    .wog-share-btn {
         border-width: 2px;
     }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .ewog-share-btn,
-    .ewog-share-btn svg {
+    .wog-share-btn,
+    .wog-share-btn svg {
         transition: none;
     }
     
-    .ewog-share-btn.loading svg {
+    .wog-share-btn.loading svg {
         animation: none;
     }
 }
 
 /* === DARK MODE SUPPORT === */
 @media (prefers-color-scheme: dark) {
-    .ewog-social-share {
+    .wog-social-share {
         border-top-color: #333;
     }
     
-    .ewog-share-label {
+    .wog-share-label {
         color: #e1e8ed;
     }
     
-    .ewog-style-modern .ewog-share-btn {
+    .wog-style-modern .wog-share-btn {
         background: #2c3e50;
         color: #ecf0f1;
         border-color: #34495e;
     }
     
-    .ewog-style-modern .ewog-share-btn:hover {
+    .wog-style-modern .wog-share-btn:hover {
         background: #34495e;
         border-color: #4a5f7a;
     }
     
-    .ewog-style-minimal .ewog-share-btn {
+    .wog-style-minimal .wog-share-btn {
         color: #bdc3c7;
     }
     
-    .ewog-style-minimal .ewog-share-btn:hover {
+    .wog-style-minimal .wog-share-btn:hover {
         background: #34495e;
         color: #ecf0f1;
     }
@@ -357,7 +357,7 @@
 
 /* === PRINT STYLES === */
 @media print {
-    .ewog-social-share {
+    .wog-social-share {
         display: none;
     }
 }

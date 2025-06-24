@@ -7,14 +7,14 @@
  */
 
 /* === ADMIN PAGE LAYOUT === */
-.ewog-admin-wrap {
+.wog-admin-wrap {
     max-width: 1200px;
     margin: 20px 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Header */
-.ewog-admin-header {
+.wog-admin-header {
     background: #fff;
     padding: 20px;
     border: 1px solid #c3c4c7;
@@ -23,36 +23,36 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.ewog-admin-header h1 {
+.wog-admin-header h1 {
     margin: 0 0 10px 0;
     color: #1d2327;
     font-size: 24px;
 }
 
-.ewog-admin-header .description {
+.wog-admin-header .description {
     color: #646970;
     font-size: 14px;
     line-height: 1.5;
 }
 
 /* Two Column Layout */
-.ewog-admin-layout {
+.wog-admin-layout {
     display: flex;
     gap: 20px;
 }
 
-.ewog-main-content {
+.wog-main-content {
     flex: 2;
     min-width: 0;
 }
 
-.ewog-sidebar {
+.wog-sidebar {
     flex: 0 0 300px;
 }
 
 /* === CARDS === */
-.ewog-card,
-.ewog-sidebar-box {
+.wog-card,
+.wog-sidebar-box {
     background: #fff;
     border: 1px solid #c3c4c7;
     border-radius: 4px;
@@ -61,14 +61,14 @@
     overflow: hidden;
 }
 
-.ewog-card-header {
+.wog-card-header {
     background: #f6f7f7;
     border-bottom: 1px solid #c3c4c7;
     padding: 15px 20px;
 }
 
-.ewog-card-header h2,
-.ewog-card-header h3 {
+.wog-card-header h2,
+.wog-card-header h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
@@ -78,26 +78,26 @@
     gap: 8px;
 }
 
-.ewog-card-header .dashicons {
+.wog-card-header .dashicons {
     color: #646970;
     font-size: 18px;
     width: 18px;
     height: 18px;
 }
 
-.ewog-card-body {
+.wog-card-body {
     padding: 20px;
 }
 
 /* === STATUS INDICATORS === */
-.ewog-status-grid {
+.wog-status-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     margin: 15px 0;
 }
 
-.ewog-status-item {
+.wog-status-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -108,39 +108,39 @@
     transition: all 0.2s ease;
 }
 
-.ewog-status-item.active {
+.wog-status-item.active {
     border-color: #00a32a;
     background: #f0f8f0;
 }
 
-.ewog-status-item.inactive {
+.wog-status-item.inactive {
     border-color: #d63638;
     background: #fef7f7;
 }
 
-.ewog-status-icon {
+.wog-status-icon {
     width: 16px;
     height: 16px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
-.ewog-status-icon.enabled {
+.wog-status-icon.enabled {
     background: #00a32a;
 }
 
-.ewog-status-icon.disabled {
+.wog-status-icon.disabled {
     background: #d63638;
 }
 
-.ewog-status-label {
+.wog-status-label {
     flex: 1;
     font-weight: 500;
     color: #1d2327;
     font-size: 14px;
 }
 
-.ewog-status-text {
+.wog-status-text {
     font-size: 11px;
     color: #646970;
     text-transform: uppercase;
@@ -148,7 +148,7 @@
 }
 
 /* === BUTTONS AND ACTIONS === */
-.ewog-btn-block {
+.wog-btn-block {
     width: 100%;
     justify-content: flex-start;
     text-align: left;
@@ -167,40 +167,40 @@
     transition: all 0.2s ease;
 }
 
-.ewog-btn-block:hover {
+.wog-btn-block:hover {
     background: #f0f0f1;
     border-color: #8c8f94;
     color: #1d2327;
     text-decoration: none;
 }
 
-.ewog-btn-block.button-primary {
+.wog-btn-block.button-primary {
     background: #2271b1;
     border-color: #2271b1;
     color: #fff;
 }
 
-.ewog-btn-block.button-primary:hover {
+.wog-btn-block.button-primary:hover {
     background: #135e96;
     border-color: #135e96;
     color: #fff;
 }
 
-.ewog-btn-block .dashicons {
+.wog-btn-block .dashicons {
     font-size: 16px;
     width: 16px;
     height: 16px;
 }
 
 /* === PLATFORM BADGES === */
-.ewog-platform-badges {
+.wog-platform-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     margin: 10px 0;
 }
 
-.ewog-platform-badge {
+.wog-platform-badge {
     background: #2271b1;
     color: #fff;
     padding: 4px 8px;
@@ -209,7 +209,7 @@
     font-weight: 500;
 }
 
-.ewog-no-platforms {
+.wog-no-platforms {
     color: #646970;
     font-style: italic;
     padding: 15px;
@@ -219,25 +219,25 @@
 }
 
 /* === FORM ELEMENTS === */
-.ewog-settings-form .form-table th {
+.wog-settings-form .form-table th {
     font-weight: 600;
     color: #1d2327;
     width: 200px;
     padding: 15px 10px;
 }
 
-.ewog-settings-form .form-table td {
+.wog-settings-form .form-table td {
     padding: 15px 10px;
 }
 
-.ewog-settings-form .form-table .description {
+.wog-settings-form .form-table .description {
     margin-top: 5px;
     color: #646970;
     font-size: 13px;
     line-height: 1.4;
 }
 
-.ewog-settings-form .button-large {
+.wog-settings-form .button-large {
     padding: 8px 30px;
     font-size: 14px;
     font-weight: 600;
@@ -248,7 +248,7 @@
     border-radius: 4px;
 }
 
-.ewog-settings-form .button-large:hover {
+.wog-settings-form .button-large:hover {
     background: #135e96;
     border-color: #135e96;
 }
@@ -270,34 +270,34 @@ h2:not(:first-child) {
 
 /* === MEDIA QUERIES === */
 @media (max-width: 1200px) {
-    .ewog-admin-layout {
+    .wog-admin-layout {
         flex-direction: column;
     }
     
-    .ewog-sidebar {
+    .wog-sidebar {
         flex: none;
     }
 }
 
 @media (max-width: 782px) {
-    .ewog-admin-wrap {
+    .wog-admin-wrap {
         margin: 10px;
     }
     
-    .ewog-admin-header {
+    .wog-admin-header {
         padding: 15px;
     }
     
-    .ewog-card-header,
-    .ewog-card-body {
+    .wog-card-header,
+    .wog-card-body {
         padding: 15px;
     }
     
-    .ewog-status-grid {
+    .wog-status-grid {
         grid-template-columns: 1fr;
     }
     
-    .ewog-btn-block {
+    .wog-btn-block {
         text-align: center;
         justify-content: center;
     }

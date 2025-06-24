@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class EWOG_Social_Share {
+class WOG_Social_Share {
     
     private static $instance = null;
     private $settings;
@@ -24,7 +24,7 @@ class EWOG_Social_Share {
     }
     
     private function __construct() {
-        $this->settings = get_option('ewog_settings', array());
+        $this->settings = get_option('wog_settings', array());
         $this->init_hooks();
     }
     
@@ -34,11 +34,11 @@ class EWOG_Social_Share {
         }
         
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-        add_shortcode('ewog_social_share', array($this, 'social_share_shortcode'));
+        add_shortcode('wog_social_share', array($this, 'social_share_shortcode'));
         
         // AJAX handler for tracking
-        add_action('wp_ajax_ewog_track_share', array($this, 'ajax_track_share'));
-        add_action('wp_ajax_nopriv_ewog_track_share', array($this, 'ajax_track_share'));
+        add_action('wp_ajax_wog_track_share', array($this, 'ajax_track_share'));
+        add_action('wp_ajax_nopriv_wog_track_share', array($this, 'ajax_track_share'));
     }
     
     /**
@@ -95,11 +95,11 @@ class EWOG_Social_Share {
         );
         
         ?>
-        <div class="ewog-social-share ewog-style-<?php echo esc_attr($style); ?>" data-product-id="<?php echo esc_attr($product->get_id()); ?>">
-            <div class="ewog-share-label">
-                <?php _e('Share this product:', EWOG_TEXT_DOMAIN); ?>
+        <div class="wog-social-share wog-style-<?php echo esc_attr($style); ?>" data-product-id="<?php echo esc_attr($product->get_id()); ?>">
+            <div class="wog-share-label">
+                <?php _e('Share this product:', WOG_TEXT_DOMAIN); ?>
             </div>
-            <div class="ewog-share-buttons">
+            <div class="wog-share-buttons">
                 <?php 
                 $enabled_platforms = $this->get_enabled_platforms();
                 
@@ -147,13 +147,13 @@ class EWOG_Social_Share {
         
         ?>
         <a href="<?php echo esc_url($url); ?>" 
-           class="ewog-share-btn ewog-share-<?php echo esc_attr($platform); ?>"
+           class="wog-share-btn wog-share-<?php echo esc_attr($platform); ?>"
            data-platform="<?php echo esc_attr($platform); ?>"
            target="_blank"
            rel="noopener noreferrer"
-           aria-label="<?php echo esc_attr(sprintf(__('Share on %s', EWOG_TEXT_DOMAIN), $config['name'])); ?>">
+           aria-label="<?php echo esc_attr(sprintf(__('Share on %s', WOG_TEXT_DOMAIN), $config['name'])); ?>">
             <?php echo $config['icon']; ?>
-            <span class="ewog-share-text"><?php echo esc_html($config['name']); ?></span>
+            <span class="wog-share-text"><?php echo esc_html($config['name']); ?></span>
         </a>
         <?php
     }
@@ -164,15 +164,15 @@ class EWOG_Social_Share {
     private function render_copy_link_button($share_data) {
         ?>
         <button type="button" 
-                class="ewog-share-btn ewog-share-copy" 
+                class="wog-share-btn wog-share-copy" 
                 data-url="<?php echo esc_attr($share_data['url']); ?>"
                 data-platform="copy"
-                aria-label="<?php esc_attr_e('Copy product link', EWOG_TEXT_DOMAIN); ?>"
-                title="<?php esc_attr_e('Copy link to clipboard', EWOG_TEXT_DOMAIN); ?>">
+                aria-label="<?php esc_attr_e('Copy product link', WOG_TEXT_DOMAIN); ?>"
+                title="<?php esc_attr_e('Copy link to clipboard', WOG_TEXT_DOMAIN); ?>">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
             </svg>
-            <span class="ewog-share-text"><?php _e('Copy', EWOG_TEXT_DOMAIN); ?></span>
+            <span class="wog-share-text"><?php _e('Copy', WOG_TEXT_DOMAIN); ?></span>
         </button>
         <?php
     }
@@ -205,7 +205,7 @@ class EWOG_Social_Share {
                 return "https://wa.me/?text=" . rawurlencode($text);
                 
             case 'email':
-                $subject = rawurlencode(__('Check out this product', EWOG_TEXT_DOMAIN));
+                $subject = rawurlencode(__('Check out this product', WOG_TEXT_DOMAIN));
                 $body = rawurlencode($title . "\n\n" . $description . "\n\n" . $share_data['url']);
                 return "mailto:?subject={$subject}&body={$body}";
                 
@@ -256,28 +256,28 @@ class EWOG_Social_Share {
         
         // Enqueue styles
         wp_enqueue_style(
-            'ewog-social-share',
-            EWOG_PLUGIN_URL . 'assets/css/social-share.css',
+            'wog-social-share',
+            WOG_PLUGIN_URL . 'assets/css/social-share.css',
             array(),
-            EWOG_VERSION
+            WOG_VERSION
         );
         
         // Enqueue JavaScript
         wp_enqueue_script(
-            'ewog-social-share',
-            EWOG_PLUGIN_URL . 'assets/js/social-share.js',
+            'wog-social-share',
+            WOG_PLUGIN_URL . 'assets/js/social-share.js',
             array(),
-            EWOG_VERSION,
+            WOG_VERSION,
             true
         );
         
         // Localize script
-        wp_localize_script('ewog-social-share', 'ewogShare', array(
-            'copied' => __('Link copied!', EWOG_TEXT_DOMAIN),
-            'copyFailed' => __('Failed to copy link', EWOG_TEXT_DOMAIN),
-            'copyLink' => __('Copy link', EWOG_TEXT_DOMAIN),
+        wp_localize_script('wog-social-share', 'wogShare', array(
+            'copied' => __('Link copied!', WOG_TEXT_DOMAIN),
+            'copyFailed' => __('Failed to copy link', WOG_TEXT_DOMAIN),
+            'copyLink' => __('Copy link', WOG_TEXT_DOMAIN),
             'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('ewog_share_nonce'),
+            'nonce' => wp_create_nonce('wog_share_nonce'),
             'debug' => defined('WP_DEBUG') && WP_DEBUG
         ));
     }
@@ -308,7 +308,7 @@ class EWOG_Social_Share {
      * AJAX handler for tracking shares
      */
     public function ajax_track_share() {
-        check_ajax_referer('ewog_share_nonce', 'nonce');
+        check_ajax_referer('wog_share_nonce', 'nonce');
         
         $platform = sanitize_text_field($_POST['platform'] ?? '');
         $product_id = intval($_POST['product_id'] ?? 0);
@@ -316,7 +316,7 @@ class EWOG_Social_Share {
         
         if ($platform && $product_id) {
             // Fire action for other plugins to hook into
-            do_action('ewog_social_share_tracked', $platform, $product_id, $url);
+            do_action('wog_social_share_tracked', $platform, $product_id, $url);
             
             // Log if debug mode is enabled
             if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -325,7 +325,7 @@ class EWOG_Social_Share {
         }
         
         wp_send_json_success(array(
-            'message' => __('Share tracked successfully', EWOG_TEXT_DOMAIN)
+            'message' => __('Share tracked successfully', WOG_TEXT_DOMAIN)
         ));
     }
 }

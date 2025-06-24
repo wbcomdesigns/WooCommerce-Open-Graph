@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class EWOG_Meta_Tags {
+class WOG_Meta_Tags {
     
     private static $instance = null;
     private $settings;
@@ -23,7 +23,7 @@ class EWOG_Meta_Tags {
     }
     
     private function __construct() {
-        $this->settings = get_option('ewog_settings', array());
+        $this->settings = get_option('wog_settings', array());
         $this->init_hooks();
     }
     
@@ -232,7 +232,7 @@ class EWOG_Meta_Tags {
             )
         );
         
-        return apply_filters('ewog_product_meta_data', $meta_data, $product, $post);
+        return apply_filters('wog_product_meta_data', $meta_data, $product, $post);
     }
     
     /**

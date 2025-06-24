@@ -9,12 +9,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class EWOG_Settings {
+class WOG_Settings {
     
     private static $instance = null;
     private $settings;
     private $default_settings;
-    private $cache_key = 'ewog_settings_cache';
+    private $cache_key = 'wog_settings_cache';
     
     public static function get_instance() {
         if (null === self::$instance) {
@@ -31,7 +31,7 @@ class EWOG_Settings {
     
     private function init_hooks() {
         // Clear cache when settings are updated
-        add_action('update_option_ewog_settings', array($this, 'clear_settings_cache'));
+        add_action('update_option_wog_settings', array($this, 'clear_settings_cache'));
     }
     
     /**
@@ -72,7 +72,7 @@ class EWOG_Settings {
         );
         
         // Allow plugins to modify default settings
-        $this->default_settings = apply_filters('ewog_default_settings', $this->default_settings);
+        $this->default_settings = apply_filters('wog_default_settings', $this->default_settings);
     }
     
     /**
@@ -80,7 +80,7 @@ class EWOG_Settings {
      */
     private function load_settings() {
         // Try to get from cache first
-        $cached_settings = wp_cache_get($this->cache_key, 'ewog');
+        $cached_settings = wp_cache_get($this->cache_key, 'wog');
         
         if ($cached_settings !== false) {
             $this->settings = $cached_settings;
@@ -88,23 +88,23 @@ class EWOG_Settings {
         }
         
         // Load from database
-        $saved_settings = get_option('ewog_settings', array());
+        $saved_settings = get_option('wog_settings', array());
         $this->settings = wp_parse_args($saved_settings, $this->default_settings);
         
         // Cache the settings
-        wp_cache_set($this->cache_key, $this->settings, 'ewog', HOUR_IN_SECONDS);
+        wp_cache_set($this->cache_key, $this->settings, 'wog', HOUR_IN_SECONDS);
     }
     
     /**
      * Clear settings cache
      */
     public function clear_settings_cache() {
-        wp_cache_delete($this->cache_key, 'ewog');
+        wp_cache_delete($this->cache_key, 'wog');
         
         // Reload settings
         $this->load_settings();
         
-        do_action('ewog_settings_cache_cleared');
+        do_action('wog_settings_cache_cleared');
     }
     
     /**
@@ -130,11 +130,11 @@ class EWOG_Settings {
      */
     public function update($key, $value) {
         $this->settings[$key] = $value;
-        $result = update_option('ewog_settings', $this->settings);
+        $result = update_option('wog_settings', $this->settings);
         
         if ($result) {
             $this->clear_settings_cache();
-            do_action('ewog_setting_updated', $key, $value);
+            do_action('wog_setting_updated', $key, $value);
         }
         
         return $result;
@@ -145,11 +145,11 @@ class EWOG_Settings {
      */
     public function update_multiple($settings) {
         $this->settings = wp_parse_args($settings, $this->settings);
-        $result = update_option('ewog_settings', $this->settings);
+        $result = update_option('wog_settings', $this->settings);
         
         if ($result) {
             $this->clear_settings_cache();
-            do_action('ewog_settings_updated', $settings);
+            do_action('wog_settings_updated', $settings);
         }
         
         return $result;
@@ -160,11 +160,11 @@ class EWOG_Settings {
      */
     public function reset_to_defaults() {
         $this->settings = $this->default_settings;
-        $result = update_option('ewog_settings', $this->settings);
+        $result = update_option('wog_settings', $this->settings);
         
         if ($result) {
             $this->clear_settings_cache();
-            do_action('ewog_settings_reset');
+            do_action('wog_settings_reset');
         }
         
         return $result;
@@ -283,7 +283,7 @@ class EWOG_Settings {
      */
     public function export_settings() {
         $export_data = array(
-            'version' => EWOG_VERSION,
+            'version' => WOG_VERSION,
             'timestamp' => current_time('mysql'),
             'site_url' => get_site_url(),
             'settings' => $this->settings
@@ -299,11 +299,11 @@ class EWOG_Settings {
         $imported_data = json_decode($json_string, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return new WP_Error('invalid_json', __('Invalid JSON format', EWOG_TEXT_DOMAIN));
+            return new WP_Error('invalid_json', __('Invalid JSON format', WOG_TEXT_DOMAIN));
         }
         
         if (!isset($imported_data['settings']) || !is_array($imported_data['settings'])) {
-            return new WP_Error('no_settings', __('No valid settings found in import data', EWOG_TEXT_DOMAIN));
+            return new WP_Error('no_settings', __('No valid settings found in import data', WOG_TEXT_DOMAIN));
         }
         
         // Validate imported settings
@@ -315,7 +315,7 @@ class EWOG_Settings {
         }
         
         if (empty($valid_settings)) {
-            return new WP_Error('no_valid_settings', __('No valid settings found in import', EWOG_TEXT_DOMAIN));
+            return new WP_Error('no_valid_settings', __('No valid settings found in import', WOG_TEXT_DOMAIN));
         }
         
         // Sanitize settings before import
@@ -323,7 +323,7 @@ class EWOG_Settings {
         
         $this->update_multiple($sanitized_settings);
         
-        do_action('ewog_settings_imported', $sanitized_settings, $imported_data);
+        do_action('wog_settings_imported', $sanitized_settings, $imported_data);
         
         return count($valid_settings);
     }
@@ -386,7 +386,7 @@ class EWOG_Settings {
         // URL settings
         $validated['fallback_image'] = esc_url_raw($settings['fallback_image'] ?? '');
         
-        return apply_filters('ewog_validated_settings', $validated, $settings);
+        return apply_filters('wog_validated_settings', $validated, $settings);
     }
     
     /**
@@ -475,7 +475,7 @@ class EWOG_Settings {
                 break;
         }
         
-        return apply_filters("ewog_{$section}_settings", $section_settings);
+        return apply_filters("wog_{$section}_settings", $section_settings);
     }
     
     /**
@@ -493,7 +493,7 @@ class EWOG_Settings {
             'debug_mode' => $this->is_debug_mode()
         );
         
-        return apply_filters('ewog_config_summary', $summary);
+        return apply_filters('wog_config_summary', $summary);
     }
     
     /**
@@ -521,9 +521,9 @@ class EWOG_Settings {
                 $this->update_multiple($migrated_settings);
                 
                 // Mark migration as complete
-                update_option('ewog_migration_completed', true);
+                update_option('wog_migration_completed', true);
                 
-                do_action('ewog_settings_migrated', $migrated_settings, $old_settings);
+                do_action('wog_settings_migrated', $migrated_settings, $old_settings);
             }
         }
     }

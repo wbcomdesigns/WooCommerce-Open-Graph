@@ -4,22 +4,22 @@
  */
 
 /* Remove all dark mode and reset */
-.ewog-admin-wrap,
-.ewog-admin-wrap * {
+.wog-admin-wrap,
+.wog-admin-wrap * {
     color: inherit !important;
     background: inherit !important;
     border-color: inherit !important;
 }
 
 /* Base Admin Wrapper */
-.ewog-admin-wrap {
+.wog-admin-wrap {
     max-width: 1200px;
     margin: 20px 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* Tab Navigation - WordPress Native Style */
-.ewog-tab-content {
+.wog-tab-content {
     background: #fff;
     border: 1px solid #c3c4c7;
     border-top: none;
@@ -39,38 +39,38 @@
 }
 
 /* Grid System */
-.ewog-row {
+.wog-row {
     display: flex;
     gap: 20px;
     margin-bottom: 20px;
 }
 
-.ewog-col-4 {
+.wog-col-4 {
     flex: 0 0 33.333%;
 }
 
-.ewog-col-6 {
+.wog-col-6 {
     flex: 0 0 50%;
 }
 
-.ewog-col-8 {
+.wog-col-8 {
     flex: 0 0 66.666%;
 }
 
 @media (max-width: 768px) {
-    .ewog-row {
+    .wog-row {
         flex-direction: column;
     }
     
-    .ewog-col-4,
-    .ewog-col-6,
-    .ewog-col-8 {
+    .wog-col-4,
+    .wog-col-6,
+    .wog-col-8 {
         flex: 1;
     }
 }
 
 /* Card Components */
-.ewog-card {
+.wog-card {
     background: #fff;
     border: 1px solid #c3c4c7;
     border-radius: 4px;
@@ -79,14 +79,14 @@
     overflow: hidden;
 }
 
-.ewog-card-header {
+.wog-card-header {
     background: #f6f7f7;
     border-bottom: 1px solid #c3c4c7;
     padding: 15px 20px;
 }
 
-.ewog-card-header h2,
-.ewog-card-header h3 {
+.wog-card-header h2,
+.wog-card-header h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
@@ -96,22 +96,22 @@
     gap: 8px;
 }
 
-.ewog-card-header .dashicons {
+.wog-card-header .dashicons {
     color: #646970;
 }
 
-.ewog-card-body {
+.wog-card-body {
     padding: 20px;
 }
 
 /* Status Grid */
-.ewog-status-grid {
+.wog-status-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 15px;
 }
 
-.ewog-status-item {
+.wog-status-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -121,37 +121,37 @@
     background: #f9f9f9;
 }
 
-.ewog-status-item.active {
+.wog-status-item.active {
     border-color: #00a32a;
     background: #f0f8f0;
 }
 
-.ewog-status-item.inactive {
+.wog-status-item.inactive {
     border-color: #d63638;
     background: #fef7f7;
 }
 
-.ewog-status-item .dashicons {
+.wog-status-item .dashicons {
     font-size: 18px;
     width: 18px;
     height: 18px;
 }
 
-.ewog-status-item.active .dashicons {
+.wog-status-item.active .dashicons {
     color: #00a32a;
 }
 
-.ewog-status-item.inactive .dashicons {
+.wog-status-item.inactive .dashicons {
     color: #d63638;
 }
 
-.ewog-status-label {
+.wog-status-label {
     flex: 1;
     font-weight: 500;
     color: #1d2327;
 }
 
-.ewog-status-badge {
+.wog-status-badge {
     font-size: 11px;
     font-weight: 600;
     padding: 2px 6px;
@@ -160,41 +160,41 @@
     letter-spacing: 0.5px;
 }
 
-.ewog-status-item.active .ewog-status-badge {
+.wog-status-item.active .wog-status-badge {
     background: #00a32a;
     color: #fff;
 }
 
-.ewog-status-item.inactive .ewog-status-badge {
+.wog-status-item.inactive .wog-status-badge {
     background: #d63638;
     color: #fff;
 }
 
 /* Action Lists and Buttons */
-.ewog-actions-list {
+.wog-actions-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.ewog-btn-block {
+.wog-btn-block {
     width: 100%;
     justify-content: flex-start;
     text-align: left;
 }
 
-.ewog-btn-block .dashicons {
+.wog-btn-block .dashicons {
     margin-right: 8px;
 }
 
 /* Platform Badges */
-.ewog-platform-badges {
+.wog-platform-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.ewog-platform-badge {
+.wog-platform-badge {
     background: #2271b1;
     color: #fff;
     padding: 4px 10px;
@@ -203,20 +203,20 @@
     font-weight: 500;
 }
 
-.ewog-no-platforms {
+.wog-no-platforms {
     color: #646970;
     font-style: italic;
 }
 
 /* Quick Toggles */
-.ewog-quick-toggles {
+.wog-quick-toggles {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     margin: 15px 0;
 }
 
-.ewog-quick-toggle {
+.wog-quick-toggle {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -226,28 +226,28 @@
     background: #f9f9f9;
 }
 
-.ewog-quick-toggle.active {
+.wog-quick-toggle.active {
     border-color: #00a32a;
     background: #f0f8f0;
 }
 
-.ewog-quick-toggle strong {
+.wog-quick-toggle strong {
     color: #1d2327;
     font-size: 14px;
 }
 
-.ewog-toggle-btn {
+.wog-toggle-btn {
     font-size: 12px;
     padding: 4px 8px;
     min-height: auto;
 }
 
 /* Toggle Fields */
-.ewog-toggle-wrapper {
+.wog-toggle-wrapper {
     margin-bottom: 20px;
 }
 
-.ewog-toggle-label {
+.wog-toggle-label {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -259,47 +259,47 @@
     background: #fff;
 }
 
-.ewog-toggle-label:hover {
+.wog-toggle-label:hover {
     border-color: #2271b1;
     box-shadow: 0 0 0 1px #2271b1;
 }
 
-.ewog-toggle-input {
+.wog-toggle-input {
     margin: 0 !important;
     position: relative;
     top: 2px;
 }
 
-.ewog-toggle-slider {
+.wog-toggle-slider {
     display: none; /* We'll use native checkbox for simplicity */
 }
 
-.ewog-toggle-content {
+.wog-toggle-content {
     flex: 1;
 }
 
-.ewog-toggle-content strong {
+.wog-toggle-content strong {
     display: block;
     margin-bottom: 4px;
     color: #1d2327;
     font-size: 14px;
 }
 
-.ewog-toggle-content small {
+.wog-toggle-content small {
     color: #646970;
     font-size: 13px;
     line-height: 1.4;
 }
 
 /* Platform Grid */
-.ewog-platforms-grid {
+.wog-platforms-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
     margin: 20px 0;
 }
 
-.ewog-platform-card {
+.wog-platform-card {
     border: 2px solid #dcdcde;
     border-radius: 6px;
     cursor: pointer;
@@ -308,17 +308,17 @@
     overflow: hidden;
 }
 
-.ewog-platform-card:hover {
+.wog-platform-card:hover {
     border-color: #2271b1;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.ewog-platform-card.active {
+.wog-platform-card.active {
     border-color: #00a32a;
     background: #f0f8f0;
 }
 
-.ewog-platform-label {
+.wog-platform-label {
     display: block;
     padding: 15px;
     cursor: pointer;
@@ -326,36 +326,36 @@
     margin: 0;
 }
 
-.ewog-platform-icon {
+.wog-platform-icon {
     font-size: 24px;
     display: block;
     margin-bottom: 8px;
 }
 
-.ewog-platform-label strong {
+.wog-platform-label strong {
     display: block;
     margin-bottom: 4px;
     color: #1d2327;
     font-size: 14px;
 }
 
-.ewog-platform-label small {
+.wog-platform-label small {
     color: #646970;
     font-size: 12px;
 }
 
 /* Advanced Options */
-.ewog-advanced-options {
+.wog-advanced-options {
     margin-top: 20px;
 }
 
-.ewog-collapsible {
+.wog-collapsible {
     border: 1px solid #dcdcde;
     border-radius: 4px;
     overflow: hidden;
 }
 
-.ewog-collapsible-header {
+.wog-collapsible-header {
     background: #f6f7f7;
     padding: 15px 20px;
     cursor: pointer;
@@ -369,32 +369,32 @@
     list-style: none;
 }
 
-.ewog-collapsible-header::-webkit-details-marker {
+.wog-collapsible-header::-webkit-details-marker {
     display: none;
 }
 
-.ewog-collapsible-header .dashicons {
+.wog-collapsible-header .dashicons {
     transition: transform 0.2s ease;
 }
 
-.ewog-collapsible[open] .ewog-collapsible-header .dashicons {
+.wog-collapsible[open] .wog-collapsible-header .dashicons {
     transform: rotate(90deg);
 }
 
-.ewog-collapsible-content {
+.wog-collapsible-content {
     padding: 20px;
     border-top: 1px solid #dcdcde;
 }
 
 /* Tools Section */
-.ewog-tool-buttons {
+.wog-tool-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
 }
 
-.ewog-test-results {
+.wog-test-results {
     background: #f6f7f7;
     border: 1px solid #dcdcde;
     border-radius: 4px;
@@ -402,36 +402,36 @@
     min-height: 50px;
 }
 
-.ewog-test-results:empty::before {
+.wog-test-results:empty::before {
     content: "Test results will appear here...";
     color: #646970;
     font-style: italic;
 }
 
 /* Sitemap Tools */
-.ewog-sitemap-status {
+.wog-sitemap-status {
     line-height: 1.6;
 }
 
-.ewog-sitemap-actions {
+.wog-sitemap-actions {
     display: flex;
     gap: 10px;
     margin: 15px 0;
     flex-wrap: wrap;
 }
 
-.ewog-sitemap-links {
+.wog-sitemap-links {
     margin-top: 20px;
     padding-top: 15px;
     border-top: 1px solid #dcdcde;
 }
 
-.ewog-sitemap-links ul {
+.wog-sitemap-links ul {
     margin: 10px 0;
     padding-left: 20px;
 }
 
-.ewog-sitemap-links code {
+.wog-sitemap-links code {
     background: #f0f0f1;
     padding: 2px 6px;
     border-radius: 3px;
@@ -440,30 +440,30 @@
 }
 
 /* Form Elements */
-.ewog-settings-form .button-large {
+.wog-settings-form .button-large {
     padding: 8px 30px;
     font-size: 14px;
     height: auto;
 }
 
-.ewog-settings-form .form-table th {
+.wog-settings-form .form-table th {
     font-weight: 600;
     color: #1d2327;
     width: 200px;
 }
 
-.ewog-settings-form .form-table td {
+.wog-settings-form .form-table td {
     padding: 15px 10px;
 }
 
 /* Loading States */
-.ewog-loading {
+.wog-loading {
     opacity: 0.6;
     pointer-events: none;
     position: relative;
 }
 
-.ewog-loading::after {
+.wog-loading::after {
     content: "";
     position: absolute;
     top: 50%;
@@ -483,18 +483,18 @@
 }
 
 /* WordPress Notices Integration */
-.ewog-admin-wrap .notice {
+.wog-admin-wrap .notice {
     margin: 15px 0;
     border-left-width: 4px;
 }
 
-.ewog-admin-wrap .notice p {
+.wog-admin-wrap .notice p {
     margin: 0.5em 0;
     padding: 2px;
 }
 
 /* Success/Error Messages */
-.ewog-message {
+.wog-message {
     display: flex;
     align-items: center;
     padding: 12px 16px;
@@ -503,25 +503,25 @@
     border-left: 4px solid;
 }
 
-.ewog-message.success {
+.wog-message.success {
     background: #f0f8f0;
     border-left-color: #00a32a;
     color: #1e4620;
 }
 
-.ewog-message.error {
+.wog-message.error {
     background: #fef7f7;
     border-left-color: #d63638;
     color: #3c1618;
 }
 
-.ewog-message.warning {
+.wog-message.warning {
     background: #fcf9e8;
     border-left-color: #dba617;
     color: #674a00;
 }
 
-.ewog-message.info {
+.wog-message.info {
     background: #f0f6fc;
     border-left-color: #2271b1;
     color: #1e2e3c;
@@ -529,142 +529,142 @@
 
 /* Responsive Design */
 @media (max-width: 782px) {
-    .ewog-admin-wrap {
+    .wog-admin-wrap {
         margin: 10px;
     }
     
-    .ewog-card-header,
-    .ewog-card-body {
+    .wog-card-header,
+    .wog-card-body {
         padding: 15px;
     }
     
-    .ewog-status-grid {
+    .wog-status-grid {
         grid-template-columns: 1fr;
     }
     
-    .ewog-platforms-grid {
+    .wog-platforms-grid {
         grid-template-columns: 1fr;
     }
     
-    .ewog-quick-toggles {
+    .wog-quick-toggles {
         grid-template-columns: 1fr;
     }
     
-    .ewog-tool-buttons {
+    .wog-tool-buttons {
         flex-direction: column;
     }
     
-    .ewog-sitemap-actions {
+    .wog-sitemap-actions {
         flex-direction: column;
     }
     
-    .ewog-toggle-label {
+    .wog-toggle-label {
         padding: 12px;
     }
 }
 
 /* High Contrast Support */
 @media (prefers-contrast: high) {
-    .ewog-card,
-    .ewog-toggle-label,
-    .ewog-platform-card {
+    .wog-card,
+    .wog-toggle-label,
+    .wog-platform-card {
         border-width: 2px;
     }
     
-    .ewog-status-item {
+    .wog-status-item {
         border-width: 2px;
     }
 }
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
-    .ewog-toggle-label,
-    .ewog-platform-card,
-    .ewog-collapsible-header .dashicons {
+    .wog-toggle-label,
+    .wog-platform-card,
+    .wog-collapsible-header .dashicons {
         transition: none;
     }
     
-    .ewog-loading::after {
+    .wog-loading::after {
         animation: none;
         border: 2px solid #2271b1;
     }
 }
 
 /* Focus Styles for Accessibility */
-.ewog-toggle-label:focus-within,
-.ewog-platform-card:focus-within,
-.ewog-collapsible-header:focus {
+.wog-toggle-label:focus-within,
+.wog-platform-card:focus-within,
+.wog-collapsible-header:focus {
     outline: 2px solid #2271b1;
     outline-offset: 2px;
 }
 
 /* Print Styles */
 @media print {
-    .ewog-actions-list,
-    .ewog-tool-buttons,
-    .ewog-sitemap-actions,
-    .ewog-quick-toggles .ewog-toggle-btn {
+    .wog-actions-list,
+    .wog-tool-buttons,
+    .wog-sitemap-actions,
+    .wog-quick-toggles .wog-toggle-btn {
         display: none;
     }
     
-    .ewog-card {
+    .wog-card {
         border: 1px solid #000;
         break-inside: avoid;
         margin-bottom: 20px;
     }
     
-    .ewog-tab-content {
+    .wog-tab-content {
         border: none;
     }
 }
 
 /* Override any existing dark mode styles */
-.ewog-admin-wrap .ewog-admin-header {
+.wog-admin-wrap .wog-admin-header {
     background: #f6f7f7 !important;
     color: #1d2327 !important;
     border: 1px solid #c3c4c7 !important;
 }
 
-.ewog-admin-wrap .ewog-sidebar-box {
+.wog-admin-wrap .wog-sidebar-box {
     background: #fff !important;
     color: #1d2327 !important;
     border: 1px solid #c3c4c7 !important;
 }
 
 /* Ensure all text is readable */
-.ewog-admin-wrap h1,
-.ewog-admin-wrap h2,
-.ewog-admin-wrap h3,
-.ewog-admin-wrap p,
-.ewog-admin-wrap label,
-.ewog-admin-wrap span {
+.wog-admin-wrap h1,
+.wog-admin-wrap h2,
+.wog-admin-wrap h3,
+.wog-admin-wrap p,
+.wog-admin-wrap label,
+.wog-admin-wrap span {
     color: #1d2327 !important;
 }
 
-.ewog-admin-wrap .description {
+.wog-admin-wrap .description {
     color: #646970 !important;
 }
 
 /* Clean button styles */
-.ewog-admin-wrap .button {
+.wog-admin-wrap .button {
     background: #f6f7f7 !important;
     border-color: #dcdcde !important;
     color: #2c3338 !important;
 }
 
-.ewog-admin-wrap .button-primary {
+.wog-admin-wrap .button-primary {
     background: #2271b1 !important;
     border-color: #2271b1 !important;
     color: #fff !important;
 }
 
-.ewog-admin-wrap .button:hover {
+.wog-admin-wrap .button:hover {
     background: #f0f0f1 !important;
     border-color: #8c8f94 !important;
     color: #2c3338 !important;
 }
 
-.ewog-admin-wrap .button-primary:hover {
+.wog-admin-wrap .button-primary:hover {
     background: #135e96 !important;
     border-color: #135e96 !important;
 }

@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name: Enhanced Woo Open Graph
- * Plugin URI: https://wbcomdesigns.com/enhanced-woo-open-graph
- * Description: Comprehensive Schema.org markup, Open Graph optimization, and XML sitemaps for WooCommerce. Fill the gaps that free SEO plugins miss.
+ * Plugin Name: Woo Open Graph
+ * Plugin URI: https://wbcomdesigns.com/woo-open-graph
+ * Description: Comprehensive Schema.org markup, Open Graph optimization, and social sharing for WooCommerce. Fill the gaps that free SEO plugins miss.
  * Version: 2.0.0
  * Author: Wbcom Designs
  * Author URI: https://wbcomdesigns.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: enhanced-woo-open-graph
+ * Text Domain: woo-open-graph
  * Domain Path: /languages
  * Requires at least: 5.0
  * Tested up to: 6.4
@@ -39,16 +39,16 @@ add_action('before_woocommerce_init', function() {
 });
 
 // Define plugin constants
-define('EWOG_VERSION', '2.0.0');
-define('EWOG_PLUGIN_FILE', __FILE__);
-define('EWOG_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('EWOG_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('EWOG_TEXT_DOMAIN', 'enhanced-woo-open-graph');
+define('WOG_VERSION', '2.0.0');
+define('WOG_PLUGIN_FILE', __FILE__);
+define('WOG_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('WOG_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('WOG_TEXT_DOMAIN', 'woo-open-graph');
 
 /**
- * Main Enhanced Woo Open Graph Class
+ * Main Woo Open Graph Class
  */
-class Enhanced_Woo_Open_Graph {
+class Woo_Open_Graph {
     
     /**
      * Instance of this class
@@ -96,21 +96,21 @@ class Enhanced_Woo_Open_Graph {
     }
     
     /**
-     * Load plugin dependencies - FIXED TO INCLUDE META BOXES
+     * Load plugin dependencies
      */
     private function load_dependencies() {
-        $includes_dir = EWOG_PLUGIN_DIR . 'includes/';
-        $admin_dir = EWOG_PLUGIN_DIR . 'admin/';
+        $includes_dir = WOG_PLUGIN_DIR . 'includes/';
+        $admin_dir = WOG_PLUGIN_DIR . 'admin/';
         
         // Check if files exist before requiring
         $required_files = array(
-            $includes_dir . 'class-ewog-settings.php',
-            $includes_dir . 'class-ewog-meta-tags.php',
-            $includes_dir . 'class-ewog-schema.php',
-            $includes_dir . 'class-ewog-sitemap.php',
-            $includes_dir . 'class-ewog-social-share.php',
-            $includes_dir . 'class-ewog-meta-boxes.php', // ADDED THIS LINE
-            $admin_dir . 'class-ewog-admin.php'
+            $includes_dir . 'class-wog-settings.php',
+            $includes_dir . 'class-wog-meta-tags.php',
+            $includes_dir . 'class-wog-schema.php',
+            $includes_dir . 'class-wog-sitemap.php',
+            $includes_dir . 'class-wog-social-share.php',
+            $includes_dir . 'class-wog-meta-boxes.php',
+            $admin_dir . 'class-wog-admin.php'
         );
         
         foreach ($required_files as $file) {
@@ -121,7 +121,7 @@ class Enhanced_Woo_Open_Graph {
     }
     
     /**
-     * Initialize plugin - FIXED TO INCLUDE META BOXES
+     * Initialize plugin
      */
     public function init() {
         // Check if WooCommerce is active
@@ -131,33 +131,32 @@ class Enhanced_Woo_Open_Graph {
         }
         
         // Initialize components only if classes exist
-        if (class_exists('EWOG_Settings')) {
-            $this->settings = EWOG_Settings::get_instance();
+        if (class_exists('WOG_Settings')) {
+            $this->settings = WOG_Settings::get_instance();
         }
         
-        if (class_exists('EWOG_Meta_Tags')) {
-            EWOG_Meta_Tags::get_instance();
+        if (class_exists('WOG_Meta_Tags')) {
+            WOG_Meta_Tags::get_instance();
         }
         
-        if (class_exists('EWOG_Schema')) {
-            EWOG_Schema::get_instance();
+        if (class_exists('WOG_Schema')) {
+            WOG_Schema::get_instance();
         }
         
-        if (class_exists('EWOG_Sitemap')) {
-            EWOG_Sitemap::get_instance();
+        if (class_exists('WOG_Sitemap')) {
+            WOG_Sitemap::get_instance();
         }
         
-        if (class_exists('EWOG_Social_Share')) {
-            EWOG_Social_Share::get_instance();
+        if (class_exists('WOG_Social_Share')) {
+            WOG_Social_Share::get_instance();
         }
         
-        // ADDED META BOXES INITIALIZATION
-        if (class_exists('EWOG_Meta_Boxes')) {
-            EWOG_Meta_Boxes::get_instance();
+        if (class_exists('WOG_Meta_Boxes')) {
+            WOG_Meta_Boxes::get_instance();
         }
         
-        if (is_admin() && class_exists('EWOG_Admin')) {
-            EWOG_Admin::get_instance();
+        if (is_admin() && class_exists('WOG_Admin')) {
+            WOG_Admin::get_instance();
         }
         
         // Add custom hooks
@@ -169,7 +168,7 @@ class Enhanced_Woo_Open_Graph {
      */
     private function add_custom_hooks() {
         // Allow other plugins to hook into our functionality
-        do_action('ewog_init', $this);
+        do_action('wog_init', $this);
         
         // Product save hooks for cache clearing
         add_action('woocommerce_update_product', array($this, 'clear_product_cache'));
@@ -185,7 +184,7 @@ class Enhanced_Woo_Open_Graph {
      */
     public function load_textdomain() {
         load_plugin_textdomain(
-            EWOG_TEXT_DOMAIN,
+            WOG_TEXT_DOMAIN,
             false,
             dirname(plugin_basename(__FILE__)) . '/languages/'
         );
@@ -207,8 +206,8 @@ class Enhanced_Woo_Open_Graph {
             <p>
                 <?php 
                 echo sprintf(
-                    __('Enhanced Woo Open Graph requires WooCommerce to be installed and active. %s', EWOG_TEXT_DOMAIN),
-                    '<a href="' . admin_url('plugin-install.php?s=woocommerce&tab=search&type=term') . '">' . __('Install WooCommerce', EWOG_TEXT_DOMAIN) . '</a>'
+                    __('Woo Open Graph requires WooCommerce to be installed and active. %s', WOG_TEXT_DOMAIN),
+                    '<a href="' . admin_url('plugin-install.php?s=woocommerce&tab=search&type=term') . '">' . __('Install WooCommerce', WOG_TEXT_DOMAIN) . '</a>'
                 );
                 ?>
             </p>
@@ -223,8 +222,8 @@ class Enhanced_Woo_Open_Graph {
         if (!$this->is_woocommerce_active()) {
             deactivate_plugins(plugin_basename(__FILE__));
             wp_die(
-                __('Enhanced Woo Open Graph requires WooCommerce to be installed and active.', EWOG_TEXT_DOMAIN),
-                __('Plugin Activation Error', EWOG_TEXT_DOMAIN),
+                __('Woo Open Graph requires WooCommerce to be installed and active.', WOG_TEXT_DOMAIN),
+                __('Plugin Activation Error', WOG_TEXT_DOMAIN),
                 array('back_link' => true)
             );
         }
@@ -263,17 +262,17 @@ class Enhanced_Woo_Open_Graph {
             'debug_mode' => false
         );
         
-        add_option('ewog_settings', $default_options);
+        add_option('wog_settings', $default_options);
         
         // Set plugin version
-        add_option('ewog_version', EWOG_VERSION);
+        add_option('wog_version', WOG_VERSION);
         
         // Set activation flag for rewrite rules flush
-        add_option('ewog_flush_rewrite_rules', true);
+        add_option('wog_flush_rewrite_rules', true);
         
         // Schedule sitemap generation
-        if (!wp_next_scheduled('ewog_generate_sitemaps')) {
-            wp_schedule_event(time(), 'daily', 'ewog_generate_sitemaps');
+        if (!wp_next_scheduled('wog_generate_sitemaps')) {
+            wp_schedule_event(time(), 'daily', 'wog_generate_sitemaps');
         }
         
         // Create cache table if caching is enabled
@@ -285,7 +284,7 @@ class Enhanced_Woo_Open_Graph {
      */
     public function deactivate() {
         // Clear scheduled events
-        wp_clear_scheduled_hook('ewog_generate_sitemaps');
+        wp_clear_scheduled_hook('wog_generate_sitemaps');
         
         // Flush rewrite rules
         flush_rewrite_rules();
@@ -300,7 +299,7 @@ class Enhanced_Woo_Open_Graph {
     private function create_cache_table() {
         global $wpdb;
         
-        $table_name = $wpdb->prefix . 'ewog_meta_cache';
+        $table_name = $wpdb->prefix . 'wog_meta_cache';
         
         $charset_collate = $wpdb->get_charset_collate();
         
@@ -325,9 +324,9 @@ class Enhanced_Woo_Open_Graph {
      * Flush rewrite rules if needed
      */
     public function flush_rewrite_rules_maybe() {
-        if (get_option('ewog_flush_rewrite_rules')) {
+        if (get_option('wog_flush_rewrite_rules')) {
             flush_rewrite_rules();
-            delete_option('ewog_flush_rewrite_rules');
+            delete_option('wog_flush_rewrite_rules');
         }
     }
     
@@ -336,10 +335,10 @@ class Enhanced_Woo_Open_Graph {
      */
     public function add_sitemap_to_robots($output, $public) {
         if ('1' == $public) {
-            $settings = get_option('ewog_settings', array());
+            $settings = get_option('wog_settings', array());
             
             if (!empty($settings['enable_product_sitemap'])) {
-                $output .= "\nSitemap: " . home_url('/ewog-sitemap.xml') . "\n";
+                $output .= "\nSitemap: " . home_url('/wog-sitemap.xml') . "\n";
             }
         }
         
@@ -350,12 +349,12 @@ class Enhanced_Woo_Open_Graph {
      * Clear product cache
      */
     public function clear_product_cache($product_id) {
-        $settings = get_option('ewog_settings', array());
+        $settings = get_option('wog_settings', array());
         
         if (!empty($settings['cache_meta_tags'])) {
             global $wpdb;
             
-            $table_name = $wpdb->prefix . 'ewog_meta_cache';
+            $table_name = $wpdb->prefix . 'wog_meta_cache';
             $wpdb->delete(
                 $table_name,
                 array('post_id' => $product_id),
@@ -364,10 +363,10 @@ class Enhanced_Woo_Open_Graph {
         }
         
         // Clear related transients
-        delete_transient('ewog_product_meta_' . $product_id);
-        delete_transient('ewog_product_schema_' . $product_id);
+        delete_transient('wog_product_meta_' . $product_id);
+        delete_transient('wog_product_schema_' . $product_id);
         
-        do_action('ewog_product_cache_cleared', $product_id);
+        do_action('wog_product_cache_cleared', $product_id);
     }
     
     /**
@@ -375,10 +374,10 @@ class Enhanced_Woo_Open_Graph {
      */
     public function clear_category_cache($term_id) {
         // Clear category-related transients
-        delete_transient('ewog_category_meta_' . $term_id);
-        delete_transient('ewog_category_products_' . $term_id);
+        delete_transient('wog_category_meta_' . $term_id);
+        delete_transient('wog_category_products_' . $term_id);
         
-        do_action('ewog_category_cache_cleared', $term_id);
+        do_action('wog_category_cache_cleared', $term_id);
     }
     
     /**
@@ -390,8 +389,8 @@ class Enhanced_Woo_Open_Graph {
         // Delete all plugin transients
         $wpdb->query(
             "DELETE FROM {$wpdb->options} 
-             WHERE option_name LIKE '_transient_ewog_%' 
-             OR option_name LIKE '_transient_timeout_ewog_%'"
+             WHERE option_name LIKE '_transient_wog_%' 
+             OR option_name LIKE '_transient_timeout_wog_%'"
         );
     }
     
@@ -406,14 +405,14 @@ class Enhanced_Woo_Open_Graph {
      * Get plugin version
      */
     public static function get_version() {
-        return EWOG_VERSION;
+        return WOG_VERSION;
     }
     
     /**
      * Check if debug mode is enabled
      */
     public function is_debug_mode() {
-        $settings = get_option('ewog_settings', array());
+        $settings = get_option('wog_settings', array());
         return !empty($settings['debug_mode']);
     }
     
@@ -422,7 +421,7 @@ class Enhanced_Woo_Open_Graph {
      */
     public function debug_log($message, $data = null) {
         if ($this->is_debug_mode() && function_exists('error_log')) {
-            $log_message = '[Enhanced Woo Open Graph] ' . $message;
+            $log_message = '[Woo Open Graph] ' . $message;
             
             if ($data !== null) {
                 $log_message .= ' | Data: ' . print_r($data, true);
@@ -436,14 +435,14 @@ class Enhanced_Woo_Open_Graph {
      * Get cache from database
      */
     public function get_cache($post_id, $meta_type) {
-        $settings = get_option('ewog_settings', array());
+        $settings = get_option('wog_settings', array());
         
         if (empty($settings['cache_meta_tags'])) {
             return false;
         }
         
         global $wpdb;
-        $table_name = $wpdb->prefix . 'ewog_meta_cache';
+        $table_name = $wpdb->prefix . 'wog_meta_cache';
         
         $cached = $wpdb->get_var($wpdb->prepare(
             "SELECT meta_content FROM $table_name 
@@ -460,14 +459,14 @@ class Enhanced_Woo_Open_Graph {
      * Set cache in database
      */
     public function set_cache($post_id, $meta_type, $data) {
-        $settings = get_option('ewog_settings', array());
+        $settings = get_option('wog_settings', array());
         
         if (empty($settings['cache_meta_tags'])) {
             return false;
         }
         
         global $wpdb;
-        $table_name = $wpdb->prefix . 'ewog_meta_cache';
+        $table_name = $wpdb->prefix . 'wog_meta_cache';
         
         $wpdb->replace(
             $table_name,
@@ -490,7 +489,7 @@ class Enhanced_Woo_Open_Graph {
         global $wpdb;
         
         $info = array(
-            'plugin_version' => EWOG_VERSION,
+            'plugin_version' => WOG_VERSION,
             'wordpress_version' => get_bloginfo('version'),
             'woocommerce_version' => defined('WC_VERSION') ? WC_VERSION : 'Not installed',
             'php_version' => PHP_VERSION,
@@ -502,19 +501,19 @@ class Enhanced_Woo_Open_Graph {
             'active_plugins' => get_option('active_plugins'),
             'active_theme' => get_template(),
             'multisite' => is_multisite() ? 'Yes' : 'No',
-            'settings' => get_option('ewog_settings', array())
+            'settings' => get_option('wog_settings', array())
         );
         
-        return apply_filters('ewog_system_info', $info);
+        return apply_filters('wog_system_info', $info);
     }
     
     /**
      * Export settings for backup/migration
      */
     public function export_settings() {
-        $settings = get_option('ewog_settings', array());
+        $settings = get_option('wog_settings', array());
         $export_data = array(
-            'version' => EWOG_VERSION,
+            'version' => WOG_VERSION,
             'timestamp' => current_time('mysql'),
             'settings' => $settings
         );
@@ -530,12 +529,12 @@ class Enhanced_Woo_Open_Graph {
             $data = json_decode(base64_decode($import_data), true);
             
             if (!$data || !isset($data['settings'])) {
-                return new WP_Error('invalid_data', __('Invalid import data', EWOG_TEXT_DOMAIN));
+                return new WP_Error('invalid_data', __('Invalid import data', WOG_TEXT_DOMAIN));
             }
             
-            // Validate settings - only update if EWOG_Admin class exists
-            if (class_exists('EWOG_Admin')) {
-                $admin = EWOG_Admin::get_instance();
+            // Validate settings - only update if WOG_Admin class exists
+            if (class_exists('WOG_Admin')) {
+                $admin = WOG_Admin::get_instance();
                 $sanitized_settings = $admin->sanitize_settings($data['settings']);
             } else {
                 // Basic sanitization if admin class is not available
@@ -543,7 +542,7 @@ class Enhanced_Woo_Open_Graph {
             }
             
             // Update settings
-            update_option('ewog_settings', $sanitized_settings);
+            update_option('wog_settings', $sanitized_settings);
             
             return true;
             
@@ -554,26 +553,26 @@ class Enhanced_Woo_Open_Graph {
 }
 
 // Initialize the plugin
-Enhanced_Woo_Open_Graph::get_instance();
+Woo_Open_Graph::get_instance();
 
 /**
  * Global function to get plugin instance
  */
-function ewog() {
-    return Enhanced_Woo_Open_Graph::get_instance();
+function wog() {
+    return Woo_Open_Graph::get_instance();
 }
 
 /**
  * Backward compatibility functions
  */
-if (!function_exists('ewog_get_settings')) {
-    function ewog_get_settings() {
-        return ewog()->get_settings();
+if (!function_exists('wog_get_settings')) {
+    function wog_get_settings() {
+        return wog()->get_settings();
     }
 }
 
-if (!function_exists('ewog_debug_log')) {
-    function ewog_debug_log($message, $data = null) {
-        ewog()->debug_log($message, $data);
+if (!function_exists('wog_debug_log')) {
+    function wog_debug_log($message, $data = null) {
+        wog()->debug_log($message, $data);
     }
 }

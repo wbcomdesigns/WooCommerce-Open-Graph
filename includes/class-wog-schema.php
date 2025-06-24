@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class EWOG_Schema {
+class WOG_Schema {
     
     private static $instance = null;
     private $settings;
@@ -22,7 +22,7 @@ class EWOG_Schema {
     }
     
     private function __construct() {
-        $this->settings = get_option('ewog_settings', array());
+        $this->settings = get_option('wog_settings', array());
         $this->init_hooks();
     }
     

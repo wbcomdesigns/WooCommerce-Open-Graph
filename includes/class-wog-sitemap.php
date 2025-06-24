@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class EWOG_Sitemap {
+class WOG_Sitemap {
     
     private static $instance = null;
     private $settings;
@@ -36,7 +36,7 @@ class EWOG_Sitemap {
      * Constructor
      */
     private function __construct() {
-        $this->settings = get_option('ewog_settings', array());
+        $this->settings = get_option('wog_settings', array());
         $this->init_hooks();
     }
     
@@ -56,8 +56,8 @@ class EWOG_Sitemap {
             
             // Background processing
             add_action('wp', array($this, 'schedule_sitemap_generation'));
-            add_action('ewog_generate_sitemaps', array($this, 'generate_all_sitemaps_background'));
-            add_action('ewog_generate_single_sitemap', array($this, 'generate_single_sitemap_background'), 10, 2);
+            add_action('wog_generate_sitemaps', array($this, 'generate_all_sitemaps_background'));
+            add_action('wog_generate_single_sitemap', array($this, 'generate_single_sitemap_background'), 10, 2);
             
             // Cleanup hooks
             add_action('wp_scheduled_delete', array($this, 'cleanup_old_cache'));
@@ -70,45 +70,45 @@ class EWOG_Sitemap {
     public function add_sitemap_rewrite_rules() {
         // Main sitemap index
         add_rewrite_rule(
-            '^ewog-sitemap\.xml$',
-            'index.php?ewog_sitemap=index',
+            '^wog-sitemap\.xml$',
+            'index.php?wog_sitemap=index',
             'top'
         );
         
         // Product sitemaps (paginated)
         add_rewrite_rule(
             '^product-sitemap\.xml$',
-            'index.php?ewog_sitemap=products&ewog_sitemap_page=1',
+            'index.php?wog_sitemap=products&wog_sitemap_page=1',
             'top'
         );
         
         add_rewrite_rule(
             '^product-sitemap-([0-9]+)\.xml$',
-            'index.php?ewog_sitemap=products&ewog_sitemap_page=$matches[1]',
+            'index.php?wog_sitemap=products&wog_sitemap_page=$matches[1]',
             'top'
         );
         
         // Category sitemaps
         add_rewrite_rule(
             '^product-category-sitemap\.xml$',
-            'index.php?ewog_sitemap=categories',
+            'index.php?wog_sitemap=categories',
             'top'
         );
         
         // Brand sitemaps
         add_rewrite_rule(
             '^product-brand-sitemap\.xml$',
-            'index.php?ewog_sitemap=brands',
+            'index.php?wog_sitemap=brands',
             'top'
         );
         
-        add_rewrite_tag('%ewog_sitemap%', '([^&]+)');
-        add_rewrite_tag('%ewog_sitemap_page%', '([0-9]+)');
+        add_rewrite_tag('%wog_sitemap%', '([^&]+)');
+        add_rewrite_tag('%wog_sitemap_page%', '([0-9]+)');
         
         // Ensure rewrite rules are flushed
-        if (!get_option('ewog_rewrite_rules_flushed_v2')) {
+        if (!get_option('wog_rewrite_rules_flushed_v2')) {
             flush_rewrite_rules();
-            update_option('ewog_rewrite_rules_flushed_v2', true);
+            update_option('wog_rewrite_rules_flushed_v2', true);
         }
     }
     
@@ -116,7 +116,7 @@ class EWOG_Sitemap {
      * Handle sitemap requests
      */
     public function handle_sitemap_requests() {
-        $sitemap = get_query_var('ewog_sitemap');
+        $sitemap = get_query_var('wog_sitemap');
         
         if (empty($sitemap)) {
             return;
@@ -129,7 +129,7 @@ class EWOG_Sitemap {
         $this->set_xml_headers();
         
         // Check for cached version
-        $page = get_query_var('ewog_sitemap_page') ?: 1;
+        $page = get_query_var('wog_sitemap_page') ?: 1;
         $cache_key = $this->get_cache_key($sitemap, $page);
         $cached_sitemap = $this->get_cached_sitemap($cache_key);
         
@@ -434,7 +434,7 @@ class EWOG_Sitemap {
         for ($page = 1; $page <= $total_pages; $page++) {
             wp_schedule_single_event(
                 time() + ($page * 30), 
-                'ewog_generate_single_sitemap', 
+                'wog_generate_single_sitemap', 
                 array('products', $page)
             );
         }
@@ -442,19 +442,19 @@ class EWOG_Sitemap {
         // Schedule other sitemaps
         wp_schedule_single_event(
             time() + (($total_pages + 1) * 30), 
-            'ewog_generate_single_sitemap', 
+            'wog_generate_single_sitemap', 
             array('categories', 0)
         );
         
         if ($this->has_product_brands()) {
             wp_schedule_single_event(
                 time() + (($total_pages + 2) * 30), 
-                'ewog_generate_single_sitemap', 
+                'wog_generate_single_sitemap', 
                 array('brands', 0)
             );
         }
         
-        update_option('ewog_sitemap_last_generated', time());
+        update_option('wog_sitemap_last_generated', time());
     }
     
     /**
@@ -532,7 +532,7 @@ class EWOG_Sitemap {
     }
     
     private function get_cache_key($sitemap_type, $page = 0) {
-        $key = "ewog_sitemap_{$sitemap_type}";
+        $key = "wog_sitemap_{$sitemap_type}";
         if ($page > 0) {
             $key .= "_page_{$page}";
         }
@@ -550,7 +550,7 @@ class EWOG_Sitemap {
         
         // Use cached visibility if available
         $cache_key = "product_visible_{$product->get_id()}";
-        $cached_visibility = wp_cache_get($cache_key, 'ewog');
+        $cached_visibility = wp_cache_get($cache_key, 'wog');
         
         if ($cached_visibility !== false) {
             return $cached_visibility;
@@ -559,14 +559,14 @@ class EWOG_Sitemap {
         $is_visible = method_exists($product, 'is_visible') ? $product->is_visible() : true;
         
         // Cache for 1 hour
-        wp_cache_set($cache_key, $is_visible, 'ewog', 3600);
+        wp_cache_set($cache_key, $is_visible, 'wog', 3600);
         
         return $is_visible;
     }
     
     private function get_published_product_count() {
         $cache_key = 'published_product_count';
-        $cached_count = wp_cache_get($cache_key, 'ewog');
+        $cached_count = wp_cache_get($cache_key, 'wog');
         
         if ($cached_count !== false) {
             return $cached_count;
@@ -597,7 +597,7 @@ class EWOG_Sitemap {
         }
         
         $count = intval($count);
-        wp_cache_set($cache_key, $count, 'ewog', 1800); // 30 minutes
+        wp_cache_set($cache_key, $count, 'wog', 1800); // 30 minutes
         
         return $count;
     }
@@ -634,7 +634,7 @@ class EWOG_Sitemap {
     
     private function get_products_last_modified() {
         $cache_key = 'products_last_modified';
-        $cached_date = wp_cache_get($cache_key, 'ewog');
+        $cached_date = wp_cache_get($cache_key, 'wog');
         
         if ($cached_date !== false) {
             return $cached_date;
@@ -652,14 +652,14 @@ class EWOG_Sitemap {
         );
         
         $formatted_date = $last_modified ? date('c', strtotime($last_modified)) : date('c');
-        wp_cache_set($cache_key, $formatted_date, 'ewog', 3600);
+        wp_cache_set($cache_key, $formatted_date, 'wog', 3600);
         
         return $formatted_date;
     }
     
     private function get_categories_last_modified() {
         $cache_key = 'categories_last_modified';
-        $cached_date = wp_cache_get($cache_key, 'ewog');
+        $cached_date = wp_cache_get($cache_key, 'wog');
         
         if ($cached_date !== false) {
             return $cached_date;
@@ -680,7 +680,7 @@ class EWOG_Sitemap {
         );
         
         $formatted_date = $last_modified ? date('c', strtotime($last_modified)) : date('c');
-        wp_cache_set($cache_key, $formatted_date, 'ewog', 3600);
+        wp_cache_set($cache_key, $formatted_date, 'wog', 3600);
         
         return $formatted_date;
     }
@@ -716,7 +716,7 @@ class EWOG_Sitemap {
     }
     
     private function should_include_images() {
-        return apply_filters('ewog_sitemap_include_images', true);
+        return apply_filters('wog_sitemap_include_images', true);
     }
     
     private function get_product_sitemap_images($product) {
@@ -900,11 +900,11 @@ class EWOG_Sitemap {
         
         $wpdb->query(
             "DELETE FROM {$wpdb->options} 
-             WHERE option_name LIKE '_transient_ewog_%' 
-             OR option_name LIKE '_transient_timeout_ewog_%'"
+             WHERE option_name LIKE '_transient_wog_%' 
+             OR option_name LIKE '_transient_timeout_wog_%'"
         );
         
-        wp_cache_flush_group('ewog');
+        wp_cache_flush_group('wog');
     }
     
     public function cleanup_old_cache() {
@@ -923,19 +923,19 @@ class EWOG_Sitemap {
     }
     
     private function schedule_sitemap_update() {
-        if (!wp_next_scheduled('ewog_generate_sitemaps')) {
-            wp_schedule_single_event(time() + 600, 'ewog_generate_sitemaps'); // 10 minutes
+        if (!wp_next_scheduled('wog_generate_sitemaps')) {
+            wp_schedule_single_event(time() + 600, 'wog_generate_sitemaps'); // 10 minutes
         }
     }
     
     public function schedule_sitemap_generation() {
-        if (!wp_next_scheduled('ewog_generate_sitemaps')) {
-            wp_schedule_event(time(), 'daily', 'ewog_generate_sitemaps');
+        if (!wp_next_scheduled('wog_generate_sitemaps')) {
+            wp_schedule_event(time(), 'daily', 'wog_generate_sitemaps');
         }
     }
     
     private function schedule_single_sitemap($type, $page) {
-        wp_schedule_single_event(time() + 30, 'ewog_generate_single_sitemap', array($type, $page));
+        wp_schedule_single_event(time() + 30, 'wog_generate_single_sitemap', array($type, $page));
     }
     
     /**
@@ -966,7 +966,7 @@ class EWOG_Sitemap {
         }
         
         $this->clear_sitemap_cache();
-        delete_option('ewog_rewrite_rules_flushed_v2');
+        delete_option('wog_rewrite_rules_flushed_v2');
         
         $this->add_sitemap_rewrite_rules();
         flush_rewrite_rules();
@@ -981,11 +981,11 @@ class EWOG_Sitemap {
             'total_products' => $this->get_published_product_count(),
             'products_per_sitemap' => $this->get_products_per_sitemap(),
             'total_sitemap_pages' => ceil($this->get_published_product_count() / $this->get_products_per_sitemap()),
-            'last_generated' => get_option('ewog_sitemap_last_generated', 0),
+            'last_generated' => get_option('wog_sitemap_last_generated', 0),
             'cache_enabled' => true,
             'memory_limit' => ini_get('memory_limit'),
             'urls' => array(
-                'main_index' => home_url('/ewog-sitemap.xml'),
+                'main_index' => home_url('/wog-sitemap.xml'),
                 'products_page_1' => home_url('/product-sitemap-1.xml'),
                 'categories' => home_url('/product-category-sitemap.xml'),
             )
@@ -1009,7 +1009,7 @@ class EWOG_Sitemap {
         
         $stats = $this->get_sitemap_stats();
         
-        echo "<div class='ewog-debug-info'>";
+        echo "<div class='wog-debug-info'>";
         echo "<h3>EWOG Sitemap Debug Information</h3>";
         echo "<table class='widefat'>";
         
@@ -1026,18 +1026,18 @@ class EWOG_Sitemap {
         
         // Test buttons
         echo "<p>";
-        echo "<a href='" . home_url('/ewog-sitemap.xml') . "' target='_blank' class='button'>Test Main Index</a> ";
+        echo "<a href='" . home_url('/wog-sitemap.xml') . "' target='_blank' class='button'>Test Main Index</a> ";
         echo "<a href='" . home_url('/product-sitemap-1.xml') . "' target='_blank' class='button'>Test Products</a> ";
-        echo "<button onclick='ewogClearCache()' class='button'>Clear Cache</button>";
+        echo "<button onclick='wogClearCache()' class='button'>Clear Cache</button>";
         echo "</p>";
         
         echo "<script>
-        function ewogClearCache() {
+        function wogClearCache() {
             if (confirm('Clear all sitemap cache?')) {
                 fetch(ajaxurl, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'action=ewog_clear_cache&nonce=' + ewogAdmin.nonce
+                    body: 'action=wog_clear_cache&nonce=' + wogAdmin.nonce
                 }).then(() => location.reload());
             }
         }
@@ -1054,7 +1054,7 @@ class EWOG_Sitemap {
         $urls = array();
         
         if (!empty($this->settings['enable_product_sitemap'])) {
-            $urls[] = home_url('/ewog-sitemap.xml');
+            $urls[] = home_url('/wog-sitemap.xml');
         }
         
         return $urls;
@@ -1062,7 +1062,7 @@ class EWOG_Sitemap {
     
     public function add_sitemap_to_robots($output) {
         if (!empty($this->settings['enable_product_sitemap'])) {
-            $output .= "\nSitemap: " . home_url('/ewog-sitemap.xml') . "\n";
+            $output .= "\nSitemap: " . home_url('/wog-sitemap.xml') . "\n";
         }
         
         return $output;
