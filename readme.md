@@ -16,11 +16,6 @@ Enhanced Woo Open Graph is a comprehensive WordPress plugin that helps your WooC
 - **♿ Accessible**: WCAG 2.1 compliant with full keyboard navigation and screen reader support
 - **🔧 Developer Friendly**: 20+ hooks, extensive customization options, and comprehensive API
 
-## 📷 Screenshots
-
-| Modern Admin Interface | Share Button Styles | Mobile Responsive |
-|:----------------------:|:-------------------:|:----------------:|
-| ![Admin Interface](https://via.placeholder.com/300x200?text=Admin+Interface) | ![Button Styles](https://via.placeholder.com/300x200?text=Button+Styles) | ![Mobile View](https://via.placeholder.com/300x200?text=Mobile+View) |
 
 ## 🔥 Key Features
 
