@@ -5,7 +5,7 @@ Tags: woocommerce, open graph, social media, facebook, schema
 Requires at least: 5.0
 Tested up to: 6.8.1
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -255,6 +255,15 @@ Absolutely! All share buttons are optimized for mobile devices with touch-friend
 
 == Changelog ==
 
+= 2.0.1 - 2025-01-10 =
+
+**Micro Update - WordPress.org Compliance**
+
+* Renamed plugin from "Woo Open Graph" to "Open Graph for WooCommerce" for trademark compliance
+* Updated text domain to match new plugin slug
+* Updated all internal references and documentation
+* No functionality changes - all features remain the same
+
 = 2.0.0 - 2024-12-15 =
 
 **Major Release - Complete Rewrite**
@@ -323,6 +332,9 @@ Absolutely! All share buttons are optimized for mobile devices with touch-friend
 * Basic product meta tag generation
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+Minor update: Plugin renamed to "Open Graph for WooCommerce" for WordPress.org compliance. No functionality changes.
 
 = 2.0.0 =
 Major update! Complete rewrite with massive improvements! 
