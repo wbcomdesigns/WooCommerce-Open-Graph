@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Open Graph for WooCommerce
- * Plugin URI: https://wbcomdesigns.com/open-graph-for-woocommerce
+ * Plugin URI: https://wbcomdesigns.com/downloads/woo-open-graph/
  * Description: Comprehensive Schema.org markup, Open Graph optimization, and social sharing for WooCommerce. Fill the gaps that free SEO plugins miss.
  * Version: 2.0.0
  * Author: Wbcom Designs
