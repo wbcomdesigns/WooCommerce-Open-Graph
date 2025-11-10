@@ -1,4 +1,4 @@
-﻿=== Woo Open Graph ===
+﻿=== Open Graph for WooCommerce ===
 Contributors: wbcomdesigns
 Donate link: https://wbcomdesigns.com/donate
 Tags: woocommerce, open graph, social media, facebook, schema
@@ -13,7 +13,7 @@ Advanced Open Graph meta tags and social sharing for WooCommerce. Boost social m
 
 == Description ==
 
-**Woo Open Graph** helps your WooCommerce products look perfect when shared on social media. This comprehensive plugin automatically generates optimized Open Graph meta tags, Twitter Cards, and Schema.org structured data to boost your social media presence and SEO.
+**Open Graph for WooCommerce** helps your WooCommerce products look perfect when shared on social media. This comprehensive plugin automatically generates optimized Open Graph meta tags, Twitter Cards, and Schema.org structured data to boost your social media presence and SEO.
 
 = Perfect For =
 
@@ -52,7 +52,7 @@ Advanced Open Graph meta tags and social sharing for WooCommerce. Boost social m
 
 = What Makes It Special =
 
-Unlike basic Open Graph plugins, Woo Open Graph is specifically designed for WooCommerce:
+Unlike basic Open Graph plugins, Open Graph for WooCommerce is specifically designed for WooCommerce:
 
 * Product-focused: Includes pricing, availability, and product-specific data
 * Performance optimized: Only loads resources when needed
@@ -165,7 +165,7 @@ This is a complete rewrite with massive improvements:
 
 1. Go to your WordPress admin dashboard
 2. Navigate to **Plugins → Add New**
-3. Search for "Enhanced Woo Open Graph"
+3. Search for "Open Graph for WooCommerce"
 4. Click **Install Now** and then **Activate**
 5. Go to **WooCommerce → Social Media** to configure settings
 

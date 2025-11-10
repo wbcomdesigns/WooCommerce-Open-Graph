@@ -1,11 +1,11 @@
-# Woo Open Graph
+# Open Graph for WooCommerce
 
-> **Advanced Open Graph meta tags and social sharing for WooCommerce**  
+> **Advanced Open Graph meta tags and social sharing for WooCommerce**
 > Boost social media engagement with automatic Schema.org markup and beautiful share buttons.
 
 ## 🚀 Overview
 
-Enhanced Woo Open Graph is a comprehensive WordPress plugin that helps your WooCommerce products look perfect when shared on social media. It automatically generates optimized Open Graph meta tags, Twitter Cards, and Schema.org structured data to boost your social media presence and SEO.
+Open Graph for WooCommerce is a comprehensive WordPress plugin that helps your WooCommerce products look perfect when shared on social media. It automatically generates optimized Open Graph meta tags, Twitter Cards, and Schema.org structured data to boost your social media presence and SEO.
 
 ### ✨ What Makes It Special
 
@@ -51,19 +51,19 @@ Enhanced Woo Open Graph is a comprehensive WordPress plugin that helps your WooC
 ### WordPress.org (Recommended)
 ```bash
 # From WordPress admin
-Plugins → Add New → Search "Enhanced Woo Open Graph" → Install → Activate
+Plugins → Add New → Search "Open Graph for WooCommerce" → Install → Activate
 ```
 
 ### Manual Installation
 ```bash
 # Download and extract
-wp plugin install woo-open-graph.zip
-wp plugin activate woo-open-graph
+wp plugin install open-graph-for-woocommerce.zip
+wp plugin activate open-graph-for-woocommerce
 ```
 
 ### Composer
 ```bash
-composer require wbcomdesigns/woo-open-graph
+composer require wbcomdesigns/open-graph-for-woocommerce
 ```
 
 ## ⚙️ Quick Setup
@@ -126,7 +126,7 @@ add_action('wog_social_share_tracked', function($platform, $product_id, $url) {
 ### Local Development Setup
 ```bash
 # Clone repository
-git clone https://github.com/wbcomdesigns/woo-open-graph.git
+git clone https://github.com/wbcomdesigns/open-graph-for-woocommerce.git
 cd woo-open-graph
 
 # Install dependencies

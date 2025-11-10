@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name: Woo Open Graph
- * Plugin URI: https://wbcomdesigns.com/woo-open-graph
+ * Plugin Name: Open Graph for WooCommerce
+ * Plugin URI: https://wbcomdesigns.com/open-graph-for-woocommerce
  * Description: Comprehensive Schema.org markup, Open Graph optimization, and social sharing for WooCommerce. Fill the gaps that free SEO plugins miss.
  * Version: 2.0.0
  * Author: Wbcom Designs
  * Author URI: https://wbcomdesigns.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: woo-open-graph
+ * Text Domain: open-graph-for-woocommerce
  * Domain Path: /languages
  * Requires at least: 5.0
  * Tested up to: 6.8.1
@@ -44,7 +44,7 @@ define('WOG_VERSION', '2.0.0');
 define('WOG_PLUGIN_FILE', __FILE__);
 define('WOG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WOG_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WOG_TEXT_DOMAIN', 'woo-open-graph');
+define('WOG_TEXT_DOMAIN', 'open-graph-for-woocommerce');
 
 /**
  * Main plugin class
@@ -194,7 +194,7 @@ class Woo_Open_Graph {
             <p>
                 <?php 
                 echo sprintf(
-                    __('Woo Open Graph requires WooCommerce to be installed and active. %s', WOG_TEXT_DOMAIN),
+                    __('Open Graph for WooCommerce requires WooCommerce to be installed and active. %s', WOG_TEXT_DOMAIN),
                     '<a href="' . admin_url('plugin-install.php?s=woocommerce&tab=search&type=term') . '">' . __('Install WooCommerce', WOG_TEXT_DOMAIN) . '</a>'
                 );
                 ?>
@@ -210,7 +210,7 @@ class Woo_Open_Graph {
         if (!$this->is_woocommerce_active()) {
             deactivate_plugins(plugin_basename(__FILE__));
             wp_die(
-                __('Woo Open Graph requires WooCommerce to be installed and active.', WOG_TEXT_DOMAIN),
+                __('Open Graph for WooCommerce requires WooCommerce to be installed and active.', WOG_TEXT_DOMAIN),
                 __('Plugin Activation Error', WOG_TEXT_DOMAIN),
                 array('back_link' => true)
             );
@@ -359,7 +359,7 @@ class Woo_Open_Graph {
      */
     public function debug_log($message, $data = null) {
         if ($this->is_debug_mode() && function_exists('error_log')) {
-            $log_message = '[Woo Open Graph] ' . $message;
+            $log_message = '[Open Graph for WooCommerce] ' . $message;
             
             if ($data !== null) {
                 $log_message .= ' | Data: ' . print_r($data, true);
