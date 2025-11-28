@@ -51,10 +51,10 @@ class WOG_Admin {
     public function add_admin_menu() {
         add_submenu_page(
             'woocommerce',
-            __('Woo Open Graph', 'open-graph-for-woocommerce'),
-            __('Social Media', 'open-graph-for-woocommerce'),
+            __('Woo Open Graph', 'woo-open-graph'),
+            __('Social Media', 'woo-open-graph'),
             'manage_woocommerce',
-            'open-graph-for-woocommerce',
+            'woo-open-graph',
             array($this, 'admin_page')
         );
     }
@@ -68,18 +68,18 @@ class WOG_Admin {
         // Core Features Section
         add_settings_section(
             'wog_core_section',
-            __('Core Features', 'open-graph-for-woocommerce'),
+            __('Core Features', 'woo-open-graph'),
             array($this, 'core_section_callback'),
             'wog_settings'
         );
         
         $core_fields = array(
-            'enable_schema' => __('Add Schema.org structured data to product pages for better search results', 'open-graph-for-woocommerce'),
-            'enable_facebook' => __('Generate Facebook Open Graph meta tags for better sharing', 'open-graph-for-woocommerce'),
-            'enable_twitter' => __('Generate Twitter Card meta tags for better sharing', 'open-graph-for-woocommerce'),
-            'enable_linkedin' => __('Optimize sharing for LinkedIn professional network', 'open-graph-for-woocommerce'),
-            'enable_pinterest' => __('Enable Pinterest Rich Pins with product data', 'open-graph-for-woocommerce'),
-            'enable_whatsapp' => __('Optimize sharing for WhatsApp mobile messaging', 'open-graph-for-woocommerce')
+            'enable_schema' => __('Add Schema.org structured data to product pages for better search results', 'woo-open-graph'),
+            'enable_facebook' => __('Generate Facebook Open Graph meta tags for better sharing', 'woo-open-graph'),
+            'enable_twitter' => __('Generate Twitter Card meta tags for better sharing', 'woo-open-graph'),
+            'enable_linkedin' => __('Optimize sharing for LinkedIn professional network', 'woo-open-graph'),
+            'enable_pinterest' => __('Enable Pinterest Rich Pins with product data', 'woo-open-graph'),
+            'enable_whatsapp' => __('Optimize sharing for WhatsApp mobile messaging', 'woo-open-graph')
         );
         
         foreach ($core_fields as $id => $description) {
@@ -91,125 +91,125 @@ class WOG_Admin {
         // Social Sharing Section
         add_settings_section(
             'wog_sharing_section',
-            __('Social Sharing Buttons', 'open-graph-for-woocommerce'),
+            __('Social Sharing Buttons', 'woo-open-graph'),
             array($this, 'sharing_section_callback'),
             'wog_settings'
         );
         
-        add_settings_field('enable_social_share', __('Enable Share Buttons', 'open-graph-for-woocommerce'), 
+        add_settings_field('enable_social_share', __('Enable Share Buttons', 'woo-open-graph'), 
             array($this, 'checkbox_field'), 'wog_settings', 'wog_sharing_section',
-            array('id' => 'enable_social_share', 'description' => __('Add social share buttons to product pages', 'open-graph-for-woocommerce')));
+            array('id' => 'enable_social_share', 'description' => __('Add social share buttons to product pages', 'woo-open-graph')));
         
-        add_settings_field('share_button_style', __('Button Style', 'open-graph-for-woocommerce'), 
+        add_settings_field('share_button_style', __('Button Style', 'woo-open-graph'), 
             array($this, 'select_field'), 'wog_settings', 'wog_sharing_section',
             array(
                 'id' => 'share_button_style',
                 'options' => array(
-                    'modern' => __('Modern', 'open-graph-for-woocommerce'),
-                    'classic' => __('Classic', 'open-graph-for-woocommerce'),
-                    'minimal' => __('Minimal', 'open-graph-for-woocommerce')
+                    'modern' => __('Modern', 'woo-open-graph'),
+                    'classic' => __('Classic', 'woo-open-graph'),
+                    'minimal' => __('Minimal', 'woo-open-graph')
                 ),
-                'description' => __('Visual style for share buttons', 'open-graph-for-woocommerce')
+                'description' => __('Visual style for share buttons', 'woo-open-graph')
             ));
         
-        add_settings_field('share_button_position', __('Button Position', 'open-graph-for-woocommerce'), 
+        add_settings_field('share_button_position', __('Button Position', 'woo-open-graph'), 
             array($this, 'select_field'), 'wog_settings', 'wog_sharing_section',
             array(
                 'id' => 'share_button_position',
                 'options' => array(
-                    'after_add_to_cart' => __('After Add to Cart Button', 'open-graph-for-woocommerce'),
-                    'before_add_to_cart' => __('Before Add to Cart Button', 'open-graph-for-woocommerce'),
-                    'after_summary' => __('After Product Summary', 'open-graph-for-woocommerce'),
-                    'after_tabs' => __('After Product Tabs', 'open-graph-for-woocommerce')
+                    'after_add_to_cart' => __('After Add to Cart Button', 'woo-open-graph'),
+                    'before_add_to_cart' => __('Before Add to Cart Button', 'woo-open-graph'),
+                    'after_summary' => __('After Product Summary', 'woo-open-graph'),
+                    'after_tabs' => __('After Product Tabs', 'woo-open-graph')
                 ),
-                'description' => __('Where to display social share buttons on product pages', 'open-graph-for-woocommerce')
+                'description' => __('Where to display social share buttons on product pages', 'woo-open-graph')
             ));
         
         // Sitemaps Section
         add_settings_section(
             'wog_sitemap_section',
-            __('XML Sitemaps', 'open-graph-for-woocommerce'),
+            __('XML Sitemaps', 'woo-open-graph'),
             array($this, 'sitemap_section_callback'),
             'wog_settings'
         );
         
-        add_settings_field('enable_product_sitemap', __('Enable Product Sitemaps', 'open-graph-for-woocommerce'), 
+        add_settings_field('enable_product_sitemap', __('Enable Product Sitemaps', 'woo-open-graph'), 
             array($this, 'sitemap_field'), 'wog_settings', 'wog_sitemap_section',
-            array('id' => 'enable_product_sitemap', 'description' => __('Generate XML sitemaps for products and categories', 'open-graph-for-woocommerce')));
+            array('id' => 'enable_product_sitemap', 'description' => __('Generate XML sitemaps for products and categories', 'woo-open-graph')));
         
-        add_settings_field('sitemap_products_per_page', __('Products Per Sitemap', 'open-graph-for-woocommerce'), 
+        add_settings_field('sitemap_products_per_page', __('Products Per Sitemap', 'woo-open-graph'), 
             array($this, 'number_field'), 'wog_settings', 'wog_sitemap_section',
             array(
                 'id' => 'sitemap_products_per_page',
                 'min' => 100, 'max' => 1000, 'default' => 500,
-                'description' => __('Number of products per sitemap file (recommended: 500)', 'open-graph-for-woocommerce')
+                'description' => __('Number of products per sitemap file (recommended: 500)', 'woo-open-graph')
             ));
         
         // Platform Settings Section
         add_settings_section(
             'wog_platform_section',
-            __('Platform Settings', 'open-graph-for-woocommerce'),
+            __('Platform Settings', 'woo-open-graph'),
             array($this, 'platform_section_callback'),
             'wog_settings'
         );
         
-        add_settings_field('facebook_app_id', __('Facebook App ID', 'open-graph-for-woocommerce'), 
+        add_settings_field('facebook_app_id', __('Facebook App ID', 'woo-open-graph'), 
             array($this, 'text_field'), 'wog_settings', 'wog_platform_section',
             array(
                 'id' => 'facebook_app_id',
                 'placeholder' => '123456789012345',
-                'description' => __('Optional: Your Facebook App ID for better analytics and insights', 'open-graph-for-woocommerce')
+                'description' => __('Optional: Your Facebook App ID for better analytics and insights', 'woo-open-graph')
             ));
         
-        add_settings_field('twitter_username', __('Twitter Username', 'open-graph-for-woocommerce'), 
+        add_settings_field('twitter_username', __('Twitter Username', 'woo-open-graph'), 
             array($this, 'text_field'), 'wog_settings', 'wog_platform_section',
             array(
                 'id' => 'twitter_username',
                 'placeholder' => 'yourstore',
-                'description' => __('Optional: Your Twitter username (without @) for attribution', 'open-graph-for-woocommerce')
+                'description' => __('Optional: Your Twitter username (without @) for attribution', 'woo-open-graph')
             ));
         
         // Image & Content Settings Section
         add_settings_section(
             'wog_content_section',
-            __('Image & Content Settings', 'open-graph-for-woocommerce'),
+            __('Image & Content Settings', 'woo-open-graph'),
             array($this, 'content_section_callback'),
             'wog_settings'
         );
         
-        add_settings_field('fallback_image', __('Default Social Image', 'open-graph-for-woocommerce'), 
+        add_settings_field('fallback_image', __('Default Social Image', 'woo-open-graph'), 
             array($this, 'image_field'), 'wog_settings', 'wog_content_section',
             array(
                 'id' => 'fallback_image',
-                'description' => __('Default image when products don\'t have featured images (recommended: 1200x630px)', 'open-graph-for-woocommerce')
+                'description' => __('Default image when products don\'t have featured images (recommended: 1200x630px)', 'woo-open-graph')
             ));
         
-        add_settings_field('image_size', __('Social Image Size', 'open-graph-for-woocommerce'), 
+        add_settings_field('image_size', __('Social Image Size', 'woo-open-graph'), 
             array($this, 'select_field'), 'wog_settings', 'wog_content_section',
             array(
                 'id' => 'image_size',
                 'options' => array(
-                    'medium' => __('Medium (300x300)', 'open-graph-for-woocommerce'),
-                    'large' => __('Large (1024x1024)', 'open-graph-for-woocommerce'),
-                    'full' => __('Full Size', 'open-graph-for-woocommerce')
+                    'medium' => __('Medium (300x300)', 'woo-open-graph'),
+                    'large' => __('Large (1024x1024)', 'woo-open-graph'),
+                    'full' => __('Full Size', 'woo-open-graph')
                 ),
-                'description' => __('Size of product images used for social sharing', 'open-graph-for-woocommerce')
+                'description' => __('Size of product images used for social sharing', 'woo-open-graph')
             ));
         
         // Advanced Settings Section
         add_settings_section(
             'wog_advanced_section',
-            __('Advanced Settings', 'open-graph-for-woocommerce'),
+            __('Advanced Settings', 'woo-open-graph'),
             array($this, 'advanced_section_callback'),
             'wog_settings'
         );
         
         $advanced_fields = array(
-            'disable_title_description' => __('Override titles and descriptions from other SEO plugins (use with caution)', 'open-graph-for-woocommerce'),
-            'enable_enhanced_schema' => __('Include advanced product properties (GTIN, MPN, brand, specifications)', 'open-graph-for-woocommerce'),
-            'enable_breadcrumb_schema' => __('Add breadcrumb navigation schema markup', 'open-graph-for-woocommerce'),
-            'enable_organization_schema' => __('Add organization and store information schema', 'open-graph-for-woocommerce'),
-            'debug_mode' => __('Enable debug mode for troubleshooting (adds HTML comments)', 'open-graph-for-woocommerce')
+            'disable_title_description' => __('Override titles and descriptions from other SEO plugins (use with caution)', 'woo-open-graph'),
+            'enable_enhanced_schema' => __('Include advanced product properties (GTIN, MPN, brand, specifications)', 'woo-open-graph'),
+            'enable_breadcrumb_schema' => __('Add breadcrumb navigation schema markup', 'woo-open-graph'),
+            'enable_organization_schema' => __('Add organization and store information schema', 'woo-open-graph'),
+            'debug_mode' => __('Enable debug mode for troubleshooting (adds HTML comments)', 'woo-open-graph')
         );
         
         foreach ($advanced_fields as $id => $description) {
@@ -227,7 +227,7 @@ class WOG_Admin {
         <div class="wrap wog-admin-wrap">
             <div class="wog-admin-header">
                 <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
-                <p class="description"><?php esc_html_e('Configure how your WooCommerce products appear when shared on social media platforms. This plugin works alongside your existing SEO plugin to fill any gaps.', 'open-graph-for-woocommerce'); ?></p>
+                <p class="description"><?php esc_html_e('Configure how your WooCommerce products appear when shared on social media platforms. This plugin works alongside your existing SEO plugin to fill any gaps.', 'woo-open-graph'); ?></p>
             </div>
             
             <div class="wog-admin-layout">
@@ -236,7 +236,7 @@ class WOG_Admin {
                         <?php
                         settings_fields('wog_settings_group');
                         do_settings_sections('wog_settings');
-                        submit_button(__('Save Settings', 'open-graph-for-woocommerce'), 'primary', 'submit', true, array('class' => 'button-primary button-large'));
+                        submit_button(__('Save Settings', 'woo-open-graph'), 'primary', 'submit', true, array('class' => 'button-primary button-large'));
                         ?>
                     </form>
                 </div>
@@ -244,7 +244,7 @@ class WOG_Admin {
                 <div class="wog-sidebar">
                     <div class="wog-sidebar-box">
                         <div class="wog-card-header">
-                            <h3><span class="dashicons dashicons-dashboard"></span> <?php esc_html_e('Current Status', 'open-graph-for-woocommerce'); ?></h3>
+                            <h3><span class="dashicons dashicons-dashboard"></span> <?php esc_html_e('Current Status', 'woo-open-graph'); ?></h3>
                         </div>
                         <div class="wog-card-body">
                             <?php $this->display_quick_status(); ?>
@@ -253,46 +253,46 @@ class WOG_Admin {
                     
                     <div class="wog-sidebar-box">
                         <div class="wog-card-header">
-                            <h3><span class="dashicons dashicons-external"></span> <?php esc_html_e('Testing Tools', 'open-graph-for-woocommerce'); ?></h3>
+                            <h3><span class="dashicons dashicons-external"></span> <?php esc_html_e('Testing Tools', 'woo-open-graph'); ?></h3>
                         </div>
                         <div class="wog-card-body">
-                            <p><?php esc_html_e('Test how your products look when shared:', 'open-graph-for-woocommerce'); ?></p>
+                            <p><?php esc_html_e('Test how your products look when shared:', 'woo-open-graph'); ?></p>
                             <a href="https://developers.facebook.com/tools/debug/" target="_blank" class="wog-btn-block">
                                 <span class="dashicons dashicons-facebook"></span>
-                                <?php esc_html_e('Facebook Debugger', 'open-graph-for-woocommerce'); ?>
+                                <?php esc_html_e('Facebook Debugger', 'woo-open-graph'); ?>
                             </a>
                             <a href="https://cards-dev.twitter.com/validator" target="_blank" class="wog-btn-block">
                                 <span class="dashicons dashicons-twitter"></span>
-                                <?php esc_html_e('Twitter Validator', 'open-graph-for-woocommerce'); ?>
+                                <?php esc_html_e('Twitter Validator', 'woo-open-graph'); ?>
                             </a>
                             <a href="https://search.google.com/test/rich-results" target="_blank" class="wog-btn-block">
                                 <span class="dashicons dashicons-google"></span>
-                                <?php esc_html_e('Google Rich Results', 'open-graph-for-woocommerce'); ?>
+                                <?php esc_html_e('Google Rich Results', 'woo-open-graph'); ?>
                             </a>
                             <a href="https://www.linkedin.com/post-inspector/" target="_blank" class="wog-btn-block">
                                 <span class="dashicons dashicons-linkedin"></span>
-                                <?php esc_html_e('LinkedIn Inspector', 'open-graph-for-woocommerce'); ?>
+                                <?php esc_html_e('LinkedIn Inspector', 'woo-open-graph'); ?>
                             </a>
                         </div>
                     </div>
                     
                     <div class="wog-sidebar-box">
                         <div class="wog-card-header">
-                            <h3><span class="dashicons dashicons-info"></span> <?php esc_html_e('Plugin Information', 'open-graph-for-woocommerce'); ?></h3>
+                            <h3><span class="dashicons dashicons-info"></span> <?php esc_html_e('Plugin Information', 'woo-open-graph'); ?></h3>
                         </div>
                         <div class="wog-card-body">
-                            <p><strong><?php esc_html_e('Version:', 'open-graph-for-woocommerce'); ?></strong> <?php echo WOG_VERSION; ?></p>
-                            <p><strong><?php esc_html_e('Compatible with:', 'open-graph-for-woocommerce'); ?></strong> Yoast, RankMath, SEOPress</p>
-                            <p><strong><?php esc_html_e('Auto-generates:', 'open-graph-for-woocommerce'); ?></strong> <?php esc_html_e('Schema, Open Graph, Twitter Cards', 'open-graph-for-woocommerce'); ?></p>
+                            <p><strong><?php esc_html_e('Version:', 'woo-open-graph'); ?></strong> <?php echo WOG_VERSION; ?></p>
+                            <p><strong><?php esc_html_e('Compatible with:', 'woo-open-graph'); ?></strong> Yoast, RankMath, SEOPress</p>
+                            <p><strong><?php esc_html_e('Auto-generates:', 'woo-open-graph'); ?></strong> <?php esc_html_e('Schema, Open Graph, Twitter Cards', 'woo-open-graph'); ?></p>
                             
                             <hr>
                             
-                            <h4><?php esc_html_e('Important Notes', 'open-graph-for-woocommerce'); ?></h4>
+                            <h4><?php esc_html_e('Important Notes', 'woo-open-graph'); ?></h4>
                             <ul>
-                                <li><?php esc_html_e('Uses product featured images automatically', 'open-graph-for-woocommerce'); ?></li>
-                                <li><?php esc_html_e('Individual products can have custom titles/descriptions', 'open-graph-for-woocommerce'); ?></li>
-                                <li><?php esc_html_e('Works alongside existing SEO plugins', 'open-graph-for-woocommerce'); ?></li>
-                                <li><?php esc_html_e('Uses WordPress built-in caching for performance', 'open-graph-for-woocommerce'); ?></li>
+                                <li><?php esc_html_e('Uses product featured images automatically', 'woo-open-graph'); ?></li>
+                                <li><?php esc_html_e('Individual products can have custom titles/descriptions', 'woo-open-graph'); ?></li>
+                                <li><?php esc_html_e('Works alongside existing SEO plugins', 'woo-open-graph'); ?></li>
+                                <li><?php esc_html_e('Uses WordPress built-in caching for performance', 'woo-open-graph'); ?></li>
                             </ul>
                         </div>
                     </div>
@@ -304,7 +304,7 @@ class WOG_Admin {
         // Sitemap generation functions
         function wogGenerateSitemap(button) {
             button.disabled = true;
-            button.textContent = '<?php esc_html_e('Generating...', 'open-graph-for-woocommerce'); ?>';
+            button.textContent = '<?php esc_html_e('Generating...', 'woo-open-graph'); ?>';
             
             fetch(ajaxurl, {
                 method: 'POST',
@@ -325,13 +325,13 @@ class WOG_Admin {
             })
             .finally(() => {
                 button.disabled = false;
-                button.textContent = '<?php esc_html_e('Generate Now', 'open-graph-for-woocommerce'); ?>';
+                button.textContent = '<?php esc_html_e('Generate Now', 'woo-open-graph'); ?>';
             });
         }
         
         function wogTestSitemap(button) {
             button.disabled = true;
-            button.textContent = '<?php esc_html_e('Testing...', 'open-graph-for-woocommerce'); ?>';
+            button.textContent = '<?php esc_html_e('Testing...', 'woo-open-graph'); ?>';
             
             fetch(ajaxurl, {
                 method: 'POST',
@@ -352,7 +352,7 @@ class WOG_Admin {
             })
             .finally(() => {
                 button.disabled = false;
-                button.textContent = '<?php esc_html_e('Test Sitemaps', 'open-graph-for-woocommerce'); ?>';
+                button.textContent = '<?php esc_html_e('Test Sitemaps', 'woo-open-graph'); ?>';
             });
         }
         
@@ -401,27 +401,27 @@ class WOG_Admin {
      * Section callback functions
      */
     public function core_section_callback() {
-        echo '<p>' . __('Enable the core social media optimization features for your WooCommerce products.', 'open-graph-for-woocommerce') . '</p>';
+        echo '<p>' . __('Enable the core social media optimization features for your WooCommerce products.', 'woo-open-graph') . '</p>';
     }
     
     public function sharing_section_callback() {
-        echo '<p>' . __('Configure social sharing buttons that appear on your product pages.', 'open-graph-for-woocommerce') . '</p>';
+        echo '<p>' . __('Configure social sharing buttons that appear on your product pages.', 'woo-open-graph') . '</p>';
     }
     
     public function sitemap_section_callback() {
-        echo '<p>' . __('Generate XML sitemaps to help search engines discover your products and categories.', 'open-graph-for-woocommerce') . '</p>';
+        echo '<p>' . __('Generate XML sitemaps to help search engines discover your products and categories.', 'woo-open-graph') . '</p>';
     }
     
     public function platform_section_callback() {
-        echo '<p>' . __('Optional platform-specific settings for enhanced integration.', 'open-graph-for-woocommerce') . '</p>';
+        echo '<p>' . __('Optional platform-specific settings for enhanced integration.', 'woo-open-graph') . '</p>';
     }
     
     public function content_section_callback() {
-        echo '<p>' . __('Configure how images and content appear when shared on social media.', 'open-graph-for-woocommerce') . '</p>';
+        echo '<p>' . __('Configure how images and content appear when shared on social media.', 'woo-open-graph') . '</p>';
     }
     
     public function advanced_section_callback() {
-        echo '<p>' . __('Advanced options for power users and specific use cases.', 'open-graph-for-woocommerce') . '</p>';
+        echo '<p>' . __('Advanced options for power users and specific use cases.', 'woo-open-graph') . '</p>';
     }
     
     /**
@@ -498,7 +498,7 @@ class WOG_Admin {
         echo 'placeholder="https://example.com/image.jpg" ';
         echo 'class="regular-text" />';
         
-        echo '<button type="button" class="button" onclick="wogSelectImage(this)">' . __('Choose Image', 'open-graph-for-woocommerce') . '</button>';
+        echo '<button type="button" class="button" onclick="wogSelectImage(this)">' . __('Choose Image', 'woo-open-graph') . '</button>';
         
         if ($value) {
             echo '<img src="' . esc_url($value) . '" class="wog-image-preview" style="max-width: 80px; height: auto; border: 1px solid #ddd; border-radius: 3px;" />';
@@ -524,10 +524,10 @@ class WOG_Admin {
             echo '<div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 4px solid #00a32a; border-radius: 0 3px 3px 0;">';
             
             if ($last_generated) {
-                echo '<p><strong>' . __('Last Generated:', 'open-graph-for-woocommerce') . '</strong> ' . date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $last_generated) . '</p>';
+                echo '<p><strong>' . __('Last Generated:', 'woo-open-graph') . '</strong> ' . date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $last_generated) . '</p>';
             }
             
-            echo '<p><strong>' . __('Sitemap URLs:', 'open-graph-for-woocommerce') . '</strong></p>';
+            echo '<p><strong>' . __('Sitemap URLs:', 'woo-open-graph') . '</strong></p>';
             echo '<ul>';
             echo '<li><a href="' . home_url('/wog-sitemap.xml') . '" target="_blank">' . home_url('/wog-sitemap.xml') . '</a> (Main Index)</li>';
             echo '<li><a href="' . home_url('/product-sitemap-1.xml') . '" target="_blank">' . home_url('/product-sitemap-1.xml') . '</a> (Products)</li>';
@@ -535,8 +535,8 @@ class WOG_Admin {
             echo '</ul>';
             
             echo '<p>';
-            echo '<button type="button" class="button" onclick="wogGenerateSitemap(this)">' . __('Generate Now', 'open-graph-for-woocommerce') . '</button> ';
-            echo '<button type="button" class="button" onclick="wogTestSitemap(this)">' . __('Test Sitemaps', 'open-graph-for-woocommerce') . '</button>';
+            echo '<button type="button" class="button" onclick="wogGenerateSitemap(this)">' . __('Generate Now', 'woo-open-graph') . '</button> ';
+            echo '<button type="button" class="button" onclick="wogTestSitemap(this)">' . __('Test Sitemaps', 'woo-open-graph') . '</button>';
             echo '</p>';
             
             echo '<div id="wog-sitemap-results"></div>';
@@ -552,11 +552,11 @@ class WOG_Admin {
         
         // Core Features
         echo '<div style="margin-bottom: 20px;">';
-        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Core Features', 'open-graph-for-woocommerce') . '</h4>';
+        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Core Features', 'woo-open-graph') . '</h4>';
         $core_features = array(
-            'enable_schema' => __('Schema Markup', 'open-graph-for-woocommerce'),
-            'enable_facebook' => __('Facebook', 'open-graph-for-woocommerce'),
-            'enable_twitter' => __('Twitter', 'open-graph-for-woocommerce'),
+            'enable_schema' => __('Schema Markup', 'woo-open-graph'),
+            'enable_facebook' => __('Facebook', 'woo-open-graph'),
+            'enable_twitter' => __('Twitter', 'woo-open-graph'),
         );
         
         foreach ($core_features as $key => $label) {
@@ -567,11 +567,11 @@ class WOG_Admin {
         
         // Additional Platforms
         echo '<div style="margin-bottom: 20px;">';
-        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Additional Platforms', 'open-graph-for-woocommerce') . '</h4>';
+        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Additional Platforms', 'woo-open-graph') . '</h4>';
         $additional_platforms = array(
-            'enable_linkedin' => __('LinkedIn', 'open-graph-for-woocommerce'),
-            'enable_pinterest' => __('Pinterest', 'open-graph-for-woocommerce'),
-            'enable_whatsapp' => __('WhatsApp', 'open-graph-for-woocommerce'),
+            'enable_linkedin' => __('LinkedIn', 'woo-open-graph'),
+            'enable_pinterest' => __('Pinterest', 'woo-open-graph'),
+            'enable_whatsapp' => __('WhatsApp', 'woo-open-graph'),
         );
         
         foreach ($additional_platforms as $key => $label) {
@@ -582,10 +582,10 @@ class WOG_Admin {
         
         // Tools
         echo '<div>';
-        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Tools', 'open-graph-for-woocommerce') . '</h4>';
+        echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . __('Tools', 'woo-open-graph') . '</h4>';
         $tools = array(
-            'enable_social_share' => __('Share Buttons', 'open-graph-for-woocommerce'),
-            'enable_product_sitemap' => __('XML Sitemaps', 'open-graph-for-woocommerce'),
+            'enable_social_share' => __('Share Buttons', 'woo-open-graph'),
+            'enable_product_sitemap' => __('XML Sitemaps', 'woo-open-graph'),
         );
         
         foreach ($tools as $key => $label) {
@@ -597,8 +597,8 @@ class WOG_Admin {
         // Performance note
         echo '<div style="margin-top: 20px; padding: 10px; background: #f0f8f0; border-left: 4px solid #00a32a; border-radius: 0 3px 3px 0;">';
         echo '<p style="margin: 0; font-size: 12px; color: #1e4620;">';
-        echo '<strong>' . __('Performance:', 'open-graph-for-woocommerce') . '</strong> ';
-        echo __('This plugin uses WordPress built-in caching and works with all cache plugins automatically.', 'open-graph-for-woocommerce');
+        echo '<strong>' . __('Performance:', 'woo-open-graph') . '</strong> ';
+        echo __('This plugin uses WordPress built-in caching and works with all cache plugins automatically.', 'woo-open-graph');
         echo '</p>';
         echo '</div>';
     }
@@ -608,7 +608,7 @@ class WOG_Admin {
      */
     private function render_status_item($label, $enabled) {
         $status_class = $enabled ? 'enabled' : 'disabled';
-        $status_text = $enabled ? __('On', 'open-graph-for-woocommerce') : __('Off', 'open-graph-for-woocommerce');
+        $status_text = $enabled ? __('On', 'woo-open-graph') : __('Off', 'woo-open-graph');
         
         echo '<div class="wog-status-item">';
         echo '<span class="wog-status-icon ' . $status_class . '"></span>';
@@ -621,7 +621,7 @@ class WOG_Admin {
      * Add settings link to plugin actions
      */
     public function add_action_links($links) {
-        $settings_link = '<a href="' . admin_url('admin.php?page=woo-open-graph') . '">' . __('Settings', 'open-graph-for-woocommerce') . '</a>';
+        $settings_link = '<a href="' . admin_url('admin.php?page=woo-open-graph') . '">' . __('Settings', 'woo-open-graph') . '</a>';
         array_unshift($links, $settings_link);
         return $links;
     }
@@ -651,7 +651,7 @@ class WOG_Admin {
         check_ajax_referer('wog_admin_nonce', 'nonce');
         
         if (!current_user_can('manage_woocommerce')) {
-            wp_send_json_error(array('message' => __('Unauthorized', 'open-graph-for-woocommerce')));
+            wp_send_json_error(array('message' => __('Unauthorized', 'woo-open-graph')));
         }
         
         if (class_exists('WOG_Sitemap')) {
@@ -660,11 +660,11 @@ class WOG_Admin {
             update_option('wog_sitemap_last_generated', time());
             
             wp_send_json_success(array(
-                'message' => __('Sitemaps generated successfully!', 'open-graph-for-woocommerce')
+                'message' => __('Sitemaps generated successfully!', 'woo-open-graph')
             ));
         } else {
             wp_send_json_error(array(
-                'message' => __('Sitemap generation not available', 'open-graph-for-woocommerce')
+                'message' => __('Sitemap generation not available', 'woo-open-graph')
             ));
         }
     }
@@ -676,7 +676,7 @@ class WOG_Admin {
         check_ajax_referer('wog_admin_nonce', 'nonce');
         
         if (!current_user_can('manage_woocommerce')) {
-            wp_send_json_error(array('message' => __('Unauthorized', 'open-graph-for-woocommerce')));
+            wp_send_json_error(array('message' => __('Unauthorized', 'woo-open-graph')));
         }
         
         $sitemap_url = home_url('/wog-sitemap.xml');
@@ -684,7 +684,7 @@ class WOG_Admin {
         
         if (is_wp_error($response)) {
             wp_send_json_error(array(
-                'message' => __('Failed to fetch sitemap: ', 'open-graph-for-woocommerce') . $response->get_error_message()
+                'message' => __('Failed to fetch sitemap: ', 'woo-open-graph') . $response->get_error_message()
             ));
         }
         
@@ -693,18 +693,18 @@ class WOG_Admin {
         
         if ($code !== 200) {
             wp_send_json_error(array(
-                'message' => sprintf(__('Sitemap returned HTTP %d', 'open-graph-for-woocommerce'), $code)
+                'message' => sprintf(__('Sitemap returned HTTP %d', 'woo-open-graph'), $code)
             ));
         }
         
         if (strpos($body, '<sitemapindex') === false && strpos($body, '<urlset') === false) {
             wp_send_json_error(array(
-                'message' => __('Invalid sitemap format', 'open-graph-for-woocommerce')
+                'message' => __('Invalid sitemap format', 'woo-open-graph')
             ));
         }
         
         wp_send_json_success(array(
-            'message' => __('Sitemaps are working correctly!', 'open-graph-for-woocommerce')
+            'message' => __('Sitemaps are working correctly!', 'woo-open-graph')
         ));
     }
     

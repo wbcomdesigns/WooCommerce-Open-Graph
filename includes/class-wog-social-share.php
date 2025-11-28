@@ -115,7 +115,7 @@ class WOG_Social_Share {
             }
             ?>
             <div class="wog-share-label">
-                <?php esc_html_e('Share this product:', 'open-graph-for-woocommerce'); ?>
+                <?php esc_html_e('Share this product:', 'woo-open-graph'); ?>
             </div>
             <div class="wog-share-buttons">
                 <?php 
@@ -173,7 +173,7 @@ class WOG_Social_Share {
            data-platform="<?php echo esc_attr($platform); ?>"
            target="_blank"
            rel="noopener noreferrer"
-           aria-label="<?php echo esc_attr(sprintf(__('Share on %s', 'open-graph-for-woocommerce'), $config['name'])); ?>">
+           aria-label="<?php echo esc_attr(sprintf(__('Share on %s', 'woo-open-graph'), $config['name'])); ?>">
             <?php echo $config['icon']; ?>
             <span class="wog-share-text"><?php echo esc_html($config['name']); ?></span>
         </a>
@@ -189,12 +189,12 @@ class WOG_Social_Share {
                 class="wog-share-btn wog-share-copy" 
                 data-url="<?php echo esc_attr($share_data['url']); ?>"
                 data-platform="copy"
-                aria-label="<?php esc_attresc_html_e('Copy product link', 'open-graph-for-woocommerce'); ?>"
-                title="<?php esc_attresc_html_e('Copy link to clipboard', 'open-graph-for-woocommerce'); ?>">
+                aria-label="<?php esc_attresc_html_e('Copy product link', 'woo-open-graph'); ?>"
+                title="<?php esc_attresc_html_e('Copy link to clipboard', 'woo-open-graph'); ?>">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
             </svg>
-            <span class="wog-share-text"><?php esc_html_e('Copy', 'open-graph-for-woocommerce'); ?></span>
+            <span class="wog-share-text"><?php esc_html_e('Copy', 'woo-open-graph'); ?></span>
         </button>
         <?php
     }
@@ -249,14 +249,14 @@ class WOG_Social_Share {
                 return 'https://wa.me/?text=' . rawurlencode($whatsapp_text);
                 
             case 'email':
-                $subject = sprintf(__('Check out: %s', 'open-graph-for-woocommerce'), $clean_title);
+                $subject = sprintf(__('Check out: %s', 'woo-open-graph'), $clean_title);
                 $body_text = $clean_title;
                 
                 if (!empty($clean_description)) {
                     $body_text .= "\n\n" . $clean_description;
                 }
                 
-                $body_text .= "\n\n" . __('View product:', 'open-graph-for-woocommerce') . ' ' . $raw_url;
+                $body_text .= "\n\n" . __('View product:', 'woo-open-graph') . ' ' . $raw_url;
                 
                 return 'mailto:?subject=' . rawurlencode($subject) . '&body=' . rawurlencode($body_text);
                 
@@ -409,9 +409,9 @@ class WOG_Social_Share {
         );
         
         wp_localize_script('wog-social-share', 'wogShare', array(
-            'copied' => __('Link copied!', 'open-graph-for-woocommerce'),
-            'copyFailed' => __('Failed to copy link', 'open-graph-for-woocommerce'),
-            'copyLink' => __('Copy link', 'open-graph-for-woocommerce'),
+            'copied' => __('Link copied!', 'woo-open-graph'),
+            'copyFailed' => __('Failed to copy link', 'woo-open-graph'),
+            'copyLink' => __('Copy link', 'woo-open-graph'),
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('wog_share_nonce'),
             'debug' => defined('WP_DEBUG') && WP_DEBUG
@@ -459,7 +459,7 @@ class WOG_Social_Share {
         }
         
         wp_send_json_success(array(
-            'message' => __('Share tracked successfully', 'open-graph-for-woocommerce')
+            'message' => __('Share tracked successfully', 'woo-open-graph')
         ));
     }
     

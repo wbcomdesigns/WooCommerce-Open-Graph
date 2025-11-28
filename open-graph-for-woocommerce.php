@@ -8,7 +8,7 @@
  * Author URI: https://wbcomdesigns.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: open-graph-for-woocommerce
+ * Text Domain: woo-open-graph
  * Domain Path: /languages
  * Requires at least: 5.0
  * Tested up to: 6.8.1
@@ -171,7 +171,7 @@ class Woo_Open_Graph {
      */
     public function load_textdomain() {
         load_plugin_textdomain(
-            'open-graph-for-woocommerce',
+            'woo-open-graph',
             false,
             dirname(plugin_basename(__FILE__)) . '/languages/'
         );
@@ -193,8 +193,8 @@ class Woo_Open_Graph {
             <p>
                 <?php 
                 echo sprintf(
-                    __('Open Graph for WooCommerce requires WooCommerce to be installed and active. %s', 'open-graph-for-woocommerce'),
-                    '<a href="' . admin_url('plugin-install.php?s=woocommerce&tab=search&type=term') . '">' . __('Install WooCommerce', 'open-graph-for-woocommerce') . '</a>'
+                    __('Open Graph for WooCommerce requires WooCommerce to be installed and active. %s', 'woo-open-graph'),
+                    '<a href="' . admin_url('plugin-install.php?s=woocommerce&tab=search&type=term') . '">' . __('Install WooCommerce', 'woo-open-graph') . '</a>'
                 );
                 ?>
             </p>
@@ -209,8 +209,8 @@ class Woo_Open_Graph {
         if (!$this->is_woocommerce_active()) {
             deactivate_plugins(plugin_basename(__FILE__));
             wp_die(
-                __('Open Graph for WooCommerce requires WooCommerce to be installed and active.', 'open-graph-for-woocommerce'),
-                __('Plugin Activation Error', 'open-graph-for-woocommerce'),
+                __('Open Graph for WooCommerce requires WooCommerce to be installed and active.', 'woo-open-graph'),
+                __('Plugin Activation Error', 'woo-open-graph'),
                 array('back_link' => true)
             );
         }
@@ -415,7 +415,7 @@ class Woo_Open_Graph {
             $data = json_decode(base64_decode($import_data), true);
             
             if (!$data || !isset($data['settings'])) {
-                return new WP_Error('invalid_data', __('Invalid import data', 'open-graph-for-woocommerce'));
+                return new WP_Error('invalid_data', __('Invalid import data', 'woo-open-graph'));
             }
             
             if (class_exists('WOG_Admin')) {

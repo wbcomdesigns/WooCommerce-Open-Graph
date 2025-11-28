@@ -299,11 +299,11 @@ class WOG_Settings {
         $imported_data = json_decode($json_string, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return new WP_Error('invalid_json', __('Invalid JSON format', 'open-graph-for-woocommerce'));
+            return new WP_Error('invalid_json', __('Invalid JSON format', 'woo-open-graph'));
         }
         
         if (!isset($imported_data['settings']) || !is_array($imported_data['settings'])) {
-            return new WP_Error('no_settings', __('No valid settings found in import data', 'open-graph-for-woocommerce'));
+            return new WP_Error('no_settings', __('No valid settings found in import data', 'woo-open-graph'));
         }
         
         // Validate imported settings
@@ -315,7 +315,7 @@ class WOG_Settings {
         }
         
         if (empty($valid_settings)) {
-            return new WP_Error('no_valid_settings', __('No valid settings found in import', 'open-graph-for-woocommerce'));
+            return new WP_Error('no_valid_settings', __('No valid settings found in import', 'woo-open-graph'));
         }
         
         // Sanitize settings before import

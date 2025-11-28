@@ -1,0 +1,577 @@
+# Copyright (C) 2025 Wbcom Designs
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Open Graph for WooCommerce 2.0.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/WooCommerce-Open-Graph\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-11-28T07:17:21+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: woo-open-graph\n"
+
+#. Plugin Name of the plugin
+#: open-graph-for-woocommerce.php
+msgid "Open Graph for WooCommerce"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: open-graph-for-woocommerce.php
+msgid "https://wbcomdesigns.com/downloads/woo-open-graph/"
+msgstr ""
+
+#. Description of the plugin
+#: open-graph-for-woocommerce.php
+msgid "Comprehensive Schema.org markup, Open Graph optimization, and social sharing for WooCommerce. Fill the gaps that free SEO plugins miss."
+msgstr ""
+
+#. Author of the plugin
+#: open-graph-for-woocommerce.php
+msgid "Wbcom Designs"
+msgstr ""
+
+#. Author URI of the plugin
+#: open-graph-for-woocommerce.php
+msgid "https://wbcomdesigns.com"
+msgstr ""
+
+#: admin/class-wog-admin.php:54
+msgid "Woo Open Graph"
+msgstr ""
+
+#: admin/class-wog-admin.php:55
+msgid "Social Media"
+msgstr ""
+
+#: admin/class-wog-admin.php:71
+#: admin/class-wog-admin.php:555
+msgid "Core Features"
+msgstr ""
+
+#: admin/class-wog-admin.php:77
+msgid "Add Schema.org structured data to product pages for better search results"
+msgstr ""
+
+#: admin/class-wog-admin.php:78
+msgid "Generate Facebook Open Graph meta tags for better sharing"
+msgstr ""
+
+#: admin/class-wog-admin.php:79
+msgid "Generate Twitter Card meta tags for better sharing"
+msgstr ""
+
+#: admin/class-wog-admin.php:80
+msgid "Optimize sharing for LinkedIn professional network"
+msgstr ""
+
+#: admin/class-wog-admin.php:81
+msgid "Enable Pinterest Rich Pins with product data"
+msgstr ""
+
+#: admin/class-wog-admin.php:82
+msgid "Optimize sharing for WhatsApp mobile messaging"
+msgstr ""
+
+#: admin/class-wog-admin.php:94
+msgid "Social Sharing Buttons"
+msgstr ""
+
+#: admin/class-wog-admin.php:99
+msgid "Enable Share Buttons"
+msgstr ""
+
+#: admin/class-wog-admin.php:101
+msgid "Add social share buttons to product pages"
+msgstr ""
+
+#: admin/class-wog-admin.php:103
+msgid "Button Style"
+msgstr ""
+
+#: admin/class-wog-admin.php:108
+msgid "Modern"
+msgstr ""
+
+#: admin/class-wog-admin.php:109
+msgid "Classic"
+msgstr ""
+
+#: admin/class-wog-admin.php:110
+msgid "Minimal"
+msgstr ""
+
+#: admin/class-wog-admin.php:112
+msgid "Visual style for share buttons"
+msgstr ""
+
+#: admin/class-wog-admin.php:115
+msgid "Button Position"
+msgstr ""
+
+#: admin/class-wog-admin.php:120
+msgid "After Add to Cart Button"
+msgstr ""
+
+#: admin/class-wog-admin.php:121
+msgid "Before Add to Cart Button"
+msgstr ""
+
+#: admin/class-wog-admin.php:122
+msgid "After Product Summary"
+msgstr ""
+
+#: admin/class-wog-admin.php:123
+msgid "After Product Tabs"
+msgstr ""
+
+#: admin/class-wog-admin.php:125
+msgid "Where to display social share buttons on product pages"
+msgstr ""
+
+#: admin/class-wog-admin.php:131
+#: admin/class-wog-admin.php:588
+msgid "XML Sitemaps"
+msgstr ""
+
+#: admin/class-wog-admin.php:136
+msgid "Enable Product Sitemaps"
+msgstr ""
+
+#: admin/class-wog-admin.php:138
+msgid "Generate XML sitemaps for products and categories"
+msgstr ""
+
+#: admin/class-wog-admin.php:140
+msgid "Products Per Sitemap"
+msgstr ""
+
+#: admin/class-wog-admin.php:145
+msgid "Number of products per sitemap file (recommended: 500)"
+msgstr ""
+
+#: admin/class-wog-admin.php:151
+msgid "Platform Settings"
+msgstr ""
+
+#: admin/class-wog-admin.php:156
+msgid "Facebook App ID"
+msgstr ""
+
+#: admin/class-wog-admin.php:161
+msgid "Optional: Your Facebook App ID for better analytics and insights"
+msgstr ""
+
+#: admin/class-wog-admin.php:164
+msgid "Twitter Username"
+msgstr ""
+
+#: admin/class-wog-admin.php:169
+msgid "Optional: Your Twitter username (without @) for attribution"
+msgstr ""
+
+#: admin/class-wog-admin.php:175
+msgid "Image & Content Settings"
+msgstr ""
+
+#: admin/class-wog-admin.php:180
+msgid "Default Social Image"
+msgstr ""
+
+#: admin/class-wog-admin.php:184
+msgid "Default image when products don't have featured images (recommended: 1200x630px)"
+msgstr ""
+
+#: admin/class-wog-admin.php:187
+msgid "Social Image Size"
+msgstr ""
+
+#: admin/class-wog-admin.php:192
+msgid "Medium (300x300)"
+msgstr ""
+
+#: admin/class-wog-admin.php:193
+msgid "Large (1024x1024)"
+msgstr ""
+
+#: admin/class-wog-admin.php:194
+msgid "Full Size"
+msgstr ""
+
+#: admin/class-wog-admin.php:196
+msgid "Size of product images used for social sharing"
+msgstr ""
+
+#: admin/class-wog-admin.php:202
+msgid "Advanced Settings"
+msgstr ""
+
+#: admin/class-wog-admin.php:208
+msgid "Override titles and descriptions from other SEO plugins (use with caution)"
+msgstr ""
+
+#: admin/class-wog-admin.php:209
+msgid "Include advanced product properties (GTIN, MPN, brand, specifications)"
+msgstr ""
+
+#: admin/class-wog-admin.php:210
+msgid "Add breadcrumb navigation schema markup"
+msgstr ""
+
+#: admin/class-wog-admin.php:211
+msgid "Add organization and store information schema"
+msgstr ""
+
+#: admin/class-wog-admin.php:212
+msgid "Enable debug mode for troubleshooting (adds HTML comments)"
+msgstr ""
+
+#: admin/class-wog-admin.php:230
+msgid "Configure how your WooCommerce products appear when shared on social media platforms. This plugin works alongside your existing SEO plugin to fill any gaps."
+msgstr ""
+
+#: admin/class-wog-admin.php:239
+msgid "Save Settings"
+msgstr ""
+
+#: admin/class-wog-admin.php:247
+msgid "Current Status"
+msgstr ""
+
+#: admin/class-wog-admin.php:256
+msgid "Testing Tools"
+msgstr ""
+
+#: admin/class-wog-admin.php:259
+msgid "Test how your products look when shared:"
+msgstr ""
+
+#: admin/class-wog-admin.php:262
+msgid "Facebook Debugger"
+msgstr ""
+
+#: admin/class-wog-admin.php:266
+msgid "Twitter Validator"
+msgstr ""
+
+#: admin/class-wog-admin.php:270
+msgid "Google Rich Results"
+msgstr ""
+
+#: admin/class-wog-admin.php:274
+msgid "LinkedIn Inspector"
+msgstr ""
+
+#: admin/class-wog-admin.php:281
+msgid "Plugin Information"
+msgstr ""
+
+#: admin/class-wog-admin.php:284
+msgid "Version:"
+msgstr ""
+
+#: admin/class-wog-admin.php:285
+msgid "Compatible with:"
+msgstr ""
+
+#: admin/class-wog-admin.php:286
+msgid "Auto-generates:"
+msgstr ""
+
+#: admin/class-wog-admin.php:286
+msgid "Schema, Open Graph, Twitter Cards"
+msgstr ""
+
+#: admin/class-wog-admin.php:290
+msgid "Important Notes"
+msgstr ""
+
+#: admin/class-wog-admin.php:292
+msgid "Uses product featured images automatically"
+msgstr ""
+
+#: admin/class-wog-admin.php:293
+msgid "Individual products can have custom titles/descriptions"
+msgstr ""
+
+#: admin/class-wog-admin.php:294
+msgid "Works alongside existing SEO plugins"
+msgstr ""
+
+#: admin/class-wog-admin.php:295
+msgid "Uses WordPress built-in caching for performance"
+msgstr ""
+
+#: admin/class-wog-admin.php:307
+msgid "Generating..."
+msgstr ""
+
+#: admin/class-wog-admin.php:328
+#: admin/class-wog-admin.php:538
+msgid "Generate Now"
+msgstr ""
+
+#: admin/class-wog-admin.php:334
+msgid "Testing..."
+msgstr ""
+
+#: admin/class-wog-admin.php:355
+#: admin/class-wog-admin.php:539
+msgid "Test Sitemaps"
+msgstr ""
+
+#: admin/class-wog-admin.php:404
+msgid "Enable the core social media optimization features for your WooCommerce products."
+msgstr ""
+
+#: admin/class-wog-admin.php:408
+msgid "Configure social sharing buttons that appear on your product pages."
+msgstr ""
+
+#: admin/class-wog-admin.php:412
+msgid "Generate XML sitemaps to help search engines discover your products and categories."
+msgstr ""
+
+#: admin/class-wog-admin.php:416
+msgid "Optional platform-specific settings for enhanced integration."
+msgstr ""
+
+#: admin/class-wog-admin.php:420
+msgid "Configure how images and content appear when shared on social media."
+msgstr ""
+
+#: admin/class-wog-admin.php:424
+msgid "Advanced options for power users and specific use cases."
+msgstr ""
+
+#: admin/class-wog-admin.php:501
+msgid "Choose Image"
+msgstr ""
+
+#: admin/class-wog-admin.php:527
+msgid "Last Generated:"
+msgstr ""
+
+#: admin/class-wog-admin.php:530
+msgid "Sitemap URLs:"
+msgstr ""
+
+#: admin/class-wog-admin.php:557
+msgid "Schema Markup"
+msgstr ""
+
+#: admin/class-wog-admin.php:558
+msgid "Facebook"
+msgstr ""
+
+#: admin/class-wog-admin.php:559
+msgid "Twitter"
+msgstr ""
+
+#: admin/class-wog-admin.php:570
+msgid "Additional Platforms"
+msgstr ""
+
+#: admin/class-wog-admin.php:572
+msgid "LinkedIn"
+msgstr ""
+
+#: admin/class-wog-admin.php:573
+msgid "Pinterest"
+msgstr ""
+
+#: admin/class-wog-admin.php:574
+msgid "WhatsApp"
+msgstr ""
+
+#: admin/class-wog-admin.php:585
+msgid "Tools"
+msgstr ""
+
+#: admin/class-wog-admin.php:587
+msgid "Share Buttons"
+msgstr ""
+
+#: admin/class-wog-admin.php:600
+msgid "Performance:"
+msgstr ""
+
+#: admin/class-wog-admin.php:601
+msgid "This plugin uses WordPress built-in caching and works with all cache plugins automatically."
+msgstr ""
+
+#: admin/class-wog-admin.php:611
+msgid "On"
+msgstr ""
+
+#: admin/class-wog-admin.php:611
+msgid "Off"
+msgstr ""
+
+#: admin/class-wog-admin.php:624
+msgid "Settings"
+msgstr ""
+
+#: admin/class-wog-admin.php:654
+#: admin/class-wog-admin.php:679
+msgid "Unauthorized"
+msgstr ""
+
+#: admin/class-wog-admin.php:663
+msgid "Sitemaps generated successfully!"
+msgstr ""
+
+#: admin/class-wog-admin.php:667
+msgid "Sitemap generation not available"
+msgstr ""
+
+#: admin/class-wog-admin.php:687
+msgid "Failed to fetch sitemap: "
+msgstr ""
+
+#: admin/class-wog-admin.php:696
+#, php-format
+msgid "Sitemap returned HTTP %d"
+msgstr ""
+
+#: admin/class-wog-admin.php:702
+msgid "Invalid sitemap format"
+msgstr ""
+
+#: admin/class-wog-admin.php:707
+msgid "Sitemaps are working correctly!"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:43
+msgid "Social Media Settings"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:83
+msgid "Enable social media optimization for this product"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:87
+msgid "Generate optimized previews when this product is shared on Facebook, Twitter, LinkedIn, etc."
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:95
+msgid "Social Media Title"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:105
+msgid "Custom title for social sharing. Leave empty to use product name."
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:115
+msgid "Social Media Description"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:124
+msgid "Custom description for social sharing. Leave empty to use product description."
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:133
+msgid "Social Media Image:"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:135
+msgid "Featured image will be used"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:137
+msgid "No featured image set"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:138
+msgid "Set a featured image to improve social media sharing."
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:219
+msgid "Social"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:236
+msgid "Social media optimization disabled"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:238
+msgid "Custom social media content"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:240
+msgid "Using automatic social media content"
+msgstr ""
+
+#: includes/class-wog-settings.php:302
+msgid "Invalid JSON format"
+msgstr ""
+
+#: includes/class-wog-settings.php:306
+msgid "No valid settings found in import data"
+msgstr ""
+
+#: includes/class-wog-settings.php:318
+msgid "No valid settings found in import"
+msgstr ""
+
+#: includes/class-wog-social-share.php:118
+msgid "Share this product:"
+msgstr ""
+
+#: includes/class-wog-social-share.php:176
+#, php-format
+msgid "Share on %s"
+msgstr ""
+
+#: includes/class-wog-social-share.php:197
+msgid "Copy"
+msgstr ""
+
+#: includes/class-wog-social-share.php:252
+#, php-format
+msgid "Check out: %s"
+msgstr ""
+
+#: includes/class-wog-social-share.php:259
+msgid "View product:"
+msgstr ""
+
+#: includes/class-wog-social-share.php:412
+msgid "Link copied!"
+msgstr ""
+
+#: includes/class-wog-social-share.php:413
+msgid "Failed to copy link"
+msgstr ""
+
+#: includes/class-wog-social-share.php:414
+msgid "Copy link"
+msgstr ""
+
+#: includes/class-wog-social-share.php:462
+msgid "Share tracked successfully"
+msgstr ""
+
+#: open-graph-for-woocommerce.php:196
+#, php-format
+msgid "Open Graph for WooCommerce requires WooCommerce to be installed and active. %s"
+msgstr ""
+
+#: open-graph-for-woocommerce.php:197
+msgid "Install WooCommerce"
+msgstr ""
+
+#: open-graph-for-woocommerce.php:212
+msgid "Open Graph for WooCommerce requires WooCommerce to be installed and active."
+msgstr ""
+
+#: open-graph-for-woocommerce.php:213
+msgid "Plugin Activation Error"
+msgstr ""
+
+#: open-graph-for-woocommerce.php:418
+msgid "Invalid import data"
+msgstr ""

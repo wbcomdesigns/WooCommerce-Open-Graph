@@ -9,7 +9,7 @@ module.exports = function (grunt) {
         // Task for checking text domain
         checktextdomain: {
             options: {
-                text_domain: ['open-graph-for-woocommerce'],
+                text_domain: ['woo-open-graph'],
                 keywords: [
                     '__:1,2d',
                     '_e:1,2d',
@@ -126,7 +126,7 @@ module.exports = function (grunt) {
 
         shell: {
             wpcli: {
-                command: 'wp i18n make-pot . languages/open-graph-for-woocommerce.pot',
+                command: 'wp i18n make-pot . languages/woo-open-graph.pot',
             }
         },
 
@@ -137,7 +137,7 @@ module.exports = function (grunt) {
                     domainPath: '/languages',
                     exclude: ['node_modules/.*'],
                     mainFile: 'open-graph-for-woocommerce.php',
-                    potFilename: 'open-graph-for-woocommerce.pot',
+                    potFilename: 'woo-open-graph.pot',
                     potHeaders: {
                         poedit: true,
                         'x-poedit-keywordslist': true
