@@ -44,7 +44,6 @@ define('WOG_VERSION', '2.0.1');
 define('WOG_PLUGIN_FILE', __FILE__);
 define('WOG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WOG_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('WOG_TEXT_DOMAIN', 'open-graph-for-woocommerce');
 
 /**
  * Main plugin class
@@ -172,7 +171,7 @@ class Woo_Open_Graph {
      */
     public function load_textdomain() {
         load_plugin_textdomain(
-            WOG_TEXT_DOMAIN,
+            'open-graph-for-woocommerce',
             false,
             dirname(plugin_basename(__FILE__)) . '/languages/'
         );
@@ -194,8 +193,8 @@ class Woo_Open_Graph {
             <p>
                 <?php 
                 echo sprintf(
-                    __('Open Graph for WooCommerce requires WooCommerce to be installed and active. %s', WOG_TEXT_DOMAIN),
-                    '<a href="' . admin_url('plugin-install.php?s=woocommerce&tab=search&type=term') . '">' . __('Install WooCommerce', WOG_TEXT_DOMAIN) . '</a>'
+                    __('Open Graph for WooCommerce requires WooCommerce to be installed and active. %s', 'open-graph-for-woocommerce'),
+                    '<a href="' . admin_url('plugin-install.php?s=woocommerce&tab=search&type=term') . '">' . __('Install WooCommerce', 'open-graph-for-woocommerce') . '</a>'
                 );
                 ?>
             </p>
@@ -210,8 +209,8 @@ class Woo_Open_Graph {
         if (!$this->is_woocommerce_active()) {
             deactivate_plugins(plugin_basename(__FILE__));
             wp_die(
-                __('Open Graph for WooCommerce requires WooCommerce to be installed and active.', WOG_TEXT_DOMAIN),
-                __('Plugin Activation Error', WOG_TEXT_DOMAIN),
+                __('Open Graph for WooCommerce requires WooCommerce to be installed and active.', 'open-graph-for-woocommerce'),
+                __('Plugin Activation Error', 'open-graph-for-woocommerce'),
                 array('back_link' => true)
             );
         }
@@ -381,7 +380,7 @@ class Woo_Open_Graph {
             'woocommerce_version' => defined('WC_VERSION') ? WC_VERSION : 'Not installed',
             'php_version' => PHP_VERSION,
             'mysql_version' => $wpdb->db_version(),
-            'server_info' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'server_info' => isset($_SERVER['SERVER_SOFTWARE']) ? sanitize_text_field(wp_unslash($_SERVER['SERVER_SOFTWARE'])) : 'Unknown',
             'memory_limit' => ini_get('memory_limit'),
             'max_execution_time' => ini_get('max_execution_time'),
             'upload_max_filesize' => ini_get('upload_max_filesize'),
@@ -416,7 +415,7 @@ class Woo_Open_Graph {
             $data = json_decode(base64_decode($import_data), true);
             
             if (!$data || !isset($data['settings'])) {
-                return new WP_Error('invalid_data', __('Invalid import data', WOG_TEXT_DOMAIN));
+                return new WP_Error('invalid_data', __('Invalid import data', 'open-graph-for-woocommerce'));
             }
             
             if (class_exists('WOG_Admin')) {

@@ -115,7 +115,7 @@ class WOG_Social_Share {
             }
             ?>
             <div class="wog-share-label">
-                <?php _e('Share this product:', WOG_TEXT_DOMAIN); ?>
+                <?php esc_html_e('Share this product:', 'open-graph-for-woocommerce'); ?>
             </div>
             <div class="wog-share-buttons">
                 <?php 
@@ -173,7 +173,7 @@ class WOG_Social_Share {
            data-platform="<?php echo esc_attr($platform); ?>"
            target="_blank"
            rel="noopener noreferrer"
-           aria-label="<?php echo esc_attr(sprintf(__('Share on %s', WOG_TEXT_DOMAIN), $config['name'])); ?>">
+           aria-label="<?php echo esc_attr(sprintf(__('Share on %s', 'open-graph-for-woocommerce'), $config['name'])); ?>">
             <?php echo $config['icon']; ?>
             <span class="wog-share-text"><?php echo esc_html($config['name']); ?></span>
         </a>
@@ -189,12 +189,12 @@ class WOG_Social_Share {
                 class="wog-share-btn wog-share-copy" 
                 data-url="<?php echo esc_attr($share_data['url']); ?>"
                 data-platform="copy"
-                aria-label="<?php esc_attr_e('Copy product link', WOG_TEXT_DOMAIN); ?>"
-                title="<?php esc_attr_e('Copy link to clipboard', WOG_TEXT_DOMAIN); ?>">
+                aria-label="<?php esc_attresc_html_e('Copy product link', 'open-graph-for-woocommerce'); ?>"
+                title="<?php esc_attresc_html_e('Copy link to clipboard', 'open-graph-for-woocommerce'); ?>">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
             </svg>
-            <span class="wog-share-text"><?php _e('Copy', WOG_TEXT_DOMAIN); ?></span>
+            <span class="wog-share-text"><?php esc_html_e('Copy', 'open-graph-for-woocommerce'); ?></span>
         </button>
         <?php
     }
@@ -249,14 +249,14 @@ class WOG_Social_Share {
                 return 'https://wa.me/?text=' . rawurlencode($whatsapp_text);
                 
             case 'email':
-                $subject = sprintf(__('Check out: %s', WOG_TEXT_DOMAIN), $clean_title);
+                $subject = sprintf(__('Check out: %s', 'open-graph-for-woocommerce'), $clean_title);
                 $body_text = $clean_title;
                 
                 if (!empty($clean_description)) {
                     $body_text .= "\n\n" . $clean_description;
                 }
                 
-                $body_text .= "\n\n" . __('View product:', WOG_TEXT_DOMAIN) . ' ' . $raw_url;
+                $body_text .= "\n\n" . __('View product:', 'open-graph-for-woocommerce') . ' ' . $raw_url;
                 
                 return 'mailto:?subject=' . rawurlencode($subject) . '&body=' . rawurlencode($body_text);
                 
@@ -409,9 +409,9 @@ class WOG_Social_Share {
         );
         
         wp_localize_script('wog-social-share', 'wogShare', array(
-            'copied' => __('Link copied!', WOG_TEXT_DOMAIN),
-            'copyFailed' => __('Failed to copy link', WOG_TEXT_DOMAIN),
-            'copyLink' => __('Copy link', WOG_TEXT_DOMAIN),
+            'copied' => __('Link copied!', 'open-graph-for-woocommerce'),
+            'copyFailed' => __('Failed to copy link', 'open-graph-for-woocommerce'),
+            'copyLink' => __('Copy link', 'open-graph-for-woocommerce'),
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('wog_share_nonce'),
             'debug' => defined('WP_DEBUG') && WP_DEBUG
@@ -445,10 +445,10 @@ class WOG_Social_Share {
      */
     public function ajax_track_share() {
         check_ajax_referer('wog_share_nonce', 'nonce');
-        
-        $platform = sanitize_text_field($_POST['platform'] ?? '');
+
+        $platform = sanitize_text_field(wp_unslash($_POST['platform'] ?? ''));
         $product_id = intval($_POST['product_id'] ?? 0);
-        $url = esc_url_raw($_POST['url'] ?? '');
+        $url = esc_url_raw(wp_unslash($_POST['url'] ?? ''));
         
         if ($platform && $product_id) {
             do_action('wog_social_share_tracked', $platform, $product_id, $url);
@@ -459,7 +459,7 @@ class WOG_Social_Share {
         }
         
         wp_send_json_success(array(
-            'message' => __('Share tracked successfully', WOG_TEXT_DOMAIN)
+            'message' => __('Share tracked successfully', 'open-graph-for-woocommerce')
         ));
     }
     

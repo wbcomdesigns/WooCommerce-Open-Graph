@@ -40,7 +40,7 @@ class WOG_Meta_Boxes {
     public function add_product_meta_boxes() {
         add_meta_box(
             'wog_social_settings',
-            __('Social Media Settings', 'woo-open-graph'),
+            __('Social Media Settings', 'open-graph-for-woocommerce'),
             array($this, 'render_social_meta_box'),
             'product',
             'normal',
@@ -80,11 +80,11 @@ class WOG_Meta_Boxes {
                            name="wog_enable_og" 
                            value="1" 
                            <?php checked(!$disable_og, true); ?> />
-                    <strong><?php _e('Enable social media optimization for this product', 'woo-open-graph'); ?></strong>
+                    <strong><?php esc_html_e('Enable social media optimization for this product', 'open-graph-for-woocommerce'); ?></strong>
                 </label>
                 <br>
                 <span class="description">
-                    <?php _e('Generate optimized previews when this product is shared on Facebook, Twitter, LinkedIn, etc.', 'woo-open-graph'); ?>
+                    <?php esc_html_e('Generate optimized previews when this product is shared on Facebook, Twitter, LinkedIn, etc.', 'open-graph-for-woocommerce'); ?>
                 </span>
             </p>
             
@@ -92,7 +92,7 @@ class WOG_Meta_Boxes {
                 <!-- Title Field -->
                 <p>
                     <label for="wog_og_title">
-                        <strong><?php _e('Social Media Title', 'woo-open-graph'); ?></strong>
+                        <strong><?php esc_html_e('Social Media Title', 'open-graph-for-woocommerce'); ?></strong>
                     </label>
                     <input type="text" 
                            id="wog_og_title" 
@@ -102,7 +102,7 @@ class WOG_Meta_Boxes {
                            placeholder="<?php echo esc_attr($default_title); ?>"
                            maxlength="60" />
                     <span class="description">
-                        <?php _e('Custom title for social sharing. Leave empty to use product name.', 'woo-open-graph'); ?>
+                        <?php esc_html_e('Custom title for social sharing. Leave empty to use product name.', 'open-graph-for-woocommerce'); ?>
                         <span class="wog-counter" data-current="<?php echo strlen($og_title); ?>" data-max="60">
                             (<?php echo strlen($og_title); ?>/60)
                         </span>
@@ -112,7 +112,7 @@ class WOG_Meta_Boxes {
                 <!-- Description Field -->
                 <p>
                     <label for="wog_og_description">
-                        <strong><?php _e('Social Media Description', 'woo-open-graph'); ?></strong>
+                        <strong><?php esc_html_e('Social Media Description', 'open-graph-for-woocommerce'); ?></strong>
                     </label>
                     <textarea id="wog_og_description" 
                               name="wog_og_description" 
@@ -121,7 +121,7 @@ class WOG_Meta_Boxes {
                               placeholder="<?php echo esc_attr($default_description); ?>"
                               maxlength="155"><?php echo esc_textarea($og_description); ?></textarea>
                     <span class="description">
-                        <?php _e('Custom description for social sharing. Leave empty to use product description.', 'woo-open-graph'); ?>
+                        <?php esc_html_e('Custom description for social sharing. Leave empty to use product description.', 'open-graph-for-woocommerce'); ?>
                         <span class="wog-counter" data-current="<?php echo strlen($og_description); ?>" data-max="155">
                             (<?php echo strlen($og_description); ?>/155)
                         </span>
@@ -130,12 +130,12 @@ class WOG_Meta_Boxes {
                 
                 <!-- Image Info -->
                 <p class="wog-image-info">
-                    <strong><?php _e('Social Media Image:', 'woo-open-graph'); ?></strong>
+                    <strong><?php esc_html_e('Social Media Image:', 'open-graph-for-woocommerce'); ?></strong>
                     <?php if ($product && $product->get_image_id()): ?>
-                        <span style="color: #00a32a;">✓ <?php _e('Featured image will be used', 'woo-open-graph'); ?></span>
+                        <span style="color: #00a32a;">✓ <?php esc_html_e('Featured image will be used', 'open-graph-for-woocommerce'); ?></span>
                     <?php else: ?>
-                        <span style="color: #d63638;">⚠ <?php _e('No featured image set', 'woo-open-graph'); ?></span>
-                        <br><span class="description"><?php _e('Set a featured image to improve social media sharing.', 'woo-open-graph'); ?></span>
+                        <span style="color: #d63638;">⚠ <?php esc_html_e('No featured image set', 'open-graph-for-woocommerce'); ?></span>
+                        <br><span class="description"><?php esc_html_e('Set a featured image to improve social media sharing.', 'open-graph-for-woocommerce'); ?></span>
                     <?php endif; ?>
                 </p>
             </div>
@@ -216,7 +216,7 @@ class WOG_Meta_Boxes {
             $new_columns[$key] = $value;
             
             if ($key === 'name') {
-                $new_columns['wog_status'] = __('Social', 'woo-open-graph');
+                $new_columns['wog_status'] = __('Social', 'open-graph-for-woocommerce');
             }
         }
         
@@ -233,11 +233,11 @@ class WOG_Meta_Boxes {
             $custom_description = get_post_meta($post_id, '_wog_og_description', true);
             
             if ($disable_og) {
-                echo '<span style="color: #d63638;" title="' . esc_attr__('Social media optimization disabled', 'woo-open-graph') . '">●</span>';
+                echo '<span style="color: #d63638;" title="' . esc_attr__('Social media optimization disabled', 'open-graph-for-woocommerce') . '">●</span>';
             } elseif ($custom_title || $custom_description) {
-                echo '<span style="color: #dba617;" title="' . esc_attr__('Custom social media content', 'woo-open-graph') . '">●</span>';
+                echo '<span style="color: #dba617;" title="' . esc_attr__('Custom social media content', 'open-graph-for-woocommerce') . '">●</span>';
             } else {
-                echo '<span style="color: #00a32a;" title="' . esc_attr__('Using automatic social media content', 'woo-open-graph') . '">●</span>';
+                echo '<span style="color: #00a32a;" title="' . esc_attr__('Using automatic social media content', 'open-graph-for-woocommerce') . '">●</span>';
             }
         }
     }
@@ -247,8 +247,8 @@ class WOG_Meta_Boxes {
      */
     public function save_product_meta_boxes($post_id) {
         // Security checks
-        if (!isset($_POST['wog_meta_box_nonce']) || 
-            !wp_verify_nonce($_POST['wog_meta_box_nonce'], 'wog_product_meta_box')) {
+        if (!isset($_POST['wog_meta_box_nonce']) ||
+            !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['wog_meta_box_nonce'])), 'wog_product_meta_box')) {
             return;
         }
         
@@ -276,9 +276,9 @@ class WOG_Meta_Boxes {
                 // Inverted checkbox: save as 1 if NOT checked (disable_og), empty if checked (enabled)
                 $value = empty($_POST[$field]) ? '1' : '';
             } elseif ($field === 'wog_og_description') {
-                $value = sanitize_textarea_field($_POST[$field] ?? '');
+                $value = sanitize_textarea_field(wp_unslash($_POST[$field] ?? ''));
             } else {
-                $value = sanitize_text_field($_POST[$field] ?? '');
+                $value = sanitize_text_field(wp_unslash($_POST[$field] ?? ''));
             }
             
             if (empty($value)) {
