@@ -1,0 +1,671 @@
+/**
+ * Enhanced Woo Open Graph - Improved Admin Styles
+ * Clean WordPress-native design, no dark mode, better UX
+ */
+
+/* Remove all dark mode and reset */
+.wog-admin-wrap,
+.wog-admin-wrap * {
+    color: inherit !important;
+    background: inherit !important;
+    border-color: inherit !important;
+}
+
+/* Base Admin Wrapper */
+.wog-admin-wrap {
+    max-width: 1200px;
+    margin: 20px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Tab Navigation - WordPress Native Style */
+.wog-tab-content {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 20px;
+    margin-top: 0;
+}
+
+.nav-tab {
+    font-weight: 500;
+}
+
+.nav-tab .dashicons {
+    margin-left: 5px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Grid System */
+.wog-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.wog-col-4 {
+    flex: 0 0 33.333%;
+}
+
+.wog-col-6 {
+    flex: 0 0 50%;
+}
+
+.wog-col-8 {
+    flex: 0 0 66.666%;
+}
+
+@media (max-width: 768px) {
+    .wog-row {
+        flex-direction: column;
+    }
+    
+    .wog-col-4,
+    .wog-col-6,
+    .wog-col-8 {
+        flex: 1;
+    }
+}
+
+/* Card Components */
+.wog-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.wog-card-header {
+    background: #f6f7f7;
+    border-bottom: 1px solid #c3c4c7;
+    padding: 15px 20px;
+}
+
+.wog-card-header h2,
+.wog-card-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d2327;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wog-card-header .dashicons {
+    color: #646970;
+}
+
+.wog-card-body {
+    padding: 20px;
+}
+
+/* Status Grid */
+.wog-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.wog-status-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    border-radius: 4px;
+    border: 1px solid #dcdcde;
+    background: #f9f9f9;
+}
+
+.wog-status-item.active {
+    border-color: #00a32a;
+    background: #f0f8f0;
+}
+
+.wog-status-item.inactive {
+    border-color: #d63638;
+    background: #fef7f7;
+}
+
+.wog-status-item .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.wog-status-item.active .dashicons {
+    color: #00a32a;
+}
+
+.wog-status-item.inactive .dashicons {
+    color: #d63638;
+}
+
+.wog-status-label {
+    flex: 1;
+    font-weight: 500;
+    color: #1d2327;
+}
+
+.wog-status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wog-status-item.active .wog-status-badge {
+    background: #00a32a;
+    color: #fff;
+}
+
+.wog-status-item.inactive .wog-status-badge {
+    background: #d63638;
+    color: #fff;
+}
+
+/* Action Lists and Buttons */
+.wog-actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.wog-btn-block {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: right;
+}
+
+.wog-btn-block .dashicons {
+    margin-left: 8px;
+}
+
+/* Platform Badges */
+.wog-platform-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.wog-platform-badge {
+    background: #2271b1;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.wog-no-platforms {
+    color: #646970;
+    font-style: italic;
+}
+
+/* Quick Toggles */
+.wog-quick-toggles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.wog-quick-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    background: #f9f9f9;
+}
+
+.wog-quick-toggle.active {
+    border-color: #00a32a;
+    background: #f0f8f0;
+}
+
+.wog-quick-toggle strong {
+    color: #1d2327;
+    font-size: 14px;
+}
+
+.wog-toggle-btn {
+    font-size: 12px;
+    padding: 4px 8px;
+    min-height: auto;
+}
+
+/* Toggle Fields */
+.wog-toggle-wrapper {
+    margin-bottom: 20px;
+}
+
+.wog-toggle-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.wog-toggle-label:hover {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.wog-toggle-input {
+    margin: 0 !important;
+    position: relative;
+    top: 2px;
+}
+
+.wog-toggle-slider {
+    display: none; /* We'll use native checkbox for simplicity */
+}
+
+.wog-toggle-content {
+    flex: 1;
+}
+
+.wog-toggle-content strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #1d2327;
+    font-size: 14px;
+}
+
+.wog-toggle-content small {
+    color: #646970;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Platform Grid */
+.wog-platforms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.wog-platform-card {
+    border: 2px solid #dcdcde;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+    overflow: hidden;
+}
+
+.wog-platform-card:hover {
+    border-color: #2271b1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.wog-platform-card.active {
+    border-color: #00a32a;
+    background: #f0f8f0;
+}
+
+.wog-platform-label {
+    display: block;
+    padding: 15px;
+    cursor: pointer;
+    text-align: center;
+    margin: 0;
+}
+
+.wog-platform-icon {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.wog-platform-label strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #1d2327;
+    font-size: 14px;
+}
+
+.wog-platform-label small {
+    color: #646970;
+    font-size: 12px;
+}
+
+/* Advanced Options */
+.wog-advanced-options {
+    margin-top: 20px;
+}
+
+.wog-collapsible {
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.wog-collapsible-header {
+    background: #f6f7f7;
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d2327;
+    list-style: none;
+}
+
+.wog-collapsible-header::-webkit-details-marker {
+    display: none;
+}
+
+.wog-collapsible-header .dashicons {
+    transition: transform 0.2s ease;
+}
+
+.wog-collapsible[open] .wog-collapsible-header .dashicons {
+    transform: rotate(-90deg);
+}
+
+.wog-collapsible-content {
+    padding: 20px;
+    border-top: 1px solid #dcdcde;
+}
+
+/* Tools Section */
+.wog-tool-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.wog-test-results {
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 15px;
+    min-height: 50px;
+}
+
+.wog-test-results:empty::before {
+    content: "Test results will appear here...";
+    color: #646970;
+    font-style: italic;
+}
+
+/* Sitemap Tools */
+.wog-sitemap-status {
+    line-height: 1.6;
+}
+
+.wog-sitemap-actions {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
+
+.wog-sitemap-links {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #dcdcde;
+}
+
+.wog-sitemap-links ul {
+    margin: 10px 0;
+    padding-right: 20px;
+}
+
+.wog-sitemap-links code {
+    background: #f0f0f1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: Consolas, Monaco, monospace;
+}
+
+/* Form Elements */
+.wog-settings-form .button-large {
+    padding: 8px 30px;
+    font-size: 14px;
+    height: auto;
+}
+
+.wog-settings-form .form-table th {
+    font-weight: 600;
+    color: #1d2327;
+    width: 200px;
+}
+
+.wog-settings-form .form-table td {
+    padding: 15px 10px;
+}
+
+/* Loading States */
+.wog-loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.wog-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px -8px 0 0;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #2271b1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+}
+
+/* WordPress Notices Integration */
+.wog-admin-wrap .notice {
+    margin: 15px 0;
+    border-right-width: 4px;
+}
+
+.wog-admin-wrap .notice p {
+    margin: 0.5em 0;
+    padding: 2px;
+}
+
+/* Success/Error Messages */
+.wog-message {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border-right: 4px solid;
+}
+
+.wog-message.success {
+    background: #f0f8f0;
+    border-right-color: #00a32a;
+    color: #1e4620;
+}
+
+.wog-message.error {
+    background: #fef7f7;
+    border-right-color: #d63638;
+    color: #3c1618;
+}
+
+.wog-message.warning {
+    background: #fcf9e8;
+    border-right-color: #dba617;
+    color: #674a00;
+}
+
+.wog-message.info {
+    background: #f0f6fc;
+    border-right-color: #2271b1;
+    color: #1e2e3c;
+}
+
+/* Responsive Design */
+@media (max-width: 782px) {
+    .wog-admin-wrap {
+        margin: 10px;
+    }
+    
+    .wog-card-header,
+    .wog-card-body {
+        padding: 15px;
+    }
+    
+    .wog-status-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wog-platforms-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wog-quick-toggles {
+        grid-template-columns: 1fr;
+    }
+    
+    .wog-tool-buttons {
+        flex-direction: column;
+    }
+    
+    .wog-sitemap-actions {
+        flex-direction: column;
+    }
+    
+    .wog-toggle-label {
+        padding: 12px;
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .wog-card,
+    .wog-toggle-label,
+    .wog-platform-card {
+        border-width: 2px;
+    }
+    
+    .wog-status-item {
+        border-width: 2px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .wog-toggle-label,
+    .wog-platform-card,
+    .wog-collapsible-header .dashicons {
+        transition: none;
+    }
+    
+    .wog-loading::after {
+        animation: none;
+        border: 2px solid #2271b1;
+    }
+}
+
+/* Focus Styles for Accessibility */
+.wog-toggle-label:focus-within,
+.wog-platform-card:focus-within,
+.wog-collapsible-header:focus {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .wog-actions-list,
+    .wog-tool-buttons,
+    .wog-sitemap-actions,
+    .wog-quick-toggles .wog-toggle-btn {
+        display: none;
+    }
+    
+    .wog-card {
+        border: 1px solid #000;
+        break-inside: avoid;
+        margin-bottom: 20px;
+    }
+    
+    .wog-tab-content {
+        border: none;
+    }
+}
+
+/* Override any existing dark mode styles */
+.wog-admin-wrap .wog-admin-header {
+    background: #f6f7f7 !important;
+    color: #1d2327 !important;
+    border: 1px solid #c3c4c7 !important;
+}
+
+.wog-admin-wrap .wog-sidebar-box {
+    background: #fff !important;
+    color: #1d2327 !important;
+    border: 1px solid #c3c4c7 !important;
+}
+
+/* Ensure all text is readable */
+.wog-admin-wrap h1,
+.wog-admin-wrap h2,
+.wog-admin-wrap h3,
+.wog-admin-wrap p,
+.wog-admin-wrap label,
+.wog-admin-wrap span {
+    color: #1d2327 !important;
+}
+
+.wog-admin-wrap .description {
+    color: #646970 !important;
+}
+
+/* Clean button styles */
+.wog-admin-wrap .button {
+    background: #f6f7f7 !important;
+    border-color: #dcdcde !important;
+    color: #2c3338 !important;
+}
+
+.wog-admin-wrap .button-primary {
+    background: #2271b1 !important;
+    border-color: #2271b1 !important;
+    color: #fff !important;
+}
+
+.wog-admin-wrap .button:hover {
+    background: #f0f0f1 !important;
+    border-color: #8c8f94 !important;
+    color: #2c3338 !important;
+}
+
+.wog-admin-wrap .button-primary:hover {
+    background: #135e96 !important;
+    border-color: #135e96 !important;
+}
+/*# sourceMappingURL=woo-open-graph-admin.rtl.css.map */

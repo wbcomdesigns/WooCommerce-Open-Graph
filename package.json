@@ -1,0 +1,33 @@
+{
+  "name": "open-graph-for-woocommerce",
+  "version": "2.0.1",
+  "url": "https://github.com/wbcomdesigns/WooCommerce-Open-Graph",
+  "license": "GPL-2.0+",
+  "description": "Open Graph meta tags and social sharing for WooCommerce",
+  "devDependencies": {
+    "grunt": "^1.3.0",
+    "grunt-checktextdomain": "^1.0.1",
+    "grunt-contrib-clean": "^2.0.1",
+    "grunt-contrib-compress": "^2.0.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-cssmin": "^5.0.0",
+    "grunt-contrib-uglify": "^5.2.2",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-rtlcss": "^2.0.2",
+    "grunt-shell": "^4.0.0",
+    "grunt-wp-i18n": "^1.0.3",
+    "load-grunt-tasks": "^3.5.2"
+  },
+  "engines": {
+    "node": "16.4.0",
+    "npm": "7.24.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wbcomdesigns/WooCommerce-Open-Graph"
+  },
+  "dependencies": {
+    "grunt-checktextdomain": "^1.0.1",
+    "load-grunt-tasks": "^3.5.2"
+  }
+}

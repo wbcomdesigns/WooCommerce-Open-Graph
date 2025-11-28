@@ -1,0 +1,364 @@
+/**
+ * Enhanced Woo Open Graph - Social Share Styles
+ * Clean, modern design with multiple style options
+ * 
+ * @package Enhanced_Woo_Open_Graph
+ * @version 2.0.0
+ */
+
+/* === BASE STYLES === */
+.wog-social-share {
+    margin: 20px 0;
+    padding: 15px 0;
+    border-top: 1px solid #e1e8ed;
+    clear: both;
+}
+
+.wog-share-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wog-share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+/* === BASE BUTTON STYLES === */
+.wog-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    line-height: 1.2;
+}
+
+.wog-share-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.wog-share-btn:active {
+    transform: translateY(0);
+}
+
+.wog-share-btn svg {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.wog-share-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.wog-share-text {
+    white-space: nowrap;
+}
+
+/* === MODERN STYLE (DEFAULT) === */
+.wog-style-modern .wog-share-btn {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.wog-style-modern .wog-share-btn:hover {
+    background: #fff;
+    border-color: #adb5bd;
+}
+
+/* Platform-specific hover colors for modern style */
+.wog-style-modern .wog-share-facebook:hover {
+    background: #1877f2;
+    color: white;
+    border-color: #1877f2;
+}
+
+.wog-style-modern .wog-share-twitter:hover {
+    background: #1da1f2;
+    color: white;
+    border-color: #1da1f2;
+}
+
+.wog-style-modern .wog-share-linkedin:hover {
+    background: #0077b5;
+    color: white;
+    border-color: #0077b5;
+}
+
+.wog-style-modern .wog-share-pinterest:hover {
+    background: #bd081c;
+    color: white;
+    border-color: #bd081c;
+}
+
+.wog-style-modern .wog-share-whatsapp:hover {
+    background: #25d366;
+    color: white;
+    border-color: #25d366;
+}
+
+.wog-style-modern .wog-share-email:hover {
+    background: #6c757d;
+    color: white;
+    border-color: #6c757d;
+}
+
+.wog-style-modern .wog-share-copy:hover {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+/* === CLASSIC STYLE === */
+.wog-style-classic .wog-share-btn {
+    border-radius: 0;
+    padding: 10px 16px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wog-style-classic .wog-share-facebook {
+    background: #1877f2;
+    color: white;
+}
+
+.wog-style-classic .wog-share-twitter {
+    background: #1da1f2;
+    color: white;
+}
+
+.wog-style-classic .wog-share-linkedin {
+    background: #0077b5;
+    color: white;
+}
+
+.wog-style-classic .wog-share-pinterest {
+    background: #bd081c;
+    color: white;
+}
+
+.wog-style-classic .wog-share-whatsapp {
+    background: #25d366;
+    color: white;
+}
+
+.wog-style-classic .wog-share-email {
+    background: #6c757d;
+    color: white;
+}
+
+.wog-style-classic .wog-share-copy {
+    background: #28a745;
+    color: white;
+}
+
+.wog-style-classic .wog-share-btn:hover {
+    opacity: 0.9;
+    transform: none;
+    box-shadow: none;
+}
+
+/* === MINIMAL STYLE === */
+.wog-style-minimal .wog-share-btn {
+    background: transparent;
+    color: #6c757d;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+}
+
+.wog-style-minimal .wog-share-text {
+    display: none;
+}
+
+.wog-style-minimal .wog-share-btn:hover {
+    background: #f8f9fa;
+    color: #495057;
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* === COPY BUTTON STATES === */
+.wog-share-copy.copied {
+    background: #28a745 !important;
+    color: white !important;
+    border-color: #28a745 !important;
+}
+
+.wog-share-copy.copied::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    font-size: 16px;
+    animation: checkmark 0.3s ease;
+}
+
+@keyframes checkmark {
+    0% {
+        opacity: 0;
+        transform: translate(50%, -50%) scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(50%, -50%) scale(1);
+    }
+}
+
+/* === LOADING STATES === */
+.wog-share-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.wog-share-btn.loading svg {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+    .wog-share-buttons {
+        justify-content: center;
+    }
+    
+    .wog-style-modern .wog-share-btn,
+    .wog-style-classic .wog-share-btn {
+        flex: 1;
+        justify-content: center;
+        min-width: 0;
+        max-width: calc(50% - 4px);
+    }
+    
+    .wog-style-minimal .wog-share-btn {
+        flex: none;
+    }
+    
+    .wog-share-text {
+        display: none;
+    }
+    
+    .wog-style-minimal .wog-share-text {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .wog-social-share {
+        margin: 15px 0;
+        padding: 10px 0;
+    }
+    
+    .wog-share-buttons {
+        gap: 6px;
+    }
+    
+    .wog-share-btn {
+        padding: 8px;
+        font-size: 12px;
+    }
+    
+    .wog-style-modern .wog-share-btn,
+    .wog-style-classic .wog-share-btn {
+        max-width: calc(33.333% - 4px);
+    }
+    
+    .wog-style-minimal .wog-share-btn {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* === ACCESSIBILITY === */
+.wog-share-btn:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+.wog-share-btn:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .wog-share-btn {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .wog-share-btn,
+    .wog-share-btn svg {
+        transition: none;
+    }
+    
+    .wog-share-btn.loading svg {
+        animation: none;
+    }
+}
+
+/* === DARK MODE SUPPORT === */
+@media (prefers-color-scheme: dark) {
+    .wog-social-share {
+        border-top-color: #333;
+    }
+    
+    .wog-share-label {
+        color: #e1e8ed;
+    }
+    
+    .wog-style-modern .wog-share-btn {
+        background: #2c3e50;
+        color: #ecf0f1;
+        border-color: #34495e;
+    }
+    
+    .wog-style-modern .wog-share-btn:hover {
+        background: #34495e;
+        border-color: #4a5f7a;
+    }
+    
+    .wog-style-minimal .wog-share-btn {
+        color: #bdc3c7;
+    }
+    
+    .wog-style-minimal .wog-share-btn:hover {
+        background: #34495e;
+        color: #ecf0f1;
+    }
+}
+
+/* === PRINT STYLES === */
+@media print {
+    .wog-social-share {
+        display: none;
+    }
+}
+/*# sourceMappingURL=social-share.rtl.css.map */
