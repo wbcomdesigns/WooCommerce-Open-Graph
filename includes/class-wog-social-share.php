@@ -189,8 +189,8 @@ class WOG_Social_Share {
                 class="wog-share-btn wog-share-copy" 
                 data-url="<?php echo esc_attr($share_data['url']); ?>"
                 data-platform="copy"
-                aria-label="<?php esc_attresc_html_e('Copy product link', 'woo-open-graph'); ?>"
-                title="<?php esc_attresc_html_e('Copy link to clipboard', 'woo-open-graph'); ?>">
+                aria-label="<?php esc_attr_e('Copy product link', 'woo-open-graph'); ?>"
+                title="<?php esc_attr_e('Copy link to clipboard', 'woo-open-graph'); ?>">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
             </svg>
