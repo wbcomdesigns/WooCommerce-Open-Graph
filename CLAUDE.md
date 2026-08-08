@@ -41,7 +41,7 @@ Two places, deliberately, and they reconcile:
 |---|---|
 | **Basecamp board** | [Open Graph for WooCommerce](https://3.basecamp.com/5798509/projects/48433311) |
 | **Cards to work** | **12** — 4 in Bugs, 8 in Scope |
-| **Checklist below** | **41** items on branch `2.0.2` |
+| **Checklist below** | **52** items on branch `2.0.2` |
 
 **Why the two numbers differ.** A card is the trackable unit a person picks up; a checklist item is one verifiable step inside it. The portfolio-floor items in particular repeat across all 12 plugins — four suite-wide faults, counted once per plugin here.
 
@@ -145,6 +145,48 @@ alone resolves to nothing on BuddyX.
 - [ ] **Verify on Reign and BuddyX separately** - they resolve through different tokens, so passing on one proves nothing about the other. Change the theme accent, reload, confirm our output moved.
 - [ ] **Toggle dark mode with the theme's own control**, never by hand-adding a class. If the theme chrome stays light while our panel darkens, you are in an artificial state - stop and use the real toggle.
 - [ ] **Check a third-party theme** (Storefront or a block theme). Most customers run neither of ours; the preset and literal fallbacks are what they get and must look deliberate.
+
+### Admin side of the token bridge
+
+The frontend bridges to the theme. **wp-admin has no theme tokens** — it has its own colour scheme, chosen by each user in their
+profile. Same component vocabulary, different source, so components are written once and work in both contexts.
+
+```css
+.wog-admin {
+    /* WordPress exposes these from the user's admin colour scheme.
+       They are defined in block-library CSS, so always supply the fallback. */
+    --wog-accent:        var(--wp-admin-theme-color, #2271b1);
+    --wog-accent-strong: var(--wp-admin-theme-color-darker-10, #135e96);
+
+    --wog-bg:      #ffffff;
+    --wog-surface: #f6f7f7;
+    --wog-text:    #1d2327;
+    --wog-muted:   #646970;
+    --wog-border:  #dcdcde;
+}
+```
+
+- [ ] **One vocabulary, two bridges.** `--wog-accent`, `-bg`, `-surface`, `-text`, `-muted`, `-border` mean the same thing in both contexts; only the source differs. A component that reads them works on the front end and in wp-admin without a second implementation.
+- [ ] **Admin accent follows the user's colour scheme** via `--wp-admin-theme-color`. Always pass the fallback — the variable is defined in block-library CSS and is not guaranteed present on a plain settings screen.
+- [ ] **Do not reuse frontend theme tokens in admin.** `--bx-color-*` and `--reign-*` do not exist in wp-admin; referencing them there silently falls through to the literal, so the screen stops following the admin scheme.
+- [ ] **Verify by switching admin colour scheme** (Users → Profile) and confirming the panel follows. The reference implementation does not do this — it hardcodes 33 hex values — so do not copy its palette, only its structure.
+
+### No admin-ajax — REST or server-rendered
+
+**Decision (2026-08-08): no `admin-ajax.php` anywhere.** Every call boots the whole WordPress admin stack before doing any work,
+often just to read a row. REST skips that, is cacheable, is introspectable, and is the same surface a mobile or headless client
+would use later.
+
+**Where this plugin stands: 4 `admin-ajax` references, zero REST routes.** Suite-wide it is 137 references and 0 REST routes
+across 12 plugins. Notable here: `wog_track_share` (public, nopriv).
+
+- [ ] **Server-render first.** If the data is known at page render, emit it in the markup and delete the round trip entirely. Fastest option, and available more often than it looks.
+- [ ] **Only genuinely async work becomes a REST route**, with a real `permission_callback` and a schema. Never `__return_true`.
+- [ ] **Public routes are registered deliberately** for logged-out visitors, with their own nonce — never the admin one.
+- [ ] **Do not port a broken guard.** Handlers in this suite use `if ( isset( $_POST['nonce'] ) && ! wp_verify_nonce(...) )`, which is skipped entirely when the nonce is omitted. A REST `permission_callback` fails closed by default — keep it that way.
+- [ ] **Migrate, do not double-register.** Leaving the old `wp_ajax_` action alive "for compatibility" keeps the vulnerable path alive.
+- [ ] **Nonce is not authorisation.** Every route needs a capability check, plus an ownership check where it touches a record.
+- [ ] **Done when** `grep` for `admin-ajax` and `ajaxurl` returns nothing in this plugin.
 
 ### Rebuild the admin panel to the standard shell
 
