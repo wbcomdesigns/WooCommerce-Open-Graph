@@ -33,6 +33,20 @@ Every surface this product is known by. When these drift, a site owner reports a
 
 **Repo name does not match the install slug.** The repo is `WooCommerce-Open-Graph` (CamelCase) but the plugin installs as `open-graph-for-woocommerce`. Build and deploy scripts must use the install slug, never the repo name.
 
+## Where the work is tracked
+
+Two places, deliberately, and they reconcile:
+
+| | |
+|---|---|
+| **Basecamp board** | [Open Graph for WooCommerce](https://3.basecamp.com/5798509/projects/48433311) |
+| **Cards to work** | **11** — 5 in Bugs, 6 in Scope |
+| **Checklist below** | **25** items on branch `2.0.2` |
+
+**Why the two numbers differ.** A card is the trackable unit a person picks up; a checklist item is one verifiable step inside it. The portfolio-floor items in particular repeat across all 11 plugins — four suite-wide faults, counted once per plugin here.
+
+**To verify progress:** the card is done when every checklist item it names is ticked in this file, on this branch. Neither source is authoritative alone — the board says what is being worked, this file says what "done" means.
+
 ## Current Task List
 
 Ordered by how many store owners are affected, not by how interesting the code is.
