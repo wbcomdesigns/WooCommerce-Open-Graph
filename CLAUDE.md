@@ -15,6 +15,24 @@
 - **Pro Version:** none (single tier)
 - **Store:** https://wbcomdesigns.com/downloads/woo-open-graph/
 
+## Names & Identity
+
+Every surface this product is known by. When these drift, a site owner reports a bug under one name and support searches for another.
+
+| Surface | Value |
+|---|---|
+| Plugin Name (what the site owner sees) | `Open Graph for WooCommerce` |
+| Install slug (`wp-content/plugins/`) | `open-graph-for-woocommerce` |
+| Git repo | `WooCommerce-Open-Graph` |
+| Text domain | `woo-open-graph` |
+| readme.txt title | `Open Graph for WooCommerce` |
+| Basecamp board | **none** |
+| Basecamp URL | - |
+
+**No Basecamp board exists for this product.** Bugs have no default home - raise this before filing one.
+
+**Repo name does not match the install slug.** The repo is `WooCommerce-Open-Graph` (CamelCase) but the plugin installs as `open-graph-for-woocommerce`. Build and deploy scripts must use the install slug, never the repo name.
+
 ## What It Does
 Emits Schema.org markup, Open Graph and Twitter Card meta tags, and social share buttons for WooCommerce products. Fills the product-specific gaps that generic SEO plugins leave (price, availability, brand, ratings). Also generates a dedicated image sitemap.
 
