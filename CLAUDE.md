@@ -43,7 +43,7 @@ Two places, deliberately, and they reconcile:
 | **Cards to work** | **11** — 5 in Bugs, 6 in Scope |
 | **Checklist below** | **25** items on branch `2.0.2` |
 
-**Why the two numbers differ.** A card is the trackable unit a person picks up; a checklist item is one verifiable step inside it. The portfolio-floor items in particular repeat across all 11 plugins — four suite-wide faults, counted once per plugin here.
+**Why the two numbers differ.** A card is the trackable unit a person picks up; a checklist item is one verifiable step inside it. The portfolio-floor items in particular repeat across all 12 plugins — four suite-wide faults, counted once per plugin here.
 
 **To verify progress:** the card is done when every checklist item it names is ticked in this file, on this branch. Neither source is authoritative alone — the board says what is being worked, this file says what "done" means.
 
@@ -94,26 +94,26 @@ This product had no Basecamp board until 2026-08-08, which is why none of the ab
 - [ ] Rendered surface only partly reviewed - the plugin is deactivated on the audit store because its fatal blocks everything. Re-run the visual pass after the fix.
 
 ### The standard every plugin in this suite is measured against
-We are not auditing against each plugin's own history - we are auditing against what a WooCommerce plugin **should** provide a store owner and a developer extending it. Scored across all 11 plugins on 2026-08-08.
+We are not auditing against each plugin's own history - we are auditing against what a WooCommerce plugin **should** provide a store owner and a developer extending it. Scored across all 12 plugins on 2026-08-08.
 
 | Expectation | Who needs it | Suite score |
 |---|---|---|
-| Gutenberg block | owner | **0 / 11** |
-| Admin screen for stored data | owner | **0 / 11** |
-| REST API | developer | **0 / 11** |
-| Test suite | developer | **0 / 11** |
-| WPCS config | developer | 2 / 11 |
-| Documented hooks/filters | developer | 3 / 11 |
-| Theme-overridable templates | owner | 4 / 11 |
-| Shortcode fallback | owner | 5 / 11 |
-| RTL stylesheet | owner | 8 / 11 |
-| CSS custom properties | owner | 8 / 11 |
-| Conditional asset loading | owner | 9 / 11 |
-| Clean uninstall | owner | 9 / 11 |
-| First-run guidance | owner | 9 / 11 |
-| Translation file | owner | 10 / 11 |
-| CI config | developer | 10 / 11 |
-| Settings screen | owner | 11 / 11 |
+| Gutenberg block | owner | **0 / 12** |
+| Admin screen for stored data | owner | **0 / 12** |
+| REST API | developer | **0 / 12** |
+| Test suite | developer | **0 / 12** |
+| WPCS config | developer | 2 / 12 |
+| Documented hooks/filters | developer | 3 / 12 |
+| Theme-overridable templates | owner | 4 / 12 |
+| Shortcode fallback | owner | 5 / 12 |
+| RTL stylesheet | owner | 9 / 12 |
+| CSS custom properties | owner | 9 / 12 |
+| Conditional asset loading | owner | 9 / 12 |
+| Clean uninstall | owner | 10 / 12 |
+| First-run guidance | owner | 10 / 12 |
+| Translation file | owner | 11 / 12 |
+| CI config | developer | 11 / 12 |
+| Settings screen | owner | 12 / 12 |
 
 **The four zeros are the real backlog.** Every plugin has a settings screen; not one has a block, an admin screen for the data it stores, a REST route, or a test. Those four gaps explain more customer complaints than the entire open bug list does.
 
