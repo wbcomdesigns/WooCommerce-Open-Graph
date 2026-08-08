@@ -1185,8 +1185,14 @@ class WOG_Sitemap {
 
 	/**
 	 * Schedule a sitemap update.
+	 *
+	 * MUST stay public: this is registered directly as a hook callback on
+	 * woocommerce_update_product, created_product_cat and edited_product_cat
+	 * (see init_hooks()). WordPress invokes callbacks from global scope via
+	 * call_user_func_array(), which cannot reach a private method - making this
+	 * private throws an uncaught TypeError and fatals every product save.
 	 */
-	private function schedule_sitemap_update() {
+	public function schedule_sitemap_update() {
 		if ( ! wp_next_scheduled( 'wog_generate_sitemaps' ) ) {
 			wp_schedule_single_event( time() + 600, 'wog_generate_sitemaps' );
 		}
