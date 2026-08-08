@@ -33,6 +33,30 @@ Every surface this product is known by. When these drift, a site owner reports a
 
 **Repo name does not match the install slug.** The repo is `WooCommerce-Open-Graph` (CamelCase) but the plugin installs as `open-graph-for-woocommerce`. Build and deploy scripts must use the install slug, never the repo name.
 
+## Current Task List
+
+Ordered by how many store owners are affected, not by how interesting the code is.
+Derived from a code audit on 2026-08-08 that verified every open Basecamp card against this branch.
+**Work happens on this branch (`2.0.2`).**
+
+### 1. Social sharing is broken for most stores (board created 2026-08-08)
+- [ ] **De-duplication has never worked.** `scan_existing_tags()` listens for `wp_head_early_og`, an action only this plugin fires, so all 13 guard sites are permanent no-ops. Any store with Yoast/RankMath/SEOPress gets duplicate `og:` tags. Buffer `wp_head` itself instead. (`includes/class-wog-meta-tags.php:50-79`)
+- [ ] **Remove the "Compatible with: Yoast, RankMath, SEOPress" claim** at `admin/class-wog-admin.php:285` until the above actually works.
+- [ ] **Image hints are hardcoded** 1200/630/`image/png` at `class-wog-meta-tags.php:334-337, 659-662, 682-685, 701-704`. Derive from `wp_get_attachment_metadata()`; omit rather than guess.
+- [ ] **`og:image:alt` emitted twice** - delete the second emitter at `:510`.
+- [ ] **`og:description` vanishes when the tagline is empty** (`:698`) - add a fallback chain: excerpt, then content, then store name.
+
+### 2. Before the next release
+- [ ] **Version-key the sitemap flush guard** (`includes/class-wog-sitemap.php:109-111`). It is keyed to a hand-written `_v2` literal that every install already has, so any future rewrite-rule change that forgets to bump it 404s on 100% of upgrades while passing every fresh-install test.
+
+### Note
+This product had no Basecamp board until 2026-08-08, which is why none of the above was ever reported. Repo name (`WooCommerce-Open-Graph`) is not the install slug (`open-graph-for-woocommerce`) - build scripts must use the slug.
+
+### Ground rules for this list
+- A card is a lead, not a spec. Several open cards were found to be already fixed or factually wrong about this tree - re-verify before building.
+- Fix at the seam, not on the screen that reported it. Where a fix has a shared cause, the entry below says so.
+- Most customers do not run our themes. Verify on a generic theme (Storefront or a block theme), not only on Reign/BuddyX.
+
 ## What It Does
 Emits Schema.org markup, Open Graph and Twitter Card meta tags, and social share buttons for WooCommerce products. Fills the product-specific gaps that generic SEO plugins leave (price, availability, brand, ratings). Also generates a dedicated image sitemap.
 
