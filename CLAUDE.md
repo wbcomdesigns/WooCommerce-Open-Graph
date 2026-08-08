@@ -40,8 +40,8 @@ Two places, deliberately, and they reconcile:
 | | |
 |---|---|
 | **Basecamp board** | [Open Graph for WooCommerce](https://3.basecamp.com/5798509/projects/48433311) |
-| **Cards to work** | **11** — 5 in Bugs, 6 in Scope |
-| **Checklist below** | **25** items on branch `2.0.2` |
+| **Cards to work** | **11** — 4 in Bugs, 7 in Scope |
+| **Checklist below** | **34** items on branch `2.0.2` |
 
 **Why the two numbers differ.** A card is the trackable unit a person picks up; a checklist item is one verifiable step inside it. The portfolio-floor items in particular repeat across all 12 plugins — four suite-wide faults, counted once per plugin here.
 
@@ -92,6 +92,34 @@ This product had no Basecamp board until 2026-08-08, which is why none of the ab
 - [ ] **Dead-code leads: 15.** Largest: `debug_sitemap_info()` (42 LOC), `get_section_settings()` (42), `migrate_old_settings()` (27), `import_settings()` (23), `get_system_info()` (20). Check `migrate_old_settings()` carefully - it may only be reachable on upgrade.
 - [ ] **3 duplicate function bodies** inside the plugin.
 - [ ] Rendered surface only partly reviewed - the plugin is deactivated on the audit store because its fatal blocks everything. Re-run the visual pass after the fix.
+
+### Rebuild the admin panel to the standard shell
+
+The one screen every store owner sees, and the least invested-in across the suite. Build to the pattern in
+**Who Viewed My Profile** (`who-viewed-my-profile`, `/wp-admin/admin.php?page=bp-profile-views-settings` on the
+release-skill site) - roughly 2,000 lines, already solved, copy it rather than reinvent.
+
+```
+includes/admin/class-<prefix>-admin.php   controller + get_tabs() registry + get_overview_stats()
+includes/admin/views/shell.php            page header, sidebar nav, body slot
+includes/admin/views/overview.php         stat tiles + config snapshot + quick actions
+includes/admin/views/settings-*.php       one file per settings group
+assets/css/admin.css
+```
+
+- [ ] **Land on an Overview, not a settings form.** Opening the plugin answers "what is this doing on my store right now?" before offering a single input.
+- [ ] **This plugin's Overview should surface:** tags emitted per product type, sitemap last generated, and whether an SEO plugin is also emitting og: tags.
+- [ ] **Stat tiles each carry an explanatory caption.** A bare number is not information - the reference writes "Every row recorded in the profile-views table" under its count.
+- [ ] **A "Current configuration" snapshot** written as consequences, not stored values - "Yes, anonymous visits are stored but filtered out of aggregate counts", never `exclude_logout_user_count: 1`.
+- [ ] **Quick actions** routing to the tab that changes the thing just described.
+- [ ] **Sidebar generated from a tab registry** - one array keyed by slug with `label`, `icon`, `group` (main / settings / account). Adding a screen touches one array, not markup in three places.
+- [ ] **Version pill in the header; dependency state shown on screen** rather than rendering an empty dashboard.
+- [ ] **Replace the shared `admin/wbcom/` header/nav framework** where present - do not layer the new shell on top of it.
+- [ ] **Verify at 1440px and 390px, light and dark, LTR and RTL.** Colours from CSS custom properties, never hardcoded hex.
+
+**Two things that will bite:**
+- `<hr class="wp-header-end">` immediately after the header is **required**. Without it core's `common.js` re-parents every `.notice` to the first `<h1>` and the "Settings saved" banner lands between the title and subtitle. The reference documents this in a comment - keep the comment.
+- Call `settings_errors()` yourself in the shell, after that marker.
 
 ### The standard every plugin in this suite is measured against
 We are not auditing against each plugin's own history - we are auditing against what a WooCommerce plugin **should** provide a store owner and a developer extending it. Scored across all 12 plugins on 2026-08-08.
