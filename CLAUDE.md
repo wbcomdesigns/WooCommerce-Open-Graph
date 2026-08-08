@@ -52,6 +52,68 @@ Derived from a code audit on 2026-08-08 that verified every open Basecamp card a
 ### Note
 This product had no Basecamp board until 2026-08-08, which is why none of the above was ever reported. Repo name (`WooCommerce-Open-Graph`) is not the install slug (`open-graph-for-woocommerce`) - build scripts must use the slug.
 
+### What this plugin should have and does not (10 of 16)
+
+**Store owner expects:**
+
+- [ ] **Gutenberg block** - Block themes often never fire the classic WooCommerce hooks this plugin renders through, so the owner sees nothing and has no way to place it by hand.
+- [ ] **Theme-overridable templates** - The owner cannot restyle output without editing plugin files, which an update overwrites.
+- [ ] **Admin screen for stored data** - Anything the plugin stores, the owner must be able to see, moderate and export from wp-admin. Otherwise support means phpMyAdmin.
+- [ ] **First-run guidance** - After activation the owner should know what to do first, and the plugin should not silently change the storefront.
+- [ ] **Clean uninstall** - Uninstalling should leave no tables, options or scheduled events behind.
+- [ ] **CSS custom properties** - Without CSS custom properties the plugin cannot follow a theme or support dark mode without a rewrite.
+
+**Developer extending it expects:**
+
+- [ ] **REST API** - No mobile app, headless storefront or external integration can reach this data.
+- [ ] **Documented hooks/filters** - Developers extending the plugin have to read the source to find the extension points.
+- [ ] **Test suite** - Nothing catches a regression before a customer does.
+- [ ] **WPCS config** - Coding-standard drift is invisible until a WordPress.org review rejects it.
+### Frontend, UX & code health
+
+**P0 first - nothing else on this plugin matters until it lands.** Saving any product or product category crashes the site: `schedule_sitemap_update()` is `private` at `includes/class-wog-sitemap.php:1189` yet registered as a hook callback at `:88-90`. Make it public, then grep every `add_action`/`add_filter` callback and confirm each target is public. Add a CI check for this class - one wrong visibility takes a store down.
+
+- [ ] **No CSS custom properties at all** - 354 raw hex across 47kb of CSS, zero `var()` uses. Cannot follow a theme, cannot do dark mode. Prerequisite for any visual work.
+- [ ] **176 functions in 12 files** - the highest density in the suite. Split by concern while fixing the P0.
+- [ ] **Dead-code leads: 15.** Largest: `debug_sitemap_info()` (42 LOC), `get_section_settings()` (42), `migrate_old_settings()` (27), `import_settings()` (23), `get_system_info()` (20). Check `migrate_old_settings()` carefully - it may only be reachable on upgrade.
+- [ ] **3 duplicate function bodies** inside the plugin.
+- [ ] Rendered surface only partly reviewed - the plugin is deactivated on the audit store because its fatal blocks everything. Re-run the visual pass after the fix.
+
+### The standard every plugin in this suite is measured against
+We are not auditing against each plugin's own history - we are auditing against what a WooCommerce plugin **should** provide a store owner and a developer extending it. Scored across all 11 plugins on 2026-08-08.
+
+| Expectation | Who needs it | Suite score |
+|---|---|---|
+| Gutenberg block | owner | **0 / 11** |
+| Admin screen for stored data | owner | **0 / 11** |
+| REST API | developer | **0 / 11** |
+| Test suite | developer | **0 / 11** |
+| WPCS config | developer | 2 / 11 |
+| Documented hooks/filters | developer | 3 / 11 |
+| Theme-overridable templates | owner | 4 / 11 |
+| Shortcode fallback | owner | 5 / 11 |
+| RTL stylesheet | owner | 8 / 11 |
+| CSS custom properties | owner | 8 / 11 |
+| Conditional asset loading | owner | 9 / 11 |
+| Clean uninstall | owner | 9 / 11 |
+| First-run guidance | owner | 9 / 11 |
+| Translation file | owner | 10 / 11 |
+| CI config | developer | 10 / 11 |
+| Settings screen | owner | 11 / 11 |
+
+**The four zeros are the real backlog.** Every plugin has a settings screen; not one has a block, an admin screen for the data it stores, a REST route, or a test. Those four gaps explain more customer complaints than the entire open bug list does.
+
+### Portfolio floor - one mechanical pass per plugin
+- [ ] **Focus rings** - `outline: none` with no `:focus-visible` replacement, **98 occurrences suite-wide**. Keyboard users cannot see where they are.
+- [ ] **RTL** - raw `margin-left` / `margin-right`, **96 occurrences suite-wide**. Use `margin-inline-start/end`.
+- [ ] **Icons** - **62** Dashicons references; migrate to Lucide with a map for stored values.
+- [ ] **No native dialogs** - **12** `alert()`/`confirm()` calls put a raw browser dialog in front of a shopper mid-purchase.
+
+### Ground rules
+- **Dead-code lists are leads, not delete lists.** `init_form_fields()`, `get_content_html()` and `get_content_plain()` are `WC_Email` overrides invoked through the parent class - they look unreferenced to a static scan and **must not be removed**. The same applies to callbacks reached only by `add_action` string name and CSS classes built in JS.
+- **Deduplicate at the seam.** Where free and Pro share an identical function body, the fix is one owner plus an extension point, never the same edit twice.
+- **One concern per PR**, so a regression bisects fast.
+
 ### Ground rules for this list
 - A card is a lead, not a spec. Several open cards were found to be already fixed or factually wrong about this tree - re-verify before building.
 - Fix at the seam, not on the screen that reported it. Where a fix has a shared cause, the entry below says so.
