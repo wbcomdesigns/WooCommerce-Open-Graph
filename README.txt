@@ -42,7 +42,7 @@ Choose the style that matches your store:
 
 = Works With Your Existing Setup =
 
-This plugin works alongside other SEO plugins like Yoast, RankMath, and All in One SEO. It adds WooCommerce-specific features that general SEO plugins miss.
+This plugin works alongside other SEO plugins like Yoast, RankMath, and SEOPress. It detects the Open Graph and Twitter Card tags those plugins already output and skips duplicates, adding only the WooCommerce-specific tags they miss. Product schema is off by default because WooCommerce core already outputs Product structured data; enable it only to gap-fill Woo's schema with extra fields (brand, GTIN, MPN, specifications).
 
 = Perfect For =
 

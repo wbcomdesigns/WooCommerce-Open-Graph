@@ -80,8 +80,10 @@ class WOG_Settings {
 	 */
 	private function set_default_settings() {
 		$this->default_settings = array(
-			// Schema settings.
-			'enable_schema'              => true,
+			// Schema settings. Off by default: WooCommerce core already emits Product
+			// structured data. When enabled, this plugin gap-fills Woo's graph rather
+			// than emitting a second, competing one.
+			'enable_schema'              => false,
 			'enable_enhanced_schema'     => true,
 			'enable_breadcrumb_schema'   => true,
 			'enable_organization_schema' => true,
@@ -260,7 +262,7 @@ class WOG_Settings {
 	 * @return bool
 	 */
 	public function is_schema_enabled() {
-		return $this->get( 'enable_schema', true );
+		return $this->get( 'enable_schema', false );
 	}
 
 	/**

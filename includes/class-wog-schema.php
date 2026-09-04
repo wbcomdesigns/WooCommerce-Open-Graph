@@ -57,8 +57,77 @@ class WOG_Schema {
 	 */
 	private function init_hooks() {
 		if ( ! empty( $this->settings['enable_schema'] ) ) {
+			// Standalone nodes WooCommerce does not own (Organization / Breadcrumb / Category / Shop).
 			add_action( 'wp_head', array( $this, 'output_schema_markup' ), 5 );
+
+			// Product data is gap-filled onto WooCommerce core's own Product graph
+			// instead of emitting a second, competing JSON-LD Product <script>.
+			add_filter( 'woocommerce_structured_data_product', array( $this, 'filter_product_structured_data' ), 20, 2 );
 		}
+	}
+
+	/**
+	 * Gap-fill WooCommerce's Product structured data with fields it omits.
+	 *
+	 * Never overwrites keys WooCommerce already set, and never adds a second
+	 * Product graph. GTIN prefers the native global unique id (WC 9.2+).
+	 *
+	 * @param array      $markup  WooCommerce's product structured data.
+	 * @param WC_Product $product The product object.
+	 * @return array
+	 */
+	public function filter_product_structured_data( $markup, $product ) {
+		if ( ! is_array( $markup ) || ! $product instanceof WC_Product ) {
+			return $markup;
+		}
+
+		$gap = array();
+
+		if ( empty( $markup['brand'] ) ) {
+			$brand = $this->get_enhanced_brand_schema( $product );
+			if ( $brand ) {
+				$gap['brand'] = $brand;
+			}
+		}
+
+		if ( empty( $markup['gtin'] ) ) {
+			$gtin = $this->get_gtin( $product );
+			if ( $gtin ) {
+				$gap['gtin'] = $gtin;
+			}
+		}
+
+		if ( empty( $markup['mpn'] ) ) {
+			$mpn = $this->get_mpn( $product );
+			if ( $mpn ) {
+				$gap['mpn'] = $mpn;
+			}
+		}
+
+		if ( ! empty( $this->settings['enable_enhanced_schema'] ) ) {
+			if ( empty( $markup['manufacturer'] ) ) {
+				$manufacturer = $this->get_manufacturer_schema( $product );
+				if ( $manufacturer ) {
+					$gap['manufacturer'] = $manufacturer;
+				}
+			}
+
+			if ( empty( $markup['model'] ) ) {
+				$model = $this->get_product_model( $product );
+				if ( $model ) {
+					$gap['model'] = $model;
+				}
+			}
+
+			if ( empty( $markup['additionalProperty'] ) ) {
+				$specs = $this->get_product_specifications( $product );
+				if ( ! empty( $specs ) ) {
+					$gap['additionalProperty'] = $specs;
+				}
+			}
+		}
+
+		return array_merge( $markup, $gap );
 	}
 
 	/**
@@ -71,11 +140,9 @@ class WOG_Schema {
 
 		$schemas = array();
 
-		// Get page-specific schema.
+		// Get page-specific schema. Product data is added to WooCommerce's own
+		// Product graph via filter_product_structured_data(), not emitted here.
 		if ( is_product() ) {
-			global $post;
-			$schemas['product'] = $this->get_product_schema( $post );
-
 			if ( ! empty( $this->settings['enable_breadcrumb_schema'] ) ) {
 				$schemas['breadcrumb'] = $this->get_breadcrumb_schema();
 			}
@@ -112,194 +179,6 @@ class WOG_Schema {
 		}
 
 		return is_product() || is_product_category() || is_shop() || is_woocommerce();
-	}
-
-	/**
-	 * Get enhanced product schema.
-	 *
-	 * @param WP_Post $post The post object.
-	 * @return array
-	 */
-	private function get_product_schema( $post ) {
-		$product = wc_get_product( $post->ID );
-
-		if ( ! $product ) {
-			return array();
-		}
-
-		$schema = array(
-			'@context'        => 'https://schema.org',
-			'@type'           => 'Product',
-			'name'            => get_the_title( $post->ID ),
-			'description'     => $this->get_product_description( $product ),
-			'url'             => get_permalink( $post->ID ),
-			'image'           => $this->get_product_images( $product ),
-			'sku'             => $product->get_sku(),
-			'brand'           => $this->get_enhanced_brand_schema( $product ),
-			'category'        => $this->get_category_hierarchy( $product ),
-			'offers'          => $this->get_enhanced_offers_schema( $product ),
-			'aggregateRating' => $this->get_enhanced_rating_schema( $product ),
-			'review'          => $this->get_detailed_reviews_schema( $product ),
-		);
-
-		// Enhanced product properties.
-		if ( ! empty( $this->settings['enable_enhanced_schema'] ) ) {
-			$enhanced_props = array(
-				'productID'          => $product->get_id(),
-				'gtin'               => $this->get_gtin( $product ),
-				'mpn'                => $this->get_mpn( $product ),
-				'manufacturer'       => $this->get_manufacturer_schema( $product ),
-				'model'              => $this->get_product_model( $product ),
-				'color'              => $this->get_product_colors( $product ),
-				'size'               => $this->get_product_sizes( $product ),
-				'material'           => $this->get_product_materials( $product ),
-				'additionalProperty' => $this->get_product_specifications( $product ),
-				'hasVariant'         => $this->get_product_variants( $product ),
-			);
-
-			$schema = array_merge( $schema, array_filter( $enhanced_props ) );
-		}
-
-		// Add weight and dimensions.
-		if ( $product->get_weight() ) {
-			$schema['weight'] = array(
-				'@type'    => 'QuantitativeValue',
-				'value'    => $product->get_weight(),
-				'unitCode' => get_option( 'woocommerce_weight_unit', 'kg' ),
-			);
-		}
-
-		if ( $product->get_dimensions( false ) ) {
-			$dimensions = $product->get_dimensions( false );
-			$unit       = get_option( 'woocommerce_dimension_unit', 'cm' );
-
-			if ( ! empty( $dimensions['length'] ) ) {
-				$schema['depth'] = array(
-					'@type'    => 'QuantitativeValue',
-					'value'    => $dimensions['length'],
-					'unitCode' => $unit,
-				);
-			}
-
-			if ( ! empty( $dimensions['width'] ) ) {
-				$schema['width'] = array(
-					'@type'    => 'QuantitativeValue',
-					'value'    => $dimensions['width'],
-					'unitCode' => $unit,
-				);
-			}
-
-			if ( ! empty( $dimensions['height'] ) ) {
-				$schema['height'] = array(
-					'@type'    => 'QuantitativeValue',
-					'value'    => $dimensions['height'],
-					'unitCode' => $unit,
-				);
-			}
-		}
-
-		return array_filter( $schema );
-	}
-
-	/**
-	 * Get enhanced offers schema.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return array
-	 */
-	private function get_enhanced_offers_schema( $product ) {
-		if ( $product->is_type( 'variable' ) ) {
-			return $this->get_variable_offers_schema( $product );
-		}
-
-		$offers = array(
-			'@type'           => 'Offer',
-			'url'             => get_permalink( $product->get_id() ),
-			'priceCurrency'   => get_woocommerce_currency(),
-			'availability'    => $this->get_availability_schema( $product ),
-			'priceValidUntil' => gmdate( 'Y-m-d', strtotime( '+1 year' ) ),
-			'seller'          => array(
-				'@type' => 'Organization',
-				'name'  => get_bloginfo( 'name' ),
-				'url'   => home_url(),
-			),
-			'itemCondition'   => 'https://schema.org/NewCondition',
-		);
-
-		if ( $product->get_price() ) {
-			$offers['price'] = $product->get_price();
-		}
-
-		// Add sale price information.
-		if ( $product->is_on_sale() && $product->get_regular_price() ) {
-			$offers['priceSpecification'] = array(
-				'@type'         => 'UnitPriceSpecification',
-				'price'         => $product->get_regular_price(),
-				'priceCurrency' => get_woocommerce_currency(),
-			);
-
-			// Add sale dates if available.
-			$sale_dates = $this->get_sale_dates( $product );
-			if ( $sale_dates ) {
-				$offers['priceValidFrom']  = $sale_dates['from'];
-				$offers['priceValidUntil'] = $sale_dates['to'];
-			}
-		}
-
-		// Add shipping information.
-		$shipping = $this->get_shipping_schema( $product );
-		if ( $shipping ) {
-			$offers['shippingDetails'] = $shipping;
-		}
-
-		// Add return policy.
-		$return_policy = $this->get_return_policy_schema();
-		if ( $return_policy ) {
-			$offers['hasMerchantReturnPolicy'] = $return_policy;
-		}
-
-		return $offers;
-	}
-
-	/**
-	 * Get variable product offers schema.
-	 *
-	 * @param WC_Product $product The variable product object.
-	 * @return array
-	 */
-	private function get_variable_offers_schema( $product ) {
-		$variations = $product->get_children();
-		$offers     = array();
-
-		foreach ( $variations as $variation_id ) {
-			$variation = wc_get_product( $variation_id );
-			if ( ! $variation || ! $variation->is_purchasable() ) {
-				continue;
-			}
-
-			$offer = array(
-				'@type'         => 'Offer',
-				'url'           => get_permalink( $variation_id ),
-				'price'         => $variation->get_price(),
-				'priceCurrency' => get_woocommerce_currency(),
-				'availability'  => $this->get_availability_schema( $variation ),
-				'sku'           => $variation->get_sku(),
-				'seller'        => array(
-					'@type' => 'Organization',
-					'name'  => get_bloginfo( 'name' ),
-				),
-			);
-
-			// Add variation attributes.
-			$attributes = $variation->get_variation_attributes();
-			if ( ! empty( $attributes ) ) {
-				$offer['hasVariant'] = $this->format_variation_attributes( $attributes );
-			}
-
-			$offers[] = $offer;
-		}
-
-		return $offers;
 	}
 
 	/**
@@ -422,65 +301,13 @@ class WOG_Schema {
 	}
 
 	/**
-	 * Get product description for schema.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return string
-	 */
-	private function get_product_description( $product ) {
-		$description = $product->get_short_description();
-		if ( empty( $description ) ) {
-			$description = $product->get_description();
-		}
-		return wp_strip_all_tags( $description );
-	}
-
-	/**
-	 * Get product images for schema.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return array
-	 */
-	private function get_product_images( $product ) {
-		$images = array();
-
-		// Featured image.
-		if ( $product->get_image_id() ) {
-			$image_url = wp_get_attachment_image_src( $product->get_image_id(), 'full' );
-			if ( $image_url ) {
-				$images[] = $image_url[0];
-			}
-		}
-
-		// Gallery images.
-		$gallery_images = $product->get_gallery_image_ids();
-		foreach ( $gallery_images as $image_id ) {
-			$image_url = wp_get_attachment_image_src( $image_id, 'full' );
-			if ( $image_url ) {
-				$images[] = $image_url[0];
-			}
-		}
-
-		return ! empty( $images ) ? $images : array( wc_placeholder_img_src( 'full' ) );
-	}
-
-	/**
-	 * Get product GTIN from various meta fields.
+	 * Get product GTIN (native global unique id preferred, then custom meta).
 	 *
 	 * @param WC_Product $product The product object.
 	 * @return string
 	 */
 	private function get_gtin( $product ) {
-		$gtin_fields = array( '_gtin', '_upc', '_ean', '_isbn', '_gtin8', '_gtin12', '_gtin13', '_gtin14' );
-
-		foreach ( $gtin_fields as $field ) {
-			$gtin = get_post_meta( $product->get_id(), $field, true );
-			if ( ! empty( $gtin ) ) {
-				return $gtin;
-			}
-		}
-
-		return '';
+		return wog_get_product_gtin( $product );
 	}
 
 	/**
@@ -490,11 +317,7 @@ class WOG_Schema {
 	 * @return string
 	 */
 	private function get_mpn( $product ) {
-		$mpn = get_post_meta( $product->get_id(), '_mpn', true );
-		if ( empty( $mpn ) ) {
-			$mpn = get_post_meta( $product->get_id(), '_manufacturer_part_number', true );
-		}
-		return $mpn;
+		return wog_get_product_mpn( $product );
 	}
 
 	/**
@@ -523,154 +346,7 @@ class WOG_Schema {
 	 * @return string
 	 */
 	private function get_product_brand( $product ) {
-		// Check for common brand taxonomies.
-		$brand_taxonomies = array( 'product_brand', 'pwb-brand', 'yith_product_brand', 'pa_brand' );
-
-		foreach ( $brand_taxonomies as $taxonomy ) {
-			if ( taxonomy_exists( $taxonomy ) ) {
-				$terms = get_the_terms( $product->get_id(), $taxonomy );
-				if ( $terms && ! is_wp_error( $terms ) ) {
-					return $terms[0]->name;
-				}
-			}
-		}
-
-		// Check for brand meta field.
-		$brand = get_post_meta( $product->get_id(), '_brand', true );
-		if ( ! empty( $brand ) ) {
-			return $brand;
-		}
-
-		return '';
-	}
-
-	/**
-	 * Get category hierarchy string.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return string
-	 */
-	private function get_category_hierarchy( $product ) {
-		$categories = get_the_terms( $product->get_id(), 'product_cat' );
-
-		if ( ! $categories || is_wp_error( $categories ) ) {
-			return '';
-		}
-
-		// Get the primary category (first one).
-		$primary_category = $categories[0];
-
-		// Build category hierarchy.
-		$hierarchy = array();
-		$ancestors = get_ancestors( $primary_category->term_id, 'product_cat' );
-
-		foreach ( array_reverse( $ancestors ) as $ancestor_id ) {
-			$ancestor    = get_term( $ancestor_id, 'product_cat' );
-			$hierarchy[] = $ancestor->name;
-		}
-
-		$hierarchy[] = $primary_category->name;
-
-		return implode( ' > ', $hierarchy );
-	}
-
-	/**
-	 * Get schema availability URL.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return string
-	 */
-	private function get_availability_schema( $product ) {
-		if ( $product->is_in_stock() ) {
-			if ( $product->managing_stock() && $product->get_stock_quantity() > 0 ) {
-				return 'https://schema.org/InStock';
-			} elseif ( ! $product->managing_stock() ) {
-				return 'https://schema.org/InStock';
-			} else {
-				return 'https://schema.org/OutOfStock';
-			}
-		} else {
-			return 'https://schema.org/OutOfStock';
-		}
-	}
-
-	/**
-	 * Get enhanced rating schema.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return array|null
-	 */
-	private function get_enhanced_rating_schema( $product ) {
-		$average_rating = $product->get_average_rating();
-		$review_count   = $product->get_review_count();
-
-		if ( ! $average_rating || ! $review_count ) {
-			return null;
-		}
-
-		return array(
-			'@type'       => 'AggregateRating',
-			'ratingValue' => $average_rating,
-			'reviewCount' => $review_count,
-			'bestRating'  => '5',
-			'worstRating' => '1',
-		);
-	}
-
-	/**
-	 * Get detailed reviews schema.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return array|null
-	 */
-	private function get_detailed_reviews_schema( $product ) {
-		$reviews = get_comments(
-			array(
-				'post_id'    => $product->get_id(),
-				'status'     => 'approve',
-				'type'       => 'review',
-				'number'     => 5,
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Limited to 5 results.
-					array(
-						'key'     => 'rating',
-						'value'   => 0,
-						'compare' => '>',
-					),
-				),
-			)
-		);
-
-		if ( empty( $reviews ) ) {
-			return null;
-		}
-
-		$schema_reviews = array();
-
-		foreach ( $reviews as $review ) {
-			$rating = get_comment_meta( $review->comment_ID, 'rating', true );
-
-			if ( ! $rating ) {
-				continue;
-			}
-
-			$schema_reviews[] = array(
-				'@type'         => 'Review',
-				'reviewRating'  => array(
-					'@type'       => 'Rating',
-					'ratingValue' => $rating,
-					'bestRating'  => '5',
-					'worstRating' => '1',
-				),
-				'author'        => array(
-					'@type' => 'Person',
-					'name'  => $review->comment_author,
-				),
-				'reviewBody'    => $review->comment_content,
-				'datePublished' => get_comment_date( 'c', $review->comment_ID ),
-			);
-		}
-
-		return $schema_reviews;
+		return wog_get_product_brand( $product );
 	}
 
 	/**
@@ -792,51 +468,6 @@ class WOG_Schema {
 	}
 
 	/**
-	 * Get product colors.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return string
-	 */
-	private function get_product_colors( $product ) {
-		$color_attribute = $product->get_attribute( 'pa_color' );
-		if ( ! empty( $color_attribute ) ) {
-			return $color_attribute;
-		}
-
-		return get_post_meta( $product->get_id(), '_color', true );
-	}
-
-	/**
-	 * Get product sizes.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return string
-	 */
-	private function get_product_sizes( $product ) {
-		$size_attribute = $product->get_attribute( 'pa_size' );
-		if ( ! empty( $size_attribute ) ) {
-			return $size_attribute;
-		}
-
-		return get_post_meta( $product->get_id(), '_size', true );
-	}
-
-	/**
-	 * Get product materials.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return string
-	 */
-	private function get_product_materials( $product ) {
-		$material_attribute = $product->get_attribute( 'pa_material' );
-		if ( ! empty( $material_attribute ) ) {
-			return $material_attribute;
-		}
-
-		return get_post_meta( $product->get_id(), '_material', true );
-	}
-
-	/**
 	 * Get product specifications as PropertyValue array.
 	 *
 	 * @param WC_Product $product The product object.
@@ -868,117 +499,6 @@ class WOG_Schema {
 		}
 
 		return $specifications;
-	}
-
-	/**
-	 * Get product variants schema.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return array|null
-	 */
-	private function get_product_variants( $product ) {
-		if ( ! $product->is_type( 'variable' ) ) {
-			return null;
-		}
-
-		$variations = $product->get_children();
-		$variants   = array();
-
-		foreach ( $variations as $variation_id ) {
-			$variation = wc_get_product( $variation_id );
-			if ( ! $variation ) {
-				continue;
-			}
-
-			$variants[] = array(
-				'@type' => 'ProductModel',
-				'name'  => $variation->get_name(),
-				'sku'   => $variation->get_sku(),
-				'url'   => get_permalink( $variation_id ),
-			);
-		}
-
-		return $variants;
-	}
-
-	/**
-	 * Get sale date range.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return array|null
-	 */
-	private function get_sale_dates( $product ) {
-		$from = get_post_meta( $product->get_id(), '_sale_price_dates_from', true );
-		$to   = get_post_meta( $product->get_id(), '_sale_price_dates_to', true );
-
-		if ( ! $from && ! $to ) {
-			return null;
-		}
-
-		return array(
-			'from' => $from ? gmdate( 'c', $from ) : null,
-			'to'   => $to ? gmdate( 'c', $to ) : null,
-		);
-	}
-
-	/**
-	 * Get shipping schema for product.
-	 *
-	 * @param WC_Product $product The product object.
-	 * @return array|null
-	 */
-	private function get_shipping_schema( $product ) {
-		// Basic shipping information based on shipping class.
-		$shipping_class = $product->get_shipping_class();
-
-		if ( empty( $shipping_class ) ) {
-			return null;
-		}
-
-		return array(
-			'@type'        => 'OfferShippingDetails',
-			'shippingRate' => array(
-				'@type'    => 'MonetaryAmount',
-				'currency' => get_woocommerce_currency(),
-			),
-			'deliveryTime' => array(
-				'@type' => 'ShippingDeliveryTime',
-			),
-		);
-	}
-
-	/**
-	 * Get return policy schema.
-	 *
-	 * @return array
-	 */
-	private function get_return_policy_schema() {
-		// Basic return policy that can be customized.
-		return array(
-			'@type'                => 'MerchantReturnPolicy',
-			'returnPolicyCategory' => 'https://schema.org/MerchantReturnFiniteReturnWindow',
-			'merchantReturnDays'   => 30,
-		);
-	}
-
-	/**
-	 * Format variation attributes for schema.
-	 *
-	 * @param array $attributes The variation attributes.
-	 * @return array
-	 */
-	private function format_variation_attributes( $attributes ) {
-		$formatted = array();
-
-		foreach ( $attributes as $name => $value ) {
-			$formatted[] = array(
-				'@type' => 'PropertyValue',
-				'name'  => str_replace( 'attribute_', '', $name ),
-				'value' => $value,
-			);
-		}
-
-		return $formatted;
 	}
 
 	/**

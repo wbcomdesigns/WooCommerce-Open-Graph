@@ -242,7 +242,8 @@ class Woo_Open_Graph {
 
 		// Set default plugin options.
 		$default_options = array(
-			'enable_schema'              => true,
+			// Schema off by default; WooCommerce core already outputs Product schema.
+			'enable_schema'              => false,
 			'enable_enhanced_schema'     => true,
 			'enable_breadcrumb_schema'   => true,
 			'enable_organization_schema' => true,

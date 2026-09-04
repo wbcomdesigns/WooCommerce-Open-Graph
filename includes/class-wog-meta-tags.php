@@ -64,30 +64,49 @@ class WOG_Meta_Tags {
 	 * Set up WordPress hooks.
 	 */
 	private function init_hooks() {
-		add_action( 'wp_head', array( $this, 'scan_existing_tags' ), 1 );
+		add_action( 'wp_head', array( $this, 'start_head_buffer' ), 0 );
+		add_action( 'wp_head', array( $this, 'scan_existing_tags' ), 14 );
 		add_action( 'wp_head', array( $this, 'output_meta_tags' ), 15 );
 		add_filter( 'language_attributes', array( $this, 'add_opengraph_namespace' ) );
 	}
 
 	/**
-	 * Scan for existing Open Graph tags from other plugins.
+	 * Begin buffering <head> so tags already emitted by an SEO plugin can be detected.
+	 *
+	 * The buffer is intentionally left open; PHP flushes it at the end of wp_head,
+	 * so all captured markup (SEO plugin tags plus ours) still reaches the browser.
+	 */
+	public function start_head_buffer() {
+		if ( ! $this->should_add_meta_tags() ) {
+			return;
+		}
+
+		// ponytail: reads the top output buffer to spot OG/Twitter tags any SEO plugin
+		// (Yoast/RankMath/SEOPress/...) already printed; a nested buffer another plugin
+		// opens and never closes before priority 14 could hide tags. Rare, acceptable.
+		ob_start();
+	}
+
+	/**
+	 * Scan the buffered <head> for Open Graph / Twitter tags emitted by other plugins.
 	 */
 	public function scan_existing_tags() {
 		if ( ! $this->should_add_meta_tags() ) {
 			return;
 		}
 
-		ob_start();
-		do_action( 'wp_head_early_og' );
-		$early_content = ob_get_clean();
+		$head = ob_get_contents();
+		if ( false === $head || '' === $head ) {
+			return;
+		}
 
-		if ( preg_match_all( '/<meta\s+property=["\']og:([^"\']+)["\'][^>]*>/i', $early_content, $matches ) ) {
+		if ( preg_match_all( '/<meta\s+property=["\']og:([^"\']+)["\'][^>]*>/i', $head, $matches ) ) {
 			foreach ( $matches[1] as $property ) {
 				$this->existing_og_tags[] = strtolower( $property );
 			}
 		}
 
-		if ( preg_match_all( '/<meta\s+name=["\']twitter:([^"\']+)["\'][^>]*>/i', $early_content, $matches ) ) {
+		if ( preg_match_all( '/<meta\s+name=["\']twitter:([^"\']+)["\'][^>]*>/i', $head, $matches ) ) {
 			foreach ( $matches[1] as $property ) {
 				$this->existing_og_tags[] = 'twitter:' . strtolower( $property );
 			}
@@ -161,10 +180,6 @@ class WOG_Meta_Tags {
 
 		if ( ! empty( $this->settings['enable_pinterest'] ) ) {
 			$this->output_pinterest_tags( $meta_data );
-		}
-
-		if ( ! empty( $this->settings['enable_whatsapp'] ) ) {
-			$this->output_whatsapp_tags( $meta_data );
 		}
 
 		echo "<!-- End Woo Open Graph Meta Tags -->\n\n";
@@ -308,11 +323,8 @@ class WOG_Meta_Tags {
 		if ( empty( $description ) ) {
 			$description = $product->get_description();
 		}
-		if ( empty( $description ) ) {
-			$description = get_bloginfo( 'description' );
-		}
 
-		$enhanced_description = wp_strip_all_tags( $description );
+		$enhanced_description = $this->resolve_description( $description );
 
 		if ( $product->get_price() ) {
 			$enhanced_description .= ' Price: ' . wc_price( $product->get_price() );
@@ -323,6 +335,28 @@ class WOG_Meta_Tags {
 		}
 
 		return wp_trim_words( $enhanced_description, 35, '...' );
+	}
+
+	/**
+	 * Resolve a description to a guaranteed non-empty string.
+	 *
+	 * Falls back through the site tagline to the store name so og:description /
+	 * twitter:description is never dropped just because the tagline is blank.
+	 *
+	 * @param string $primary The preferred description source.
+	 * @return string
+	 */
+	private function resolve_description( $primary ) {
+		$candidates = array( $primary, get_bloginfo( 'description' ), get_bloginfo( 'name' ) );
+
+		foreach ( $candidates as $candidate ) {
+			$candidate = trim( wp_strip_all_tags( (string) $candidate ) );
+			if ( '' !== $candidate ) {
+				return $candidate;
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -381,12 +415,10 @@ class WOG_Meta_Tags {
 		if ( empty( $images ) ) {
 			$fallback_url = $this->get_fallback_image();
 			if ( $fallback_url ) {
+				// Bare URL, no attachment: omit width/height/type rather than guess.
 				$images[] = array(
-					'url'    => $fallback_url,
-					'width'  => 1200,
-					'height' => 630,
-					'alt'    => $product->get_name(),
-					'type'   => 'image/png',
+					'url' => $fallback_url,
+					'alt' => $product->get_name(),
 				);
 			}
 		}
@@ -411,7 +443,9 @@ class WOG_Meta_Tags {
 			echo '<meta property="og:description" content="' . esc_attr( $meta_data['description'] ) . '" />' . "\n";
 		}
 
-		echo '<meta property="og:type" content="' . esc_attr( $meta_data['type'] ) . '" />' . "\n";
+		if ( ! $this->tag_exists( 'type' ) ) {
+			echo '<meta property="og:type" content="' . esc_attr( $meta_data['type'] ) . '" />' . "\n";
+		}
 
 		if ( ! $this->tag_exists( 'url' ) ) {
 			echo '<meta property="og:url" content="' . esc_url( $meta_data['url'] ) . '" />' . "\n";
@@ -421,14 +455,23 @@ class WOG_Meta_Tags {
 			echo '<meta property="og:site_name" content="' . esc_attr( $meta_data['site_name'] ) . '" />' . "\n";
 		}
 
-		if ( ! empty( $meta_data['images'] ) ) {
+		if ( ! empty( $meta_data['images'] ) && ! $this->tag_exists( 'image' ) ) {
 			foreach ( $meta_data['images'] as $image ) {
 				echo '<meta property="og:image" content="' . esc_url( $image['url'] ) . '" />' . "\n";
 				echo '<meta property="og:image:secure_url" content="' . esc_url( $image['url'] ) . '" />' . "\n";
-				echo '<meta property="og:image:width" content="' . esc_attr( $image['width'] ) . '" />' . "\n";
-				echo '<meta property="og:image:height" content="' . esc_attr( $image['height'] ) . '" />' . "\n";
-				echo '<meta property="og:image:type" content="' . esc_attr( $image['type'] ) . '" />' . "\n";
-				echo '<meta property="og:image:alt" content="' . esc_attr( $image['alt'] ) . '" />' . "\n";
+				// Emit dimension/type hints only when read from a real attachment; a wrong hint is worse than none.
+				if ( ! empty( $image['width'] ) ) {
+					echo '<meta property="og:image:width" content="' . esc_attr( $image['width'] ) . '" />' . "\n";
+				}
+				if ( ! empty( $image['height'] ) ) {
+					echo '<meta property="og:image:height" content="' . esc_attr( $image['height'] ) . '" />' . "\n";
+				}
+				if ( ! empty( $image['type'] ) ) {
+					echo '<meta property="og:image:type" content="' . esc_attr( $image['type'] ) . '" />' . "\n";
+				}
+				if ( ! empty( $image['alt'] ) ) {
+					echo '<meta property="og:image:alt" content="' . esc_attr( $image['alt'] ) . '" />' . "\n";
+				}
 			}
 		}
 
@@ -564,18 +607,6 @@ class WOG_Meta_Tags {
 	}
 
 	/**
-	 * Output WhatsApp optimization tags.
-	 *
-	 * @param array $meta_data The meta data array.
-	 */
-	private function output_whatsapp_tags( $meta_data ) {
-		if ( ! empty( $meta_data['images'] ) ) {
-			$first_image = $meta_data['images'][0];
-			echo '<meta property="og:image:alt" content="' . esc_attr( $first_image['alt'] ) . '" />' . "\n";
-		}
-	}
-
-	/**
 	 * Check if title/description override is enabled.
 	 *
 	 * @return bool
@@ -627,33 +658,7 @@ class WOG_Meta_Tags {
 	 * @return string
 	 */
 	private function get_product_brand( $product ) {
-		static $brand_cache = array();
-
-		$product_id = $product->get_id();
-
-		if ( isset( $brand_cache[ $product_id ] ) ) {
-			return $brand_cache[ $product_id ];
-		}
-
-		$brand            = '';
-		$brand_taxonomies = array( 'product_brand', 'pwb-brand', 'yith_product_brand', 'pa_brand' );
-
-		foreach ( $brand_taxonomies as $taxonomy ) {
-			if ( taxonomy_exists( $taxonomy ) ) {
-				$terms = get_the_terms( $product_id, $taxonomy );
-				if ( $terms && ! is_wp_error( $terms ) ) {
-					$brand = $terms[0]->name;
-					break;
-				}
-			}
-		}
-
-		if ( empty( $brand ) ) {
-			$brand = get_post_meta( $product_id, '_brand', true );
-		}
-
-		$brand_cache[ $product_id ] = $brand;
-		return $brand;
+		return wog_get_product_brand( $product );
 	}
 
 	/**
@@ -718,16 +723,7 @@ class WOG_Meta_Tags {
 	 * @return string
 	 */
 	private function get_gtin( $product ) {
-		$gtin_fields = array( '_gtin', '_upc', '_ean', '_isbn', '_gtin8', '_gtin12', '_gtin13', '_gtin14' );
-
-		foreach ( $gtin_fields as $field ) {
-			$gtin = get_post_meta( $product->get_id(), $field, true );
-			if ( ! empty( $gtin ) ) {
-				return $gtin;
-			}
-		}
-
-		return '';
+		return wog_get_product_gtin( $product );
 	}
 
 	/**
@@ -737,11 +733,7 @@ class WOG_Meta_Tags {
 	 * @return string
 	 */
 	private function get_mpn( $product ) {
-		$mpn = get_post_meta( $product->get_id(), '_mpn', true );
-		if ( empty( $mpn ) ) {
-			$mpn = get_post_meta( $product->get_id(), '_manufacturer_part_number', true );
-		}
-		return $mpn;
+		return wog_get_product_mpn( $product );
 	}
 
 	/**
@@ -770,7 +762,7 @@ class WOG_Meta_Tags {
 		}
 
 		$title       = $this->should_disable_title_description() ? '' : $category->name;
-		$description = $this->should_disable_title_description() ? '' : $category->description;
+		$description = $this->should_disable_title_description() ? '' : $this->resolve_description( $category->description );
 		$image       = $this->get_category_image( $category );
 		$url         = get_term_link( $category );
 
@@ -778,15 +770,7 @@ class WOG_Meta_Tags {
 			'type'        => 'website',
 			'title'       => $title,
 			'description' => $description,
-			'images'      => array(
-				array(
-					'url'    => $image,
-					'width'  => 1200,
-					'height' => 630,
-					'alt'    => $category->name,
-					'type'   => 'image/png',
-				),
-			),
+			'images'      => $image ? array( $image ) : array(),
 			'url'         => $url,
 			'site_name'   => get_bloginfo( 'name' ),
 		);
@@ -807,16 +791,8 @@ class WOG_Meta_Tags {
 		return array(
 			'type'        => 'website',
 			'title'       => $tag->name,
-			'description' => $tag->description,
-			'images'      => array(
-				array(
-					'url'    => $this->get_fallback_image(),
-					'width'  => 1200,
-					'height' => 630,
-					'alt'    => $tag->name,
-					'type'   => 'image/png',
-				),
-			),
+			'description' => $this->resolve_description( $tag->description ),
+			'images'      => $this->fallback_image_array( $tag->name ),
 			'url'         => get_term_link( $tag ),
 			'site_name'   => get_bloginfo( 'name' ),
 		);
@@ -835,26 +811,41 @@ class WOG_Meta_Tags {
 		return array(
 			'type'        => 'website',
 			'title'       => get_the_title( $shop_page_id ),
-			'description' => ! empty( $meta_desc ) ? $meta_desc : get_bloginfo( 'description' ),
-			'images'      => array(
-				array(
-					'url'    => $this->get_fallback_image(),
-					'width'  => 1200,
-					'height' => 630,
-					'alt'    => get_the_title( $shop_page_id ),
-					'type'   => 'image/png',
-				),
-			),
+			'description' => $this->resolve_description( $meta_desc ),
+			'images'      => $this->fallback_image_array( get_the_title( $shop_page_id ) ),
 			'url'         => get_permalink( $shop_page_id ),
 			'site_name'   => get_bloginfo( 'name' ),
 		);
 	}
 
 	/**
-	 * Get category image URL.
+	 * Build an images array for a bare fallback URL (no width/height/type hints).
+	 *
+	 * @param string $alt Alt text for the image.
+	 * @return array
+	 */
+	private function fallback_image_array( $alt ) {
+		$url = $this->get_fallback_image();
+		if ( ! $url ) {
+			return array();
+		}
+
+		return array(
+			array(
+				'url' => $url,
+				'alt' => $alt,
+			),
+		);
+	}
+
+	/**
+	 * Get category image as an OG image array.
+	 *
+	 * When the category has a real thumbnail, honest width/height/type are read
+	 * from the attachment. Otherwise only the fallback URL is returned (no hints).
 	 *
 	 * @param WP_Term $category The category term object.
-	 * @return string
+	 * @return array|null
 	 */
 	private function get_category_image( $category ) {
 		$thumbnail_id = get_term_meta( $category->term_id, 'thumbnail_id', true );
@@ -862,10 +853,24 @@ class WOG_Meta_Tags {
 		if ( $thumbnail_id ) {
 			$image = wp_get_attachment_image_src( $thumbnail_id, 'large' );
 			if ( $image ) {
-				return $image[0];
+				return array(
+					'url'    => $image[0],
+					'width'  => $image[1],
+					'height' => $image[2],
+					'type'   => get_post_mime_type( $thumbnail_id ),
+					'alt'    => $category->name,
+				);
 			}
 		}
 
-		return $this->get_fallback_image();
+		$fallback = $this->get_fallback_image();
+		if ( ! $fallback ) {
+			return null;
+		}
+
+		return array(
+			'url' => $fallback,
+			'alt' => $category->name,
+		);
 	}
 }

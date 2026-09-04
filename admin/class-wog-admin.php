@@ -84,7 +84,7 @@ class WOG_Admin {
 		);
 
 		$core_fields = array(
-			'enable_schema'    => __( 'Add Schema.org structured data to product pages for better search results', 'woo-open-graph' ),
+			'enable_schema'    => __( 'Gap-fill WooCommerce\'s existing Product schema with extra fields (brand, GTIN, MPN, specifications). Off by default - WooCommerce already outputs Product structured data, so leave off unless you need the extra fields.', 'woo-open-graph' ),
 			'enable_facebook'  => __( 'Generate Facebook Open Graph meta tags for better sharing', 'woo-open-graph' ),
 			'enable_twitter'   => __( 'Generate Twitter Card meta tags for better sharing', 'woo-open-graph' ),
 			'enable_linkedin'  => __( 'Optimize sharing for LinkedIn professional network', 'woo-open-graph' ),
@@ -363,7 +363,7 @@ class WOG_Admin {
 						</div>
 						<div class="wog-card-body">
 							<p><strong><?php esc_html_e( 'Version:', 'woo-open-graph' ); ?></strong> <?php echo esc_html( WOG_VERSION ); ?></p>
-							<p><strong><?php esc_html_e( 'Compatible with:', 'woo-open-graph' ); ?></strong> Yoast, RankMath, SEOPress</p>
+							<p><strong><?php esc_html_e( 'Works alongside:', 'woo-open-graph' ); ?></strong> Yoast, RankMath, SEOPress <?php esc_html_e( '(detects their Open Graph / Twitter tags and skips duplicates)', 'woo-open-graph' ); ?></p>
 							<p><strong><?php esc_html_e( 'Auto-generates:', 'woo-open-graph' ); ?></strong> <?php esc_html_e( 'Schema, Open Graph, Twitter Cards', 'woo-open-graph' ); ?></p>
 							
 							<hr>
