@@ -590,20 +590,11 @@ class WOG_Meta_Tags {
 	 * @param array $meta_data The meta data array.
 	 */
 	private function output_pinterest_tags( $meta_data ) {
+		// Pinterest Rich Pins read the standard product:*/og:* tags emitted by
+		// output_facebook_tags(); the only Pinterest-specific tag needed is the
+		// rich-pin opt-in. Re-emitting product:price:*/availability here produced
+		// duplicate meta tags on every product page.
 		echo '<meta name="pinterest-rich-pin" content="true" />' . "\n";
-
-		if ( 'product' === $meta_data['type'] && ! empty( $meta_data['product'] ) ) {
-			$product = $meta_data['product'];
-
-			if ( ! empty( $product['price'] ) ) {
-				echo '<meta property="product:price:amount" content="' . esc_attr( $product['price'] ) . '" />' . "\n";
-				echo '<meta property="product:price:currency" content="' . esc_attr( $product['currency'] ) . '" />' . "\n";
-			}
-
-			if ( ! empty( $product['availability'] ) ) {
-				echo '<meta property="product:availability" content="' . esc_attr( $product['availability'] ) . '" />' . "\n";
-			}
-		}
 	}
 
 	/**
