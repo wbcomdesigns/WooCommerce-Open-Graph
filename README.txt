@@ -5,7 +5,7 @@ Tags: woocommerce, open graph, social media, facebook, schema
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -105,6 +105,15 @@ Yes, the plugin is fully translatable and supports RTL languages.
 8. Advanced options for power users
 
 == Changelog ==
+
+= 2.0.3 - September 2026 =
+
+* Improve  - Stop duplicating WooCommerce's Product schema; Woo's own product schema is left to stand and the plugin gap-fills only through WooCommerce filters.
+* Fix      - Remove dishonest structured-data hints: no fabricated priceValidUntil and no always-new condition; GTIN, MPN and brand now come from real WooCommerce data.
+* Fix      - Real de-duplication with Yoast, Rank Math and SEOPress: og: and twitter: tags they already emit are no longer duplicated.
+* Fix      - og:image:alt is emitted once instead of twice on every page.
+* Fix      - Share image width, height and type are read from the real product image and omitted for placeholder or non-product URLs, instead of hardcoded values.
+* Fix      - og:description keeps a fallback to the site name so it is never dropped when the site tagline is empty.
 
 = 2.0.1 =
 * Updated for WordPress.org compliance
