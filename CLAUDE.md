@@ -41,7 +41,7 @@ Two places, deliberately, and they reconcile:
 |---|---|
 | **Basecamp board** | [Open Graph for WooCommerce](https://3.basecamp.com/5798509/projects/48433311) |
 | **Cards to work** | **12** — 4 in Bugs, 8 in Scope |
-| **Checklist below** | **52** items on branch `2.0.2` |
+| **Checklist below** | **52** items, tracked against `master` (released **2.0.4**, 2026-09-14) |
 
 **Why the two numbers differ.** A card is the trackable unit a person picks up; a checklist item is one verifiable step inside it. The portfolio-floor items in particular repeat across all 12 plugins — four suite-wide faults, counted once per plugin here.
 
@@ -51,9 +51,25 @@ Two places, deliberately, and they reconcile:
 
 Ordered by how many store owners are affected, not by how interesting the code is.
 Derived from a code audit on 2026-08-08 that verified every open Basecamp card against this branch.
-**Work happens on this branch (`2.0.2`).**
+**Work happens on `master` (released **2.0.4**, 2026-09-14).** The earlier `2.0.2` line is retired - verify anything below against `master` before re-opening it.
+
+### Done in 2.0.4 (released 2026-09-14 on `master`)
+
+Two bug cards from a UI/UX pass (Basecamp bucket 48880118, "Bugs" - note this is a separate board from the plugin's own project 48433311; the account owner must POST an admission to read it). Each reproduced live before the fix and browser-verified after (woo.local, modern + minimal styles, desktop + 390px).
+
+- [x] **Share label ignored the theme.** `.wog-share-label` hardcoded `color: #333` plus a dark-mode `#e1e8ed`; both removed so the label inherits the theme text colour (`currentColor`). (`assets/css/social-share.css`)
+- [x] **Copy Link was dead in the shipped zip (Critical).** The plugin enqueues its unminified sources, but `gruntfile copy:dist` excluded `assets/js/social-share.js` and shipped only the never-loaded `min/` copy, so it 404'd on every product page. Removed the unused `min/` + `rtl/` artifacts and the `cssmin`/`uglify`/`rtlcss` tasks so the shipped file set equals the loaded set. (`gruntfile.js`, `assets/`)
+- [x] **Dead legacy admin stylesheet removed** - `admin/css/woo-open-graph-admin.*` (670 lines, never enqueued).
+- [x] **RTL handled in-source with logical properties** (`border-inline-start`, `text-align: start`) instead of unloaded `.rtl.css` files. (`assets/css/admin.css`, `includes/class-wog-meta-boxes.php`)
+- [x] **Share buttons meet a 40px minimum tap target** (base button + minimal style on mobile). (`assets/css/social-share.css`)
+- [x] **Scoped the global `h2:not(:first-child)` admin rule** to `.wog-admin-wrap`; added a `title` tooltip to icon-only share links. (`assets/css/admin.css`, `includes/class-wog-social-share.php`)
+
+**Deferred to a future release (subjective refactors, not defects):** a full design-token system (audit UI-005) and breakpoint consolidation (UI-009). These are the same work the two "CSS custom properties" items below already track - do that pass and the deferred audit items close with it.
 
 ### 1. Social sharing is broken for most stores (board created 2026-08-08)
+
+_The five meta-tag items below shipped in 2.0.3 (see the readme.txt changelog: schema de-dup, honest image hints, single `og:image:alt`, `og:description` fallback). Re-verify against `master` before re-opening any of them._
+
 - [ ] **De-duplication has never worked.** `scan_existing_tags()` listens for `wp_head_early_og`, an action only this plugin fires, so all 13 guard sites are permanent no-ops. Any store with Yoast/RankMath/SEOPress gets duplicate `og:` tags. Buffer `wp_head` itself instead. (`includes/class-wog-meta-tags.php:50-79`)
 - [ ] **Remove the "Compatible with: Yoast, RankMath, SEOPress" claim** at `admin/class-wog-admin.php:285` until the above actually works.
 - [ ] **Image hints are hardcoded** 1200/630/`image/png` at `class-wog-meta-tags.php:334-337, 659-662, 682-685, 701-704`. Derive from `wp_get_attachment_metadata()`; omit rather than guess.
