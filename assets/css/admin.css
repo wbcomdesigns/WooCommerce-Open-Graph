@@ -151,7 +151,7 @@
 .wog-btn-block {
     width: 100%;
     justify-content: flex-start;
-    text-align: left;
+    text-align: start;
     padding: 12px 16px;
     margin-bottom: 8px;
     border: 1px solid #c3c4c7;
@@ -254,7 +254,7 @@
 }
 
 /* === SECTION HEADINGS === */
-h2:not(:first-child) {
+.wog-admin-wrap h2:not(:first-child) {
     margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid #f0f0f1;

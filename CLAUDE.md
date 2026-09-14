@@ -279,8 +279,17 @@ Plain class-per-concern, no boilerplate loader. `Woo_Open_Graph` in the main fil
 
 ### Assets
 - `assets/js/social-share.js` - share button behaviour
-- `assets/css/social-share.css`, `assets/css/admin.css` (+ `rtl/` variants)
-- `admin/css/woo-open-graph-admin.css` (+ `rtl/`)
+- `assets/css/social-share.css` - front-end share widget
+- `assets/css/admin.css` - settings screen
+
+**The plugin enqueues these unminified sources directly.** There is no build-time
+minification and no separate RTL stylesheet: the shipped file set equals the
+loaded file set. RTL is handled inside the sources with CSS logical properties
+(`border-inline-start`, `text-align: start`), not a generated `.rtl.css`. Do not
+reintroduce `min/` or `rtl/` variants unless the enqueue is wired to consume them
+(the previous split shipped dead files and 404'd the enqueued JS in the release
+zip). The legacy `admin/css/woo-open-graph-admin.css` was removed in 2.0.4 (never
+enqueued).
 
 Codebase: ~5,200 PHP LOC across 11 files.
 

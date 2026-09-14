@@ -2,14 +2,14 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Open Graph for WooCommerce 2.0.3\n"
+"Project-Id-Version: Open Graph for WooCommerce 2.0.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/open-graph-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-11T11:21:16+00:00\n"
+"POT-Creation-Date: 2026-09-14T11:16:02+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: woo-open-graph\n"
@@ -540,45 +540,46 @@ msgstr ""
 
 #. translators: %s: Platform name.
 #: includes/class-wog-social-share.php:218
+#: includes/class-wog-social-share.php:220
 #, php-format
 msgid "Share on %s"
 msgstr ""
 
-#: includes/class-wog-social-share.php:236
+#: includes/class-wog-social-share.php:238
 msgid "Copy product link"
 msgstr ""
 
-#: includes/class-wog-social-share.php:237
+#: includes/class-wog-social-share.php:239
 msgid "Copy link to clipboard"
 msgstr ""
 
-#: includes/class-wog-social-share.php:241
+#: includes/class-wog-social-share.php:243
 msgid "Copy"
 msgstr ""
 
 #. translators: %s: Product title.
-#: includes/class-wog-social-share.php:301
+#: includes/class-wog-social-share.php:303
 #, php-format
 msgid "Check out: %s"
 msgstr ""
 
-#: includes/class-wog-social-share.php:308
+#: includes/class-wog-social-share.php:310
 msgid "View product:"
 msgstr ""
 
-#: includes/class-wog-social-share.php:479
+#: includes/class-wog-social-share.php:481
 msgid "Link copied!"
 msgstr ""
 
-#: includes/class-wog-social-share.php:480
+#: includes/class-wog-social-share.php:482
 msgid "Failed to copy link"
 msgstr ""
 
-#: includes/class-wog-social-share.php:481
+#: includes/class-wog-social-share.php:483
 msgid "Copy link"
 msgstr ""
 
-#: includes/class-wog-social-share.php:535
+#: includes/class-wog-social-share.php:537
 msgid "Share tracked successfully"
 msgstr ""
 
