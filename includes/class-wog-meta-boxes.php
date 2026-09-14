@@ -219,7 +219,7 @@ class WOG_Meta_Boxes {
 		.wog-meta-box .wog-toggle-field {
 			padding: 10px;
 			background: #f6f7f7;
-			border-left: 4px solid #00a32a;
+			border-inline-start: 4px solid #00a32a;
 			margin-bottom: 15px;
 		}
 		.wog-meta-box .wog-counter {

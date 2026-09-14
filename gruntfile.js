@@ -38,90 +38,12 @@ module.exports = function (grunt) {
             },
         },
 
-        // Task for CSS minification
-        cssmin: {
-            admin: {
-                files: [{
-                    expand: true,
-                    cwd: 'admin/css',
-                    src: ['*.css', '!*.min.css'],
-                    dest: 'admin/css/min',
-                    ext: '.min.css',
-                }],
-            },
-            assets: {
-                files: [{
-                    expand: true,
-                    cwd: 'assets/css',
-                    src: ['*.css', '!*.min.css'],
-                    dest: 'assets/css/min',
-                    ext: '.min.css',
-                }],
-            },
-        },
-
-        // Task for JavaScript minification
-        uglify: {
-            assets: {
-                options: {
-                    mangle: false,
-                },
-                files: [{
-                    expand: true,
-                    cwd: 'assets/js',
-                    src: ['*.js', '!*.min.js'],
-                    dest: 'assets/js/min',
-                    ext: '.min.js',
-                }],
-            },
-        },
-
-        // Task for watching file changes
+        // Task for watching PHP text-domain changes
         watch: {
-            css: {
-                files: ['admin/css/*.css', 'assets/css/*.css', '!**/*.min.css'],
-                tasks: ['cssmin'],
-            },
-            js: {
-                files: ['assets/js/*.js', '!assets/js/*.min.js'],
-                tasks: ['uglify'],
-            },
             php: {
                 files: ['**/*.php'],
                 tasks: ['checktextdomain'],
             },
-        },
-
-        // Task for generating RTL CSS
-        rtlcss: {
-            myTask: {
-                options: {
-                    map: { inline: false },
-                    opts: {
-                        clean: false
-                    },
-                    plugins: [],
-                    saveUnmodified: true,
-                },
-                files: [
-                    {
-                        expand: true,
-                        cwd: 'admin/css',
-                        src: ['*.css', '!*.min.css'],
-                        dest: 'admin/css/rtl/',
-                        ext: '.rtl.css',
-                        flatten: true
-                    },
-                    {
-                        expand: true,
-                        cwd: 'assets/css',
-                        src: ['*.css', '!*.min.css'],
-                        dest: 'assets/css/rtl/',
-                        ext: '.rtl.css',
-                        flatten: true
-                    }
-                ]
-            }
         },
 
         shell: {
@@ -154,7 +76,10 @@ module.exports = function (grunt) {
             postbuild: ['dist/open-graph-for-woocommerce'],
         },
 
-        // Task for copying files to dist
+        // Task for copying files to dist.
+        // The plugin enqueues its unminified sources directly (no build-time
+        // minification), so the shipped file set equals the loaded file set:
+        // every CSS/JS asset copied here is one the plugin actually enqueues.
         copy: {
             dist: {
                 src: [
@@ -182,9 +107,7 @@ module.exports = function (grunt) {
                     '!.distignore',
                     '!.github/**',
                     '!bin/**',
-                    '!assets/js/*.js',
-                    '!assets/js/*.map',
-                    'assets/js/min/**',
+                    '!**/*.map',
                 ],
                 dest: 'dist/open-graph-for-woocommerce/',
             },
@@ -209,25 +132,19 @@ module.exports = function (grunt) {
 
     // Load the plugins
     grunt.loadNpmTasks('grunt-wp-i18n');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-checktextdomain');
-    grunt.loadNpmTasks('grunt-rtlcss');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-compress');
 
     // Register default tasks
-    grunt.registerTask('default', ['cssmin', 'uglify', 'checktextdomain', 'rtlcss', 'shell', 'watch']);
+    grunt.registerTask('default', ['checktextdomain', 'shell', 'watch']);
 
     // Register build task for WordPress.org distribution
     grunt.registerTask('build', [
         'clean:dist',
-        'cssmin',
-        'uglify',
-        'rtlcss',
         'shell',
         'copy:dist',
         'compress:dist',

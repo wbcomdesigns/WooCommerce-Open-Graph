@@ -5,7 +5,7 @@ Tags: woocommerce, open graph, social media, facebook, schema
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -105,6 +105,15 @@ Yes, the plugin is fully translatable and supports RTL languages.
 8. Advanced options for power users
 
 == Changelog ==
+
+= 2.0.4 - September 2026 =
+
+* Improve  - Removed CSS and JavaScript files that were shipped in the plugin but never loaded, including a legacy admin stylesheet and the unused minified and RTL copies.
+* Fix      - Copy Link button now works on product pages; the share script was present in the source but excluded from the packaged plugin, so it returned a 404 and the button did nothing.
+* Fix      - The "Share this product" label now inherits the active theme text color instead of a hardcoded gray, in both light and dark modes.
+* Fix      - Share buttons now meet a 40px minimum tap-target size on mobile.
+* Fix      - Section-heading styles on the settings screen are scoped to the plugin so they no longer affect other admin headings.
+* Fix      - Icon share links now expose a title tooltip, and admin and meta-box styles use logical properties for correct right-to-left layouts.
 
 = 2.0.3 - September 2026 =
 

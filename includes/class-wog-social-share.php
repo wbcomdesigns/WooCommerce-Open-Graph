@@ -215,7 +215,9 @@ class WOG_Social_Share {
 			target="_blank"
 			rel="noopener noreferrer"
 			<?php /* translators: %s: Platform name. */ ?>
-			aria-label="<?php echo esc_attr( sprintf( __( 'Share on %s', 'woo-open-graph' ), $config['name'] ) ); ?>">
+			aria-label="<?php echo esc_attr( sprintf( __( 'Share on %s', 'woo-open-graph' ), $config['name'] ) ); ?>"
+			<?php /* translators: %s: Platform name. */ ?>
+			title="<?php echo esc_attr( sprintf( __( 'Share on %s', 'woo-open-graph' ), $config['name'] ) ); ?>">
 			<?php echo wp_kses( $config['icon'], $allowed_svg ); ?>
 			<span class="wog-share-text"><?php echo esc_html( $config['name'] ); ?></span>
 		</a>
