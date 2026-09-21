@@ -3,8 +3,10 @@ Contributors: wbcomdesigns
 Donate link: https://wbcomdesigns.com/donate
 Tags: woocommerce, open graph, social media, facebook, schema
 Requires at least: 5.0
-Tested up to: 6.9
-Requires PHP: 7.4
+Tested up to: 7.1
+Requires PHP: 8.1
+Tested with WooCommerce 11.1.1
+Tested with WooCommerce 11.1.1
 Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
