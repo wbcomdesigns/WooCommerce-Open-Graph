@@ -5,7 +5,7 @@
 - **Repo:** `WooCommerce-Open-Graph` (note: repo name is CamelCase, plugin dir is `open-graph-for-woocommerce`)
 - **Main File:** `open-graph-for-woocommerce.php`
 - **Text Domain:** `woo-open-graph`
-- **Version:** 2.0.1
+- **Version:** 2.1.0
 - **Author:** Wbcom Designs
 - **License:** GPL v2 or later
 - **Requires WordPress:** 5.0+
@@ -313,7 +313,7 @@ Codebase: ~5,200 PHP LOC across 11 files.
 
 | Constant | Value |
 |----------|-------|
-| `WOG_VERSION` | `'2.0.1'` |
+| `WOG_VERSION` | `'2.1.0'` |
 | `WOG_PLUGIN_FILE` | `__FILE__` |
 | `WOG_PLUGIN_DIR` | `plugin_dir_path(__FILE__)` |
 | `WOG_PLUGIN_URL` | `plugin_dir_url(__FILE__)` |
@@ -373,6 +373,9 @@ Also *reads* (does not own) `_brand`, `_wp_attachment_image_alt`, and `_yoast_wp
 ## Development Notes
 - **Settings live in ONE option** (`wog_settings`), not scattered keys. Add new settings to the defaults array and let `wog_validated_settings` sanitize them - do not add sibling options.
 - **Sitemap uses rewrite rules.** Any change to the sitemap route must bump the flush guard option, otherwise the endpoint 404s on existing installs.
-- **Meta output is cached.** When changing what a tag emits, clear the matching cache and fire the corresponding `wog_*_cache_cleared` action so downstream consumers stay in sync.
+- **Meta output is not cached** (the unused `cache_meta_tags` setting was removed in 2.1.0). Only sitemaps are cached, as `_transient_wog_*`.
+- **Per-product social switch:** every social layer (OG/Twitter tags, html prefix, share buttons and their assets) asks `wog_is_social_enabled_for_product()`. JSON-LD is deliberately not gated. A new output layer must ask the same helper.
+- **Uninstall** (`uninstall.php`) always clears sitemap jobs and transients; options and `_wog_*` post meta are removed only when Advanced > `delete_data_on_uninstall` is on. Add any new option or meta key to its lists.
+- **Upgrades:** `Woo_Open_Graph::maybe_upgrade()` compares `wog_version` to `WOG_VERSION` and runs `migrate_old_settings()` once.
 - Repo directory name (`WooCommerce-Open-Graph`) does not match the plugin slug (`open-graph-for-woocommerce`). Build and deploy scripts must use the plugin slug.
 - No Basecamp board exists for this product as of August 2026; bugs have no default home column.

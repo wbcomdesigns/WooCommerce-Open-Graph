@@ -194,6 +194,11 @@
         }
         
         trackShare(platform, productId, url) {
+            // Public extension point (documented in readme.md): fires for every share and copy.
+            document.dispatchEvent(new CustomEvent('wog_social_share', {
+                detail: { platform: platform, productId: productId, url: url }
+            }));
+
             // Only track if AJAX URL and nonce are available
             if (!wogShare?.ajaxUrl || !wogShare?.nonce) {
                 if (wogShare?.debug) {

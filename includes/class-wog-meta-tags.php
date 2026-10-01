@@ -133,7 +133,7 @@ class WOG_Meta_Tags {
 	 * @return string
 	 */
 	public function add_opengraph_namespace( $output ) {
-		if ( $this->should_add_meta_tags() ) {
+		if ( $this->should_add_meta_tags() && ! ( is_product() && ! wog_is_social_enabled_for_product( get_queried_object_id() ) ) ) {
 			$namespaces = array(
 				'og: https://ogp.me/ns#',
 				'product: https://ogp.me/ns/product#',
@@ -238,9 +238,8 @@ class WOG_Meta_Tags {
 			return array();
 		}
 
-		// Check if user disabled OG for this product.
-		$disabled = get_post_meta( $post->ID, '_wog_disable_og', true );
-		if ( $disabled ) {
+		// Owner switched social output off for this product.
+		if ( ! wog_is_social_enabled_for_product( $post->ID ) ) {
 			$product_cache[ $post->ID ] = array();
 			return array();
 		}
@@ -298,10 +297,12 @@ class WOG_Meta_Tags {
 	/**
 	 * Get optimized product title.
 	 *
+	 * Public so the product meta box shows exactly what will be published.
+	 *
 	 * @param WC_Product $product The product object.
 	 * @return string
 	 */
-	private function get_optimized_title( $product ) {
+	public function get_optimized_title( $product ) {
 		$title = $product->get_name();
 
 		$brand = $this->get_product_brand( $product );
@@ -315,10 +316,12 @@ class WOG_Meta_Tags {
 	/**
 	 * Get optimized product description.
 	 *
+	 * Public so the product meta box shows exactly what will be published.
+	 *
 	 * @param WC_Product $product The product object.
 	 * @return string
 	 */
-	private function get_optimized_description( $product ) {
+	public function get_optimized_description( $product ) {
 		$description = $product->get_short_description();
 		if ( empty( $description ) ) {
 			$description = $product->get_description();
@@ -326,8 +329,10 @@ class WOG_Meta_Tags {
 
 		$enhanced_description = $this->resolve_description( $description );
 
-		if ( $product->get_price() ) {
-			$enhanced_description .= ' Price: ' . wc_price( $product->get_price() );
+		// A range for variable and grouped products whose children differ.
+		$price_text = wog_get_product_price_text( $product );
+		if ( '' !== $price_text ) {
+			$enhanced_description .= ' Price: ' . $price_text;
 		}
 
 		if ( $product->is_in_stock() ) {
@@ -458,7 +463,10 @@ class WOG_Meta_Tags {
 		if ( ! empty( $meta_data['images'] ) && ! $this->tag_exists( 'image' ) ) {
 			foreach ( $meta_data['images'] as $image ) {
 				echo '<meta property="og:image" content="' . esc_url( $image['url'] ) . '" />' . "\n";
-				echo '<meta property="og:image:secure_url" content="' . esc_url( $image['url'] ) . '" />' . "\n";
+				// secure_url carries the HTTPS variant; on plain HTTP there is none to give.
+				if ( 0 === strpos( $image['url'], 'https://' ) ) {
+					echo '<meta property="og:image:secure_url" content="' . esc_url( $image['url'] ) . '" />' . "\n";
+				}
 				// Emit dimension/type hints only when read from a real attachment; a wrong hint is worse than none.
 				if ( ! empty( $image['width'] ) ) {
 					echo '<meta property="og:image:width" content="' . esc_attr( $image['width'] ) . '" />' . "\n";
@@ -524,7 +532,8 @@ class WOG_Meta_Tags {
 	private function output_twitter_tags( $meta_data ) {
 		$should_override = $this->should_disable_title_description();
 
-		$card_type = ( 'product' === $meta_data['type'] ) ? 'product' : 'summary_large_image';
+		// X has no product card; a large image card needs an image to show.
+		$card_type = ! empty( $meta_data['images'] ) ? 'summary_large_image' : 'summary';
 		if ( ! $this->tag_exists( 'twitter:card' ) || $should_override ) {
 			echo '<meta name="twitter:card" content="' . esc_attr( $card_type ) . '" />' . "\n";
 		}
@@ -733,11 +742,7 @@ class WOG_Meta_Tags {
 	 * @return string
 	 */
 	private function get_fallback_image() {
-		if ( ! empty( $this->settings['fallback_image'] ) ) {
-			return $this->settings['fallback_image'];
-		}
-
-		return wc_placeholder_img_src( 'large' );
+		return wog_get_fallback_image_url();
 	}
 
 	/**
@@ -752,8 +757,10 @@ class WOG_Meta_Tags {
 			return array();
 		}
 
-		$title       = $this->should_disable_title_description() ? '' : $category->name;
-		$description = $this->should_disable_title_description() ? '' : $this->resolve_description( $category->description );
+		// The "override" setting means always emit ours (see output_basic_og_tags()),
+		// so it must never blank the values themselves.
+		$title       = $category->name;
+		$description = $this->resolve_description( $category->description );
 		$image       = $this->get_category_image( $category );
 		$url         = get_term_link( $category );
 

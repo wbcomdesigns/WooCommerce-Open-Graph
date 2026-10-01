@@ -230,7 +230,7 @@ document.addEventListener('wog_social_share', function(event) {
 });
 
 // Custom copy functionality
-window.EWOGSocialShare.copyLink(url);
+window.wogShare.copyLink(url);
 ```
 
 ## 🐛 Troubleshooting

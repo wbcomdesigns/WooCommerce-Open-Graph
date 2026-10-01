@@ -83,6 +83,15 @@ class WOG_Schema {
 
 		$gap = array();
 
+		// WooCommerce omits image for a product without one; Google requires it.
+		// Same fallback the Open Graph layer uses, so the two never disagree.
+		if ( empty( $markup['image'] ) ) {
+			$image = wog_get_fallback_image_url();
+			if ( $image ) {
+				$gap['image'] = $image;
+			}
+		}
+
 		if ( empty( $markup['brand'] ) ) {
 			$brand = $this->get_enhanced_brand_schema( $product );
 			if ( $brand ) {
@@ -162,7 +171,7 @@ class WOG_Schema {
 			if ( ! empty( $schema_data ) ) {
 				echo "\n<!-- Enhanced Woo Open Graph Schema: " . esc_html( $type ) . " -->\n";
 				echo '<script type="application/ld+json">' . "\n";
-				echo wp_json_encode( $schema_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+				echo wp_json_encode( $schema_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP );
 				echo "\n" . '</script>' . "\n";
 			}
 		}
@@ -268,9 +277,17 @@ class WOG_Schema {
 			'@type'    => 'Organization',
 			'name'     => get_bloginfo( 'name' ),
 			'url'      => home_url(),
-			'logo'     => $this->get_site_logo(),
-			'sameAs'   => $this->get_social_profiles(),
 		);
+
+		// Empty logo / sameAs are invalid structured data: omit rather than publish blanks.
+		$logo = $this->get_site_logo();
+		if ( $logo ) {
+			$schema['logo'] = $logo;
+		}
+		$profiles = $this->get_social_profiles();
+		if ( $profiles ) {
+			$schema['sameAs'] = $profiles;
+		}
 
 		// Add contact information.
 		$phone = get_option( 'woocommerce_store_phone', '' );
@@ -350,11 +367,16 @@ class WOG_Schema {
 	}
 
 	/**
-	 * Get site logo URL.
+	 * Get site logo URL: the plugin's Organization logo setting, then the theme
+	 * custom logo, then the WordPress Site Icon.
 	 *
 	 * @return string
 	 */
 	private function get_site_logo() {
+		if ( ! empty( $this->settings['organization_logo'] ) ) {
+			return $this->settings['organization_logo'];
+		}
+
 		$custom_logo_id = get_theme_mod( 'custom_logo' );
 
 		if ( $custom_logo_id ) {
@@ -364,34 +386,18 @@ class WOG_Schema {
 			}
 		}
 
-		return '';
+		return (string) get_site_icon_url( 512 );
 	}
 
 	/**
-	 * Get social media profile URLs.
+	 * Get social media profile URLs from the Social profiles setting.
 	 *
 	 * @return array
 	 */
 	private function get_social_profiles() {
-		$profiles = array();
+		$profiles = isset( $this->settings['social_profiles'] ) ? (array) $this->settings['social_profiles'] : array();
 
-		// Get social media URLs from common locations.
-		$social_fields = array(
-			'facebook_url',
-			'twitter_url',
-			'instagram_url',
-			'linkedin_url',
-			'youtube_url',
-		);
-
-		foreach ( $social_fields as $field ) {
-			$url = get_option( $field );
-			if ( ! empty( $url ) ) {
-				$profiles[] = $url;
-			}
-		}
-
-		return $profiles;
+		return array_values( array_filter( array_map( 'esc_url_raw', $profiles ) ) );
 	}
 
 	/**
@@ -403,9 +409,10 @@ class WOG_Schema {
 		$address_fields = array(
 			'street'     => get_option( 'woocommerce_store_address' ),
 			'city'       => get_option( 'woocommerce_store_city' ),
-			'state'      => get_option( 'woocommerce_default_state' ),
+			// WooCommerce stores the base location as "CC:STATE"; read it the way core does.
+			'state'      => WC()->countries->get_base_state(),
 			'postalCode' => get_option( 'woocommerce_store_postcode' ),
-			'country'    => get_option( 'woocommerce_default_country' ),
+			'country'    => WC()->countries->get_base_country(),
 		);
 
 		$address_fields = array_filter( $address_fields );

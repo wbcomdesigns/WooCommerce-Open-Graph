@@ -507,8 +507,6 @@ class WOG_Sitemap {
 				array( 'brands', 0 )
 			);
 		}
-
-		update_option( 'wog_sitemap_last_generated', time() );
 	}
 
 	/**
@@ -547,6 +545,9 @@ class WOG_Sitemap {
 
 		$sitemap_content = ob_get_clean();
 		$this->cache_sitemap( $cache_key, $sitemap_content );
+
+		// Stamped only when a sitemap was actually written, never when it was queued.
+		update_option( 'wog_sitemap_last_generated', time() );
 	}
 
 	/**

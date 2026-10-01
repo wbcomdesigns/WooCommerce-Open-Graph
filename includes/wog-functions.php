@@ -101,3 +101,79 @@ function wog_get_product_brand( $product ) {
 
 	return (string) get_post_meta( $product->get_id(), '_brand', true );
 }
+
+/**
+ * Whether social output is allowed for a product.
+ *
+ * Covers the Open Graph / Twitter tags, the share buttons, their assets and the
+ * html prefix. Product JSON-LD is search markup and is deliberately not gated.
+ * Every output layer asks this one function, so the per-product switch cannot
+ * drift again when a layer is added.
+ *
+ * @since 2.1.0
+ * @param int $product_id Product ID.
+ * @return bool
+ */
+function wog_is_social_enabled_for_product( $product_id ) {
+	$enabled = ! get_post_meta( $product_id, '_wog_disable_og', true );
+
+	/**
+	 * Filter whether social output is allowed for a product.
+	 *
+	 * @param bool $enabled    Whether social output is allowed.
+	 * @param int  $product_id Product ID.
+	 */
+	return (bool) apply_filters( 'wog_social_enabled_for_product', $enabled, $product_id );
+}
+
+/**
+ * Image URL used when a product or archive has no image of its own.
+ *
+ * The settings fallback image, else the WooCommerce placeholder at the
+ * configured image size. Shared by the Open Graph and JSON-LD layers.
+ *
+ * @since 2.1.0
+ * @return string
+ */
+function wog_get_fallback_image_url() {
+	$settings = wog_get_settings();
+
+	if ( ! empty( $settings['fallback_image'] ) ) {
+		return $settings['fallback_image'];
+	}
+
+	return wc_placeholder_img_src( ! empty( $settings['image_size'] ) ? $settings['image_size'] : 'large' );
+}
+
+/**
+ * Product price for share text: a range when a variable or grouped product's
+ * children differ in price, otherwise the single price.
+ *
+ * @since 2.1.0
+ * @param WC_Product $product The product object.
+ * @return string Price HTML (wc_price), or '' when the product has no price.
+ */
+function wog_get_product_price_text( $product ) {
+	if ( $product instanceof WC_Product_Variable ) {
+		$min = $product->get_variation_price( 'min', true );
+		$max = $product->get_variation_price( 'max', true );
+	} elseif ( $product instanceof WC_Product_Grouped ) {
+		$prices = array();
+		foreach ( array_filter( array_map( 'wc_get_product', $product->get_children() ) ) as $child ) {
+			if ( '' !== $child->get_price() ) {
+				$prices[] = (float) $child->get_price();
+			}
+		}
+		$min = $prices ? min( $prices ) : '';
+		$max = $prices ? max( $prices ) : '';
+	} else {
+		$min = $product->get_price();
+		$max = $min;
+	}
+
+	if ( '' === $min ) {
+		return '';
+	}
+
+	return (float) $min === (float) $max ? wc_price( $min ) : wc_price( $min ) . ' – ' . wc_price( $max );
+}

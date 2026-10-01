@@ -5,7 +5,7 @@ Tags: woocommerce, open graph, social media, facebook, schema
 Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.4
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -105,6 +105,39 @@ Yes, the plugin is fully translatable and supports RTL languages.
 8. Advanced options for power users
 
 == Changelog ==
+
+= 2.1.0 - October 2026 =
+
+* New      - Organization Logo and Social Profiles settings feed the Organization structured data, with the theme logo and then the Site Icon as fallbacks.
+* New      - Optional Email share button.
+* New      - Option to delete all plugin data when the plugin is deleted (off by default).
+* New      - The [wog_social_share] shortcode accepts a product id, so share buttons can be placed on any page.
+* Improve  - X (Twitter) cards use the large-image card when the product has an image, and the summary card otherwise.
+* Improve  - Share text shows a price range for variable and grouped products whose prices differ.
+* Improve  - The product list Social column shows its state as text, not colour alone.
+* Improve  - The per-product switch is now labelled "Enable social sharing output" and states that search structured data is not affected.
+* Fix      - Product category pages keep og:title and og:description when "Override titles and descriptions" is enabled.
+* Fix      - Sold-out products show share buttons again.
+* Fix      - Turning off social output for a product now also removes its share buttons, share assets and Open Graph namespace.
+* Fix      - Share assets no longer load on product pages when share buttons are turned off.
+* Fix      - The [wog_social_share] shortcode renders on pages other than the product page.
+* Fix      - Products without a photo now include an image in their structured data.
+* Fix      - Organization structured data no longer publishes an empty logo or empty profile list.
+* Fix      - The store address publishes the country and region separately instead of a combined "US:CA" value.
+* Fix      - og:image:secure_url is emitted only for HTTPS image URLs.
+* Fix      - An invalid X (Twitter) username is rejected with a message and the previously saved username is kept.
+* Fix      - The Social column in the product list appears again.
+* Fix      - Social title and description placeholders in the product editor show exactly what will be published.
+* Fix      - Generating sitemaps reports that the work is queued, and the Last Generated time is set only when a sitemap is actually written.
+* Fix      - The documented wog_social_share JavaScript event now fires on every share, and the readme names the correct global.
+* Fix      - Share text no longer shows a doubled separator when a product has no description.
+* Fix      - Share text with accented letters, CJK or emoji is no longer cut in the middle of a character.
+* Fix      - Settings from versions before 2.0 are carried over once on upgrade, without overwriting values changed since.
+* Fix      - Removed the retired X (Twitter) Card Validator link from Testing Tools.
+* Security - The [wog_social_share] shortcode renders nothing for draft, private or password-protected products.
+* Security - Structured data escapes HTML tags inside product text.
+* Dev      - One settings sanitizer and one defaults array are shared by the settings screen, import and activation; removed the unused cache_meta_tags setting.
+* Dev      - New wog_social_enabled_for_product filter decides social output per product.
 
 = 2.0.4 - September 2026 =
 

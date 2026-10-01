@@ -40,6 +40,13 @@ class WOG_Settings {
 	private $default_settings;
 
 	/**
+	 * Image sizes an og:image may use. The one list the sanitizer and the admin
+	 * select both read, so they cannot drift. (No 'thumbnail': it is below
+	 * Facebook's 200px minimum.)
+	 */
+	const IMAGE_SIZES = array( 'medium', 'large', 'full' );
+
+	/**
 	 * Cache key for settings.
 	 *
 	 * @var string
@@ -94,11 +101,16 @@ class WOG_Settings {
 			'enable_linkedin'            => true,
 			'enable_pinterest'           => true,
 			'enable_whatsapp'            => true,
+			'enable_email'               => false,
 			'disable_title_description'  => false,
 			'image_size'                 => 'large',
 			'fallback_image'             => '',
 			'facebook_app_id'            => '',
 			'twitter_username'           => '',
+
+			// Organization schema.
+			'organization_logo'          => '',
+			'social_profiles'            => array(),
 
 			// Sitemap settings.
 			'enable_product_sitemap'     => true,
@@ -110,8 +122,8 @@ class WOG_Settings {
 			'share_button_position'      => 'after_add_to_cart',
 
 			// Advanced settings.
-			'cache_meta_tags'            => true,
 			'debug_mode'                 => false,
+			'delete_data_on_uninstall'   => false,
 		);
 
 		// Allow plugins to modify default settings.
@@ -209,6 +221,16 @@ class WOG_Settings {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * The default settings: the one array activation and every read share.
+	 *
+	 * @since 2.1.0
+	 * @return array
+	 */
+	public function get_default_settings() {
+		return $this->default_settings;
 	}
 
 	/**
@@ -389,15 +411,6 @@ class WOG_Settings {
 	}
 
 	/**
-	 * Advanced settings.
-	 *
-	 * @return bool
-	 */
-	public function is_cache_enabled() {
-		return $this->get( 'cache_meta_tags', true );
-	}
-
-	/**
 	 * Check if debug mode is enabled.
 	 *
 	 * @return bool
@@ -481,11 +494,12 @@ class WOG_Settings {
 			'enable_linkedin',
 			'enable_pinterest',
 			'enable_whatsapp',
+			'enable_email',
 			'disable_title_description',
 			'enable_product_sitemap',
 			'enable_social_share',
-			'cache_meta_tags',
 			'debug_mode',
+			'delete_data_on_uninstall',
 		);
 
 		foreach ( $boolean_settings as $setting ) {
@@ -501,14 +515,22 @@ class WOG_Settings {
 			$validated['twitter_username'] = substr( $validated['twitter_username'], 1 );
 		}
 
-		// Validate Twitter username format.
+		// Validate Twitter username format: an unresolvable handle is worse than none.
 		if ( ! empty( $validated['twitter_username'] ) && ! preg_match( '/^[A-Za-z0-9_]{1,15}$/', $validated['twitter_username'] ) ) {
-			$validated['twitter_username'] = '';
+			if ( function_exists( 'add_settings_error' ) ) {
+				add_settings_error(
+					'wog_settings',
+					'wog_twitter_username',
+					/* translators: %s: rejected username. */
+					sprintf( __( '"%s" is not a valid X (Twitter) username: use 1-15 letters, numbers or underscores. The username was not changed.', 'woo-open-graph' ), esc_html( $validated['twitter_username'] ) )
+				);
+			}
+			$previous                      = get_option( 'wog_settings', array() );
+			$validated['twitter_username'] = isset( $previous['twitter_username'] ) ? (string) $previous['twitter_username'] : '';
 		}
 
 		// Select settings with validation.
-		$valid_image_sizes       = array( 'thumbnail', 'medium', 'large', 'full' );
-		$validated['image_size'] = in_array( $settings['image_size'] ?? '', $valid_image_sizes, true ) ?
+		$validated['image_size'] = in_array( $settings['image_size'] ?? '', self::IMAGE_SIZES, true ) ?
 			$settings['image_size'] : 'large';
 
 		$valid_button_styles             = array( 'modern', 'classic', 'minimal' );
@@ -529,7 +551,21 @@ class WOG_Settings {
 		}
 
 		// URL settings.
-		$validated['fallback_image'] = esc_url_raw( $settings['fallback_image'] ?? '' );
+		$validated['fallback_image']    = esc_url_raw( $settings['fallback_image'] ?? '' );
+		$validated['organization_logo'] = esc_url_raw( $settings['organization_logo'] ?? '' );
+
+		// Social profiles: one URL per line from the textarea, or an array on import.
+		$profiles = $settings['social_profiles'] ?? array();
+		if ( is_string( $profiles ) ) {
+			$profiles = preg_split( '/[\r\n]+/', $profiles );
+		}
+		$validated['social_profiles'] = array();
+		foreach ( array_filter( (array) $profiles, 'is_string' ) as $profile ) {
+			$profile = trim( $profile );
+			if ( filter_var( $profile, FILTER_VALIDATE_URL ) && in_array( wp_parse_url( $profile, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
+				$validated['social_profiles'][] = esc_url_raw( $profile );
+			}
+		}
 
 		return apply_filters( 'wog_validated_settings', $validated, $settings );
 	}
@@ -625,7 +661,7 @@ class WOG_Settings {
 				break;
 
 			case 'advanced':
-				$advanced_keys = array( 'cache_meta_tags', 'debug_mode' );
+				$advanced_keys = array( 'debug_mode', 'delete_data_on_uninstall' );
 				foreach ( $advanced_keys as $key ) {
 					$section_settings[ $key ] = $all_settings[ $key ] ?? false;
 				}
@@ -648,7 +684,6 @@ class WOG_Settings {
 			'social_share_enabled' => $this->is_social_share_enabled(),
 			'platforms'            => $this->get_enabled_platforms(),
 			'image_size'           => $this->get_image_size(),
-			'cache_enabled'        => $this->is_cache_enabled(),
 			'debug_mode'           => $this->is_debug_mode(),
 		);
 
@@ -659,6 +694,10 @@ class WOG_Settings {
 	 * Migration helper for old settings.
 	 */
 	public function migrate_old_settings() {
+		if ( get_option( 'wog_migration_completed' ) ) {
+			return;
+		}
+
 		$old_settings = get_option( 'woo_open_graph_settings', false );
 
 		if ( $old_settings && is_array( $old_settings ) ) {
@@ -669,21 +708,21 @@ class WOG_Settings {
 				'twitter_username' => 'twitter_username',
 			);
 
+			// Fill only keys still at their default, so a value set since 2.0 is never overwritten.
+			$defaults          = $this->get_default_settings();
 			$migrated_settings = array();
 			foreach ( $migration_map as $old_key => $new_key ) {
-				if ( isset( $old_settings[ $old_key ] ) ) {
+				if ( isset( $old_settings[ $old_key ] ) && $this->get( $new_key ) === $defaults[ $new_key ] ) {
 					$migrated_settings[ $new_key ] = $old_settings[ $old_key ];
 				}
 			}
 
 			if ( ! empty( $migrated_settings ) ) {
 				$this->update_multiple( $migrated_settings );
-
-				// Mark migration as complete.
-				update_option( 'wog_migration_completed', true );
-
 				do_action( 'wog_settings_migrated', $migrated_settings, $old_settings );
 			}
 		}
+
+		update_option( 'wog_migration_completed', true );
 	}
 }
