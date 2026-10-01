@@ -54,6 +54,13 @@ class WOG_Social_Share {
 	}
 
 	/**
+	 * Product IDs whose buttons were already printed on this request.
+	 *
+	 * @var array
+	 */
+	private $rendered = array();
+
+	/**
 	 * Set up WordPress hooks.
 	 */
 	private function init_hooks() {
@@ -91,15 +98,35 @@ class WOG_Social_Share {
 				add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'display_share_buttons' ) );
 				break;
 		}
+
+		// WooCommerce fires no add-to-cart hooks for a product that cannot be bought
+		// (sold out), so the add-to-cart positions would print nothing. Fall back to
+		// just after the add-to-cart block; it only prints if nothing printed yet.
+		if ( ! in_array( $position, array( 'after_summary', 'after_tabs' ), true ) ) {
+			add_action( 'woocommerce_single_product_summary', array( $this, 'display_share_buttons' ), 31 );
+		}
+	}
+
+	/**
+	 * Whether buttons are placed automatically on this product.
+	 *
+	 * The single predicate for both rendering and asset loading, so the two
+	 * halves of the feature can never disagree.
+	 *
+	 * @param int $product_id Product ID.
+	 * @return bool
+	 */
+	private function is_auto_share_enabled( $product_id ) {
+		return ! empty( $this->settings['enable_social_share'] ) && wog_is_social_enabled_for_product( $product_id );
 	}
 
 	/**
 	 * Display share buttons on product pages.
 	 */
 	public function display_share_buttons() {
-		global $product;
+		$product = wc_get_product( get_queried_object_id() );
 
-		if ( ! $product ) {
+		if ( ! $product || isset( $this->rendered[ $product->get_id() ] ) || ! $this->is_auto_share_enabled( $product->get_id() ) ) {
 			return;
 		}
 
@@ -112,6 +139,12 @@ class WOG_Social_Share {
 	 * @param WC_Product $product The product object.
 	 */
 	public function render_share_buttons( $product ) {
+		$this->rendered[ $product->get_id() ] = true;
+
+		// Enqueue where the buttons print; a no-op when already enqueued in the head.
+		wp_enqueue_style( 'wog-social-share' );
+		wp_enqueue_script( 'wog-social-share' );
+
 		$style = ! empty( $this->settings['share_button_style'] ) ? $this->settings['share_button_style'] : 'modern';
 
 		// Get RAW data (no encoding or escaping at this stage).
@@ -270,7 +303,7 @@ class WOG_Social_Share {
 
 			case 'twitter':
 				$text = $clean_title;
-				if ( ! empty( $clean_description ) && strlen( $clean_title ) < 100 ) {
+				if ( ! empty( $clean_description ) && mb_strlen( $clean_title ) < 100 ) {
 					$text .= ' - ' . $clean_description;
 				}
 				// Limit to Twitter character limit (minus URL length of about 23 chars).
@@ -350,16 +383,17 @@ class WOG_Social_Share {
 	 * @return string
 	 */
 	private function truncate_text( $text, $max_length ) {
-		if ( strlen( $text ) <= $max_length ) {
+		// Characters, not bytes: a byte cut can split a multi-byte character.
+		if ( mb_strlen( $text ) <= $max_length ) {
 			return $text;
 		}
 
-		$truncated = substr( $text, 0, $max_length );
+		$truncated = mb_substr( $text, 0, $max_length );
 
 		// Try to break at word boundary.
-		$last_space = strrpos( $truncated, ' ' );
+		$last_space = mb_strrpos( $truncated, ' ' );
 		if ( false !== $last_space && $last_space > ( $max_length * 0.75 ) ) {
-			$truncated = substr( $truncated, 0, $last_space );
+			$truncated = mb_substr( $truncated, 0, $last_space );
 		}
 
 		return $truncated . '...';
@@ -455,18 +489,16 @@ class WOG_Social_Share {
 	 * Enqueue scripts and styles for social sharing.
 	 */
 	public function enqueue_scripts() {
-		if ( ! is_product() ) {
-			return;
-		}
-
-		wp_enqueue_style(
+		// Registered everywhere so the shortcode can enqueue them on any page;
+		// enqueued in the head only on product pages that will show buttons.
+		wp_register_style(
 			'wog-social-share',
 			WOG_PLUGIN_URL . 'assets/css/social-share.css',
 			array(),
 			WOG_VERSION
 		);
 
-		wp_enqueue_script(
+		wp_register_script(
 			'wog-social-share',
 			WOG_PLUGIN_URL . 'assets/js/social-share.js',
 			array( 'jquery' ),
@@ -486,25 +518,33 @@ class WOG_Social_Share {
 				'debug'      => defined( 'WP_DEBUG' ) && WP_DEBUG,
 			)
 		);
+
+		if ( is_product() && $this->is_auto_share_enabled( get_queried_object_id() ) ) {
+			wp_enqueue_style( 'wog-social-share' );
+			wp_enqueue_script( 'wog-social-share' );
+		}
 	}
 
 	/**
 	 * Social share shortcode handler.
 	 *
-	 * @param array $atts Shortcode attributes (unused).
+	 * Usage: [wog_social_share] on a product page, or [wog_social_share id="123"]
+	 * anywhere. Prints nothing (deliberately, with an HTML comment) when no
+	 * product is in scope or social output is off for that product.
+	 *
+	 * @param array $atts Shortcode attributes.
 	 * @return string
 	 */
-	public function social_share_shortcode( $atts ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- WordPress shortcode signature.
-		global $product;
+	public function social_share_shortcode( $atts ) {
+		$atts       = shortcode_atts( array( 'id' => 0 ), $atts, 'wog_social_share' );
+		$product_id = absint( $atts['id'] ) ? absint( $atts['id'] ) : get_queried_object_id();
+		$product    = $product_id ? wc_get_product( $product_id ) : false;
 
 		if ( ! $product ) {
-			global $post;
-			if ( $post && 'product' === $post->post_type ) {
-				$product = wc_get_product( $post->ID );
-			}
+			return '<!-- wog_social_share: no product in scope; use [wog_social_share id="PRODUCT_ID"] -->';
 		}
 
-		if ( ! $product ) {
+		if ( ! wog_is_social_enabled_for_product( $product->get_id() ) ) {
 			return '';
 		}
 

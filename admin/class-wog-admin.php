@@ -128,6 +128,18 @@ class WOG_Admin {
 		);
 
 		add_settings_field(
+			'enable_email',
+			__( 'Email Button', 'woo-open-graph' ),
+			array( $this, 'checkbox_field' ),
+			'wog_settings',
+			'wog_sharing_section',
+			array(
+				'id'          => 'enable_email',
+				'description' => __( 'Show an Email share button (opens the shopper\'s email app with the product link)', 'woo-open-graph' ),
+			)
+		);
+
+		add_settings_field(
 			'share_button_style',
 			__( 'Button Style', 'woo-open-graph' ),
 			array( $this, 'select_field' ),
@@ -231,6 +243,31 @@ class WOG_Admin {
 			)
 		);
 
+		add_settings_field(
+			'organization_logo',
+			__( 'Organization Logo', 'woo-open-graph' ),
+			array( $this, 'image_field' ),
+			'wog_settings',
+			'wog_platform_section',
+			array(
+				'id'          => 'organization_logo',
+				'description' => __( 'Logo published in the Organization structured data. Leave empty to use your theme logo, then your Site Icon.', 'woo-open-graph' ),
+			)
+		);
+
+		add_settings_field(
+			'social_profiles',
+			__( 'Social Profiles', 'woo-open-graph' ),
+			array( $this, 'textarea_field' ),
+			'wog_settings',
+			'wog_platform_section',
+			array(
+				'id'          => 'social_profiles',
+				'placeholder' => "https://www.facebook.com/yourstore\nhttps://www.instagram.com/yourstore",
+				'description' => __( 'One profile URL per line. Published as sameAs in the Organization structured data so search engines can link your store to its profiles.', 'woo-open-graph' ),
+			)
+		);
+
 		// Image & Content Settings Section.
 		add_settings_section(
 			'wog_content_section',
@@ -259,10 +296,13 @@ class WOG_Admin {
 			'wog_content_section',
 			array(
 				'id'          => 'image_size',
-				'options'     => array(
-					'medium' => __( 'Medium (300x300)', 'woo-open-graph' ),
-					'large'  => __( 'Large (1024x1024)', 'woo-open-graph' ),
-					'full'   => __( 'Full Size', 'woo-open-graph' ),
+				'options'     => array_intersect_key(
+					array(
+						'medium' => __( 'Medium (300x300)', 'woo-open-graph' ),
+						'large'  => __( 'Large (1024x1024)', 'woo-open-graph' ),
+						'full'   => __( 'Full Size', 'woo-open-graph' ),
+					),
+					array_flip( WOG_Settings::IMAGE_SIZES )
 				),
 				'description' => __( 'Size of product images used for social sharing', 'woo-open-graph' ),
 			)
@@ -282,6 +322,7 @@ class WOG_Admin {
 			'enable_breadcrumb_schema'   => __( 'Add breadcrumb navigation schema markup', 'woo-open-graph' ),
 			'enable_organization_schema' => __( 'Add organization and store information schema', 'woo-open-graph' ),
 			'debug_mode'                 => __( 'Enable debug mode for troubleshooting (adds HTML comments)', 'woo-open-graph' ),
+			'delete_data_on_uninstall'   => __( 'Delete all plugin data (settings and per-product social titles/descriptions) when the plugin is deleted', 'woo-open-graph' ),
 		);
 
 		foreach ( $advanced_fields as $id => $description ) {
@@ -310,6 +351,13 @@ class WOG_Admin {
 				<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 				<p class="description"><?php esc_html_e( 'Configure how your WooCommerce products appear when shared on social media platforms. This plugin works alongside your existing SEO plugin to fill any gaps.', 'woo-open-graph' ); ?></p>
 			</div>
+			<?php // Required: without this marker core's common.js moves notices into the heading. ?>
+			<hr class="wp-header-end">
+			<?php
+			// Custom top-level pages do not print settings notices on their own:
+			// "Settings saved" and validation errors (e.g. an invalid username) need this.
+			settings_errors();
+			?>
 			
 			<div class="wog-admin-layout">
 				<div class="wog-main-content">
@@ -341,10 +389,6 @@ class WOG_Admin {
 							<a href="https://developers.facebook.com/tools/debug/" target="_blank" class="wog-btn-block">
 								<span class="dashicons dashicons-facebook"></span>
 								<?php esc_html_e( 'Facebook Debugger', 'woo-open-graph' ); ?>
-							</a>
-							<a href="https://cards-dev.twitter.com/validator" target="_blank" class="wog-btn-block">
-								<span class="dashicons dashicons-twitter"></span>
-								<?php esc_html_e( 'Twitter Validator', 'woo-open-graph' ); ?>
 							</a>
 							<a href="https://search.google.com/test/rich-results" target="_blank" class="wog-btn-block">
 								<span class="dashicons dashicons-google"></span>
@@ -550,6 +594,26 @@ class WOG_Admin {
 		echo 'value="' . esc_attr( $value ) . '" ';
 		echo 'placeholder="' . esc_attr( $placeholder ) . '" ';
 		echo 'class="regular-text" />';
+
+		if ( isset( $args['description'] ) ) {
+			echo '<p class="description">' . esc_html( $args['description'] ) . '</p>';
+		}
+	}
+
+	/**
+	 * Render a textarea settings field (array values shown one per line).
+	 *
+	 * @param array $args The field arguments.
+	 */
+	public function textarea_field( $args ) {
+		$settings = get_option( 'wog_settings', array() );
+		$value    = isset( $settings[ $args['id'] ] ) ? $settings[ $args['id'] ] : '';
+		$value    = is_array( $value ) ? implode( "\n", $value ) : (string) $value;
+
+		echo '<textarea name="wog_settings[' . esc_attr( $args['id'] ) . ']" rows="4" class="large-text" ';
+		echo 'placeholder="' . esc_attr( isset( $args['placeholder'] ) ? $args['placeholder'] : '' ) . '">';
+		echo esc_textarea( $value );
+		echo '</textarea>';
 
 		if ( isset( $args['description'] ) ) {
 			echo '<p class="description">' . esc_html( $args['description'] ) . '</p>';
@@ -789,11 +853,12 @@ class WOG_Admin {
 		if ( class_exists( 'WOG_Sitemap' ) ) {
 			$sitemap = WOG_Sitemap::get_instance();
 			$sitemap->generate_all_sitemaps_background();
-			update_option( 'wog_sitemap_last_generated', time() );
 
+			// The work is scheduled, not done: say so. "Last Generated" is stamped
+			// by the background job when a sitemap is actually written.
 			wp_send_json_success(
 				array(
-					'message' => __( 'Sitemaps generated successfully!', 'woo-open-graph' ),
+					'message' => __( 'Sitemap generation queued. Files are rebuilt in the background over the next few minutes.', 'woo-open-graph' ),
 				)
 			);
 		} else {
@@ -860,67 +925,8 @@ class WOG_Admin {
 	 * @return array
 	 */
 	public function sanitize_settings( $input ) {
-		$sanitized = array();
-
-		// Boolean settings.
-		$booleans = array(
-			'enable_schema',
-			'enable_facebook',
-			'enable_twitter',
-			'enable_linkedin',
-			'enable_pinterest',
-			'enable_whatsapp',
-			'enable_social_share',
-			'enable_product_sitemap',
-			'disable_title_description',
-			'enable_enhanced_schema',
-			'enable_breadcrumb_schema',
-			'enable_organization_schema',
-			'debug_mode',
-		);
-
-		foreach ( $booleans as $key ) {
-			$sanitized[ $key ] = ! empty( $input[ $key ] );
-		}
-
-		// Text fields.
-		$sanitized['facebook_app_id']  = sanitize_text_field( $input['facebook_app_id'] ?? '' );
-		$sanitized['twitter_username'] = sanitize_text_field( $input['twitter_username'] ?? '' );
-
-		// Remove @ from Twitter username if present.
-		if ( ! empty( $sanitized['twitter_username'] ) && '@' === $sanitized['twitter_username'][0] ) {
-			$sanitized['twitter_username'] = substr( $sanitized['twitter_username'], 1 );
-		}
-
-		// Number fields.
-		$sanitized['sitemap_products_per_page'] = intval( $input['sitemap_products_per_page'] ?? 500 );
-		if ( $sanitized['sitemap_products_per_page'] < 100 ) {
-			$sanitized['sitemap_products_per_page'] = 100;
-		}
-		if ( $sanitized['sitemap_products_per_page'] > 1000 ) {
-			$sanitized['sitemap_products_per_page'] = 1000;
-		}
-
-		// Select fields.
-		$valid_positions                    = array( 'after_add_to_cart', 'before_add_to_cart', 'after_summary', 'after_tabs' );
-		$sanitized['share_button_position'] = in_array( $input['share_button_position'] ?? '', $valid_positions, true ) ?
-			$input['share_button_position'] : 'after_add_to_cart';
-
-		$valid_styles                    = array( 'modern', 'classic', 'minimal' );
-		$sanitized['share_button_style'] = in_array( $input['share_button_style'] ?? '', $valid_styles, true ) ?
-			$input['share_button_style'] : 'modern';
-
-		$valid_sizes             = array( 'medium', 'large', 'full' );
-		$sanitized['image_size'] = in_array( $input['image_size'] ?? '', $valid_sizes, true ) ?
-			$input['image_size'] : 'large';
-
-		// URL field.
-		$sanitized['fallback_image'] = esc_url_raw( $input['fallback_image'] ?? '' );
-
-		// Keep other existing settings that might not be in the form.
-		$existing  = get_option( 'wog_settings', array() );
-		$sanitized = array_merge( $existing, $sanitized );
-
-		return $sanitized;
+		// One sanitizer for every write path (settings screen, import), so the
+		// accepted values cannot drift between them.
+		return WOG_Settings::get_instance()->validate_settings( (array) $input );
 	}
 }

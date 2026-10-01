@@ -3,7 +3,7 @@
  * Plugin Name: Open Graph for WooCommerce
  * Plugin URI: https://wbcomdesigns.com/downloads/woo-open-graph/
  * Description: Comprehensive Schema.org markup, Open Graph optimization, and social sharing for WooCommerce. Fill the gaps that free SEO plugins miss.
- * Version: 2.0.4
+ * Version: 2.1.0
  * Author: Wbcom Designs
  * Author URI: https://wbcomdesigns.com
  * License: GPL v2 or later
@@ -45,7 +45,7 @@ add_action(
 );
 
 // Define plugin constants.
-define( 'WOG_VERSION', '2.0.4' );
+define( 'WOG_VERSION', '2.1.0' );
 define( 'WOG_PLUGIN_FILE', __FILE__ );
 define( 'WOG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WOG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -166,7 +166,28 @@ class Woo_Open_Graph {
 			WOG_Admin::get_instance();
 		}
 
+		$this->maybe_upgrade();
 		$this->add_custom_hooks();
+	}
+
+	/**
+	 * Run one-time upgrade routines when the stored version differs.
+	 *
+	 * One autoloaded option read per request; the work runs once per update.
+	 *
+	 * @since 2.1.0
+	 */
+	private function maybe_upgrade() {
+		if ( WOG_VERSION === get_option( 'wog_version' ) ) {
+			return;
+		}
+
+		if ( $this->settings ) {
+			// Pre-2.0 stores kept settings in woo_open_graph_settings; carry them over once.
+			$this->settings->migrate_old_settings();
+		}
+
+		update_option( 'wog_version', WOG_VERSION );
 	}
 
 	/**
@@ -240,30 +261,8 @@ class Woo_Open_Graph {
 			);
 		}
 
-		// Set default plugin options.
-		$default_options = array(
-			// Schema off by default; WooCommerce core already outputs Product schema.
-			'enable_schema'              => false,
-			'enable_enhanced_schema'     => true,
-			'enable_breadcrumb_schema'   => true,
-			'enable_organization_schema' => true,
-			'enable_facebook'            => true,
-			'enable_twitter'             => true,
-			'enable_linkedin'            => true,
-			'enable_pinterest'           => true,
-			'enable_whatsapp'            => true,
-			'disable_title_description'  => false,
-			'image_size'                 => 'large',
-			'fallback_image'             => '',
-			'facebook_app_id'            => '',
-			'twitter_username'           => '',
-			'enable_product_sitemap'     => true,
-			'sitemap_products_per_page'  => 500,
-			'enable_social_share'        => true,
-			'share_button_style'         => 'modern',
-			'share_button_position'      => 'after_add_to_cart',
-			'debug_mode'                 => false,
-		);
+		// One defaults array, owned by WOG_Settings, so activation and reads cannot drift.
+		$default_options = WOG_Settings::get_instance()->get_default_settings();
 
 		add_option( 'wog_settings', $default_options );
 		add_option( 'wog_version', WOG_VERSION );
