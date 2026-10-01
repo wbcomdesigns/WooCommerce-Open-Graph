@@ -154,10 +154,10 @@ function wog_get_fallback_image_url() {
  * @return string Price HTML (wc_price), or '' when the product has no price.
  */
 function wog_get_product_price_text( $product ) {
-	if ( $product->is_type( 'variable' ) ) {
+	if ( $product instanceof WC_Product_Variable ) {
 		$min = $product->get_variation_price( 'min', true );
 		$max = $product->get_variation_price( 'max', true );
-	} elseif ( $product->is_type( 'grouped' ) ) {
+	} elseif ( $product instanceof WC_Product_Grouped ) {
 		$prices = array();
 		foreach ( array_filter( array_map( 'wc_get_product', $product->get_children() ) ) as $child ) {
 			if ( '' !== $child->get_price() ) {
@@ -171,7 +171,7 @@ function wog_get_product_price_text( $product ) {
 		$max = $min;
 	}
 
-	if ( '' === $min || null === $min ) {
+	if ( '' === $min ) {
 		return '';
 	}
 

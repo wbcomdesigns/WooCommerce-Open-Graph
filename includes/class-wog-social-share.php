@@ -391,9 +391,11 @@ class WOG_Social_Share {
 		$truncated = mb_substr( $text, 0, $max_length );
 
 		// Try to break at word boundary.
-		$last_space = mb_strrpos( $truncated, ' ' );
-		if ( false !== $last_space && $last_space > ( $max_length * 0.75 ) ) {
-			$truncated = mb_substr( $truncated, 0, $last_space );
+		// Byte functions are safe here: a space is single-byte in UTF-8, and
+		// WordPress polyfills mb_substr/mb_strlen but not mb_strrpos.
+		$last_space = strrpos( $truncated, ' ' );
+		if ( false !== $last_space && $last_space > ( strlen( $truncated ) * 0.75 ) ) {
+			$truncated = substr( $truncated, 0, $last_space );
 		}
 
 		return $truncated . '...';
@@ -425,12 +427,9 @@ class WOG_Social_Share {
 		$description = wp_strip_all_tags( $description );
 		$description = trim( preg_replace( '/\s+/', ' ', $description ) );
 
-		// Add product price if available.
-		if ( $product->get_price() ) {
-			$price       = $product->get_price();
-			$currency    = get_woocommerce_currency_symbol();
-			$description = trim( $description . ' - ' . $currency . $price );
-		}
+		// Add the price (a range for variable and grouped products), as plain text.
+		$price       = html_entity_decode( wp_strip_all_tags( wog_get_product_price_text( $product ) ), ENT_QUOTES, 'UTF-8' );
+		$description = implode( ' - ', array_filter( array( $description, $price ) ) );
 
 		// Limit length for social sharing.
 		return $this->truncate_text( $description, 200 );
@@ -542,6 +541,12 @@ class WOG_Social_Share {
 
 		if ( ! $product ) {
 			return '<!-- wog_social_share: no product in scope; use [wog_social_share id="PRODUCT_ID"] -->';
+		}
+
+		// Only share what visitors may already see: never a draft, private or protected product.
+		$visible_id = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
+		if ( 'publish' !== get_post_status( $visible_id ) || post_password_required( $visible_id ) ) {
+			return '';
 		}
 
 		if ( ! wog_is_social_enabled_for_product( $product->get_id() ) ) {

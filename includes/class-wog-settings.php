@@ -522,10 +522,11 @@ class WOG_Settings {
 					'wog_settings',
 					'wog_twitter_username',
 					/* translators: %s: rejected username. */
-					sprintf( __( '"%s" is not a valid X (Twitter) username: use 1-15 letters, numbers or underscores. The username was not saved.', 'woo-open-graph' ), $validated['twitter_username'] )
+					sprintf( __( '"%s" is not a valid X (Twitter) username: use 1-15 letters, numbers or underscores. The username was not changed.', 'woo-open-graph' ), esc_html( $validated['twitter_username'] ) )
 				);
 			}
-			$validated['twitter_username'] = '';
+			$previous                      = get_option( 'wog_settings', array() );
+			$validated['twitter_username'] = isset( $previous['twitter_username'] ) ? (string) $previous['twitter_username'] : '';
 		}
 
 		// Select settings with validation.
@@ -558,7 +559,13 @@ class WOG_Settings {
 		if ( is_string( $profiles ) ) {
 			$profiles = preg_split( '/[\r\n]+/', $profiles );
 		}
-		$validated['social_profiles'] = array_values( array_filter( array_map( 'esc_url_raw', array_map( 'trim', (array) $profiles ) ) ) );
+		$validated['social_profiles'] = array();
+		foreach ( array_filter( (array) $profiles, 'is_string' ) as $profile ) {
+			$profile = trim( $profile );
+			if ( filter_var( $profile, FILTER_VALIDATE_URL ) && in_array( wp_parse_url( $profile, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
+				$validated['social_profiles'][] = esc_url_raw( $profile );
+			}
+		}
 
 		return apply_filters( 'wog_validated_settings', $validated, $settings );
 	}
@@ -701,21 +708,21 @@ class WOG_Settings {
 				'twitter_username' => 'twitter_username',
 			);
 
+			// Fill only keys still at their default, so a value set since 2.0 is never overwritten.
+			$defaults          = $this->get_default_settings();
 			$migrated_settings = array();
 			foreach ( $migration_map as $old_key => $new_key ) {
-				if ( isset( $old_settings[ $old_key ] ) ) {
+				if ( isset( $old_settings[ $old_key ] ) && $this->get( $new_key ) === $defaults[ $new_key ] ) {
 					$migrated_settings[ $new_key ] = $old_settings[ $old_key ];
 				}
 			}
 
 			if ( ! empty( $migrated_settings ) ) {
 				$this->update_multiple( $migrated_settings );
-
-				// Mark migration as complete.
-				update_option( 'wog_migration_completed', true );
-
 				do_action( 'wog_settings_migrated', $migrated_settings, $old_settings );
 			}
 		}
+
+		update_option( 'wog_migration_completed', true );
 	}
 }

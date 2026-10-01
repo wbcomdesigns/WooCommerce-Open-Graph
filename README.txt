@@ -125,14 +125,17 @@ Yes, the plugin is fully translatable and supports RTL languages.
 * Fix      - Organization structured data no longer publishes an empty logo or empty profile list.
 * Fix      - The store address publishes the country and region separately instead of a combined "US:CA" value.
 * Fix      - og:image:secure_url is emitted only for HTTPS image URLs.
-* Fix      - An invalid X (Twitter) username is rejected with a message instead of being published.
+* Fix      - An invalid X (Twitter) username is rejected with a message and the previously saved username is kept.
 * Fix      - The Social column in the product list appears again.
 * Fix      - Social title and description placeholders in the product editor show exactly what will be published.
 * Fix      - Generating sitemaps reports that the work is queued, and the Last Generated time is set only when a sitemap is actually written.
 * Fix      - The documented wog_social_share JavaScript event now fires on every share, and the readme names the correct global.
+* Fix      - Share text no longer shows a doubled separator when a product has no description.
 * Fix      - Share text with accented letters, CJK or emoji is no longer cut in the middle of a character.
-* Fix      - Settings from versions before 2.0 are carried over once on upgrade.
+* Fix      - Settings from versions before 2.0 are carried over once on upgrade, without overwriting values changed since.
 * Fix      - Removed the retired X (Twitter) Card Validator link from Testing Tools.
+* Security - The [wog_social_share] shortcode renders nothing for draft, private or password-protected products.
+* Security - Structured data escapes HTML tags inside product text.
 * Dev      - One settings sanitizer and one defaults array are shared by the settings screen, import and activation; removed the unused cache_meta_tags setting.
 * Dev      - New wog_social_enabled_for_product filter decides social output per product.
 
