@@ -108,6 +108,7 @@ module.exports = function (grunt) {
                     '!.github/**',
                     '!bin/**',
                     '!audit/**',
+                    '!docs/**',
                     '!**/*.map',
                 ],
                 dest: 'dist/open-graph-for-woocommerce/',

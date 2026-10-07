@@ -74,6 +74,9 @@ class WOG_Admin {
 		// wbcom-wrapper plugin registered wbcomplugins first.
 		add_action( 'admin_menu', array( $this, 'takeover_hub_landing' ), 999 );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		// options.php defaults to manage_options; the screen is open to manage_woocommerce
+		// (Shop Managers), who were shown a form whose Save was refused.
+		add_filter( 'option_page_capability_' . self::OPTION_GROUP, array( $this, 'settings_capability' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
 		add_action( 'in_admin_header', array( $this, 'suppress_foreign_notices' ), 1 );
 		add_filter( 'plugin_action_links_' . plugin_basename( WOG_PLUGIN_FILE ), array( $this, 'add_action_links' ) );
@@ -243,16 +246,17 @@ class WOG_Admin {
 					'title'  => __( 'Product Schema', 'woo-open-graph' ),
 					'desc'   => __( 'WooCommerce already outputs Product structured data. These options only add what it leaves out.', 'woo-open-graph' ),
 					'fields' => array(
-						'enable_schema'            => $checkbox( __( 'Product Schema Gap-fill', 'woo-open-graph' ), __( 'Gap-fill WooCommerce\'s existing Product schema with extra fields (brand, GTIN, MPN, specifications). Off by default - WooCommerce already outputs Product structured data, so leave off unless you need the extra fields.', 'woo-open-graph' ) ),
+						// Master switch: the schema class registers all of its output only when this is on.
+						'enable_schema'            => $checkbox( __( 'Structured Data', 'woo-open-graph' ), __( 'Add this plugin\'s structured data: extra Product fields (brand, GTIN, MPN), breadcrumbs and your organization. Off by default because WooCommerce already outputs Product structured data. Breadcrumb and Organization schema below only work while this is on.', 'woo-open-graph' ) ),
 						'enable_enhanced_schema'   => $checkbox( __( 'Enhanced Schema', 'woo-open-graph' ), __( 'Include advanced product properties (GTIN, MPN, brand, specifications)', 'woo-open-graph' ) ),
-						'enable_breadcrumb_schema' => $checkbox( __( 'Breadcrumb Schema', 'woo-open-graph' ), __( 'Add breadcrumb navigation schema markup', 'woo-open-graph' ) ),
+						'enable_breadcrumb_schema' => $checkbox( __( 'Breadcrumb Schema', 'woo-open-graph' ), __( 'Add breadcrumb navigation schema markup (needs Structured Data on)', 'woo-open-graph' ) ),
 					),
 				),
 				'wog_organization_section' => array(
 					'title'  => __( 'Organization', 'woo-open-graph' ),
 					'desc'   => __( 'Tell search engines who runs the store.', 'woo-open-graph' ),
 					'fields' => array(
-						'enable_organization_schema' => $checkbox( __( 'Organization Schema', 'woo-open-graph' ), __( 'Add organization and store information schema', 'woo-open-graph' ) ),
+						'enable_organization_schema' => $checkbox( __( 'Organization Schema', 'woo-open-graph' ), __( 'Add organization and store information schema (needs Structured Data on)', 'woo-open-graph' ) ),
 						'organization_logo'          => array(
 							'type'        => 'image',
 							'title'       => __( 'Organization Logo', 'woo-open-graph' ),
@@ -294,12 +298,20 @@ class WOG_Admin {
 					'desc'   => __( 'Advanced options for power users and specific use cases.', 'woo-open-graph' ),
 					'fields' => array(
 						'disable_title_description' => $checkbox( __( 'Override SEO Titles', 'woo-open-graph' ), __( 'Override titles and descriptions from other SEO plugins (use with caution)', 'woo-open-graph' ) ),
-						'debug_mode'                => $checkbox( __( 'Debug Mode', 'woo-open-graph' ), __( 'Enable debug mode for troubleshooting (adds HTML comments)', 'woo-open-graph' ) ),
 						'delete_data_on_uninstall'  => $checkbox( __( 'Delete Data On Uninstall', 'woo-open-graph' ), __( 'Delete all plugin data (settings and per-product social titles/descriptions) when the plugin is deleted', 'woo-open-graph' ) ),
 					),
 				),
 			),
 		);
+	}
+
+	/**
+	 * Capability options.php checks before saving our settings group.
+	 *
+	 * @return string
+	 */
+	public function settings_capability() {
+		return 'manage_woocommerce';
 	}
 
 	/**

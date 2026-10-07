@@ -64,29 +64,19 @@ $wog_share_on = sprintf( __( 'On: shown on product pages %s', 'woo-open-graph' )
 
 /*
  * Configuration rows, written as consequences rather than stored values.
- * Each: setting key, row label, "on" sentence, tab that changes it.
+ * Each: whether it is on, row label, "on" sentence, tab that changes it.
+ * Organization schema is only published while the Structured Data master switch is on.
  */
 $wog_rows = array(
-	array( 'enable_facebook', __( 'Facebook', 'woo-open-graph' ), __( 'On: shared product links show the product title, image and price', 'woo-open-graph' ), 'general' ),
-	array( 'enable_twitter', __( 'X (Twitter)', 'woo-open-graph' ), __( 'On: product links show a large image card on X', 'woo-open-graph' ), 'general' ),
-	array( 'enable_pinterest', __( 'Pinterest', 'woo-open-graph' ), __( 'On: pins carry Rich Pin product data', 'woo-open-graph' ), 'general' ),
-	array( 'enable_social_share', __( 'Share buttons', 'woo-open-graph' ), $wog_share_on, 'sharing' ),
-	array( 'enable_schema', __( 'Product schema', 'woo-open-graph' ), __( 'On: extra fields are added to WooCommerce\'s Product schema', 'woo-open-graph' ), 'structured-data' ),
-	array( 'enable_organization_schema', __( 'Organization schema', 'woo-open-graph' ), __( 'On: search engines are told who runs the store', 'woo-open-graph' ), 'structured-data' ),
-	array( 'enable_product_sitemap', __( 'XML sitemaps', 'woo-open-graph' ), __( 'On: products and categories are listed for search engines', 'woo-open-graph' ), 'sitemaps' ),
+	array( $wog_on( 'enable_facebook' ), __( 'Facebook', 'woo-open-graph' ), __( 'On: shared product links show the product title, image and price', 'woo-open-graph' ), 'general' ),
+	array( $wog_on( 'enable_twitter' ), __( 'X (Twitter)', 'woo-open-graph' ), __( 'On: product links show a large image card on X', 'woo-open-graph' ), 'general' ),
+	array( $wog_on( 'enable_pinterest' ), __( 'Pinterest', 'woo-open-graph' ), __( 'On: pins carry Rich Pin product data', 'woo-open-graph' ), 'general' ),
+	array( $wog_on( 'enable_social_share' ), __( 'Share buttons', 'woo-open-graph' ), $wog_share_on, 'sharing' ),
+	array( $wog_on( 'enable_schema' ), __( 'Structured data', 'woo-open-graph' ), __( 'On: extra fields are added to WooCommerce\'s Product schema', 'woo-open-graph' ), 'structured-data' ),
+	array( $wog_on( 'enable_schema' ) && $wog_on( 'enable_organization_schema' ), __( 'Organization schema', 'woo-open-graph' ), __( 'On: search engines are told who runs the store', 'woo-open-graph' ), 'structured-data' ),
+	array( $wog_on( 'enable_product_sitemap' ), __( 'XML sitemaps', 'woo-open-graph' ), __( 'On: products and categories are listed for search engines', 'woo-open-graph' ), 'sitemaps' ),
 );
 ?>
-
-<?php if ( $wog_on( 'debug_mode' ) ) : ?>
-	<div class="wog-notice wog-notice--warn">
-		<span class="dashicons dashicons-warning" aria-hidden="true"></span>
-		<div>
-			<strong><?php esc_html_e( 'Debug mode is on.', 'woo-open-graph' ); ?></strong>
-			<?php esc_html_e( 'Product pages include debugging HTML comments.', 'woo-open-graph' ); ?>
-			<a class="wog-inline-hint" href="<?php echo esc_url( $wog_tab_url( 'advanced' ) ); ?>"><?php esc_html_e( 'Turn off', 'woo-open-graph' ); ?></a>
-		</div>
-	</div>
-<?php endif; ?>
 
 <div class="wog-stats-grid">
 	<div class="wog-stat">
@@ -127,11 +117,11 @@ $wog_rows = array(
 		<p class="wog-card__desc"><?php esc_html_e( 'What happens right now when someone shares one of your products.', 'woo-open-graph' ); ?></p>
 	</div>
 	<table class="form-table" role="presentation">
-		<?php foreach ( $wog_rows as list( $wog_key, $wog_label, $wog_on_text, $wog_tab ) ) : ?>
+		<?php foreach ( $wog_rows as list( $wog_is_on, $wog_label, $wog_on_text, $wog_tab ) ) : ?>
 			<tr>
 				<th scope="row"><?php echo esc_html( $wog_label ); ?></th>
 				<td>
-					<?php if ( $wog_on( $wog_key ) ) : ?>
+					<?php if ( $wog_is_on ) : ?>
 						<span class="wog-status-on"><?php echo esc_html( $wog_on_text ); ?></span>
 					<?php else : ?>
 						<span class="wog-status-off"><?php esc_html_e( 'Off', 'woo-open-graph' ); ?></span>

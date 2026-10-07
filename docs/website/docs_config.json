@@ -1,0 +1,60 @@
+{
+	"product": "Woo Open Graph",
+	"productType": "plugin",
+	"shortId": "wooopengraph",
+	"sections": [
+		{
+			"slug": "getting-started",
+			"title": "Getting Started",
+			"pages": [
+				{ "slug": "index", "title": "Overview" },
+				{ "slug": "requirements", "title": "Requirements" },
+				{ "slug": "installation", "title": "Installation" }
+			]
+		},
+		{
+			"slug": "features",
+			"title": "Features",
+			"pages": [
+				{ "slug": "index", "title": "Features Overview" },
+				{ "slug": "open-graph-tags", "title": "Open Graph and Twitter Cards" },
+				{ "slug": "schema-markup", "title": "Schema.org Markup" },
+				{ "slug": "social-share-buttons", "title": "Social Share Buttons" },
+				{ "slug": "product-sitemap", "title": "Product XML Sitemap" }
+			]
+		},
+		{
+			"slug": "usage",
+			"title": "Usage",
+			"pages": [
+				{ "slug": "index", "title": "Using the Plugin" },
+				{ "slug": "settings", "title": "Settings Reference" },
+				{ "slug": "per-product-settings", "title": "Per-Product Settings" }
+			]
+		},
+		{
+			"slug": "developer-guide",
+			"title": "Developer Guide",
+			"pages": [
+				{ "slug": "index", "title": "Developer Overview" },
+				{ "slug": "hooks-and-filters", "title": "Hooks and Filters" },
+				{ "slug": "shortcodes", "title": "Shortcodes" },
+				{ "slug": "data-reference", "title": "Options and Meta Reference" }
+			]
+		},
+		{
+			"slug": "faq",
+			"title": "FAQ",
+			"pages": [
+				{ "slug": "index", "title": "Frequently Asked Questions" }
+			]
+		},
+		{
+			"slug": "troubleshooting",
+			"title": "Troubleshooting",
+			"pages": [
+				{ "slug": "index", "title": "Troubleshooting" }
+			]
+		}
+	]
+}
