@@ -251,15 +251,6 @@ window.wogShare.copyLink(url);
 - Requires HTTPS for modern browsers
 - Fallback provided for HTTP
 
-### Debug Mode
-```php
-// Enable debug logging
-define('WOG_DEBUG', true);
-
-// Or via admin
-WB Plugins → Open Graph → Advanced → Debug Mode
-```
-
 ## 📝 Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.

@@ -222,7 +222,7 @@ assets/js/admin.js          sitemap Generate/Test + media picker, no inline JS, 
 
 - **`get_sections()` is the single registry.** A setting is added by adding one entry there (tab > section > field). It drives `register_settings()`, the rendered cards and the save merge - never register a field anywhere else.
 - **Every tab saves into the one `wog_settings` option.** `validate_settings()` rebuilds every key from its input, so `sanitize_settings()` merges the posted tab over the stored option first (the hidden `wog_settings[_wog_tab]` names the tab). Remove the merge and saving one tab resets every other tab. Imports and programmatic saves carry no `_wog_tab` and keep the old full-rebuild behaviour.
-- **Every validated key must belong to exactly one tab**, or it can never be changed from the UI and a tab save would never touch it.
+- **Every validated key must belong to exactly one tab**, or it can never be changed from the UI and a tab save would never touch it. The one deliberate exception is `debug_mode`: its switch was removed in 2.1.0 because nothing called `wog_debug_log()`, so the key is validated but never shown.
 - Tabs are filterable via `wog_admin_tabs`; adding a settings tab also needs a `get_sections()` entry or it renders empty.
 
 ### The standard every plugin in this suite is measured against

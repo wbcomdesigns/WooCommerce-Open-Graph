@@ -1,0 +1,87 @@
+{
+  "product": "Open Graph for WooCommerce",
+  "productType": "plugin",
+  "shortId": "woo-open-graph",
+  "sections": [
+    {
+      "title": "Getting Started",
+      "slug": "getting-started-woo-open-graph",
+      "folder": "getting-started",
+      "docs": [
+        { "file": "what-it-does.md", "title": "What Open Graph for WooCommerce Does", "slug": "what-it-does-woo-open-graph" },
+        { "file": "requirements.md", "title": "Requirements", "slug": "requirements-woo-open-graph" },
+        { "file": "installation.md", "title": "Install and Open the Settings", "slug": "installation-woo-open-graph" }
+      ]
+    },
+    {
+      "title": "Features",
+      "slug": "features-woo-open-graph",
+      "folder": "features",
+      "docs": [
+        { "file": "overview.md", "title": "Features Overview", "slug": "features-overview-woo-open-graph" },
+        { "file": "social-previews.md", "title": "Social Previews (Open Graph and X Cards)", "slug": "social-previews-woo-open-graph" },
+        { "file": "share-buttons.md", "title": "Share Buttons", "slug": "share-buttons-woo-open-graph" },
+        { "file": "per-product-control.md", "title": "Per-Product Control", "slug": "per-product-control-woo-open-graph" },
+        { "file": "structured-data.md", "title": "Structured Data (for Google)", "slug": "structured-data-woo-open-graph" },
+        { "file": "product-sitemaps.md", "title": "Product Sitemaps", "slug": "product-sitemaps-woo-open-graph" }
+      ]
+    },
+    {
+      "title": "How-to Guides",
+      "slug": "how-to-woo-open-graph",
+      "folder": "how-to",
+      "docs": [
+        { "file": "set-up-in-5-minutes.md", "title": "Set Up in 5 Minutes", "slug": "set-up-in-5-minutes-woo-open-graph" },
+        { "file": "check-how-a-product-looks-when-shared.md", "title": "Check How a Product Looks When Shared", "slug": "check-how-a-product-looks-when-shared-woo-open-graph" },
+        { "file": "custom-social-title-and-description.md", "title": "Write a Custom Social Title and Description", "slug": "custom-social-title-and-description-woo-open-graph" },
+        { "file": "stop-social-output-for-one-product.md", "title": "Stop Social Output for One Product", "slug": "stop-social-output-for-one-product-woo-open-graph" },
+        { "file": "add-share-buttons.md", "title": "Add Share Buttons and Choose Their Style and Position", "slug": "add-share-buttons-woo-open-graph" },
+        { "file": "share-buttons-with-shortcode.md", "title": "Put Share Buttons on Any Page", "slug": "share-buttons-with-shortcode-woo-open-graph" },
+        { "file": "set-a-default-social-image.md", "title": "Set a Default Image for Products Without a Photo", "slug": "set-a-default-social-image-woo-open-graph" },
+        { "file": "add-logo-and-social-profiles-for-google.md", "title": "Add Your Store Logo and Social Profiles for Google", "slug": "add-logo-and-social-profiles-for-google-woo-open-graph" },
+        { "file": "use-with-seo-plugins.md", "title": "Use with Yoast SEO, Rank Math or SEOPress", "slug": "use-with-seo-plugins-woo-open-graph" },
+        { "file": "submit-product-sitemap-to-google.md", "title": "Submit the Product Sitemap to Google Search Console", "slug": "submit-product-sitemap-to-google-woo-open-graph" },
+        { "file": "remove-all-plugin-data-on-uninstall.md", "title": "Remove All Plugin Data When Uninstalling", "slug": "remove-all-plugin-data-on-uninstall-woo-open-graph" }
+      ]
+    },
+    {
+      "title": "Settings Reference",
+      "slug": "settings-woo-open-graph",
+      "folder": "settings",
+      "docs": [
+        { "file": "overview-tab.md", "title": "The Overview Tab", "slug": "overview-tab-woo-open-graph" },
+        { "file": "settings-reference.md", "title": "Settings Reference", "slug": "settings-reference-woo-open-graph" }
+      ]
+    },
+    {
+      "title": "Developer Guide",
+      "slug": "developer-guide-woo-open-graph",
+      "folder": "developer-guide",
+      "docs": [
+        { "file": "overview.md", "title": "Developer Overview", "slug": "developer-overview-woo-open-graph" },
+        { "file": "hooks-and-filters.md", "title": "Hooks and Filters", "slug": "hooks-and-filters-woo-open-graph" },
+        { "file": "shortcodes.md", "title": "Shortcodes", "slug": "shortcodes-woo-open-graph" },
+        { "file": "data-reference.md", "title": "Options, Meta and Data Reference", "slug": "data-reference-woo-open-graph" }
+      ]
+    },
+    {
+      "title": "FAQ",
+      "slug": "faq-woo-open-graph",
+      "folder": "faq",
+      "docs": [
+        { "file": "common-questions.md", "title": "Frequently Asked Questions", "slug": "faq-common-questions-woo-open-graph" }
+      ]
+    },
+    {
+      "title": "Troubleshooting",
+      "slug": "troubleshooting-woo-open-graph",
+      "folder": "troubleshooting",
+      "docs": [
+        { "file": "social-preview-problems.md", "title": "Social Preview Problems", "slug": "social-preview-problems-woo-open-graph" },
+        { "file": "share-button-problems.md", "title": "Share Button Problems", "slug": "share-button-problems-woo-open-graph" },
+        { "file": "structured-data-and-sitemap-problems.md", "title": "Structured Data and Sitemap Problems", "slug": "structured-data-and-sitemap-problems-woo-open-graph" },
+        { "file": "settings-problems.md", "title": "Settings Problems", "slug": "settings-problems-woo-open-graph" }
+      ]
+    }
+  ]
+}

@@ -113,10 +113,13 @@ Yes, the plugin is fully translatable and supports RTL languages.
 * New      - Option to delete all plugin data when the plugin is deleted (off by default).
 * New      - The [wog_social_share] shortcode accepts a product id, so share buttons can be placed on any page.
 * Improve  - New settings screen under WB Plugins > Open Graph: an Overview of what the plugin does on your store, then General, Share Buttons, Structured Data, Sitemaps and Advanced tabs. Existing settings carry over unchanged.
+* Improve  - The Structured Data tab names its master switch and marks the options that depend on it, and the Overview reports Organization schema only when it is actually published.
+* Improve  - Removed the Debug Mode switch, which had no effect on your pages.
 * Improve  - X (Twitter) cards use the large-image card when the product has an image, and the summary card otherwise.
 * Improve  - Share text shows a price range for variable and grouped products whose prices differ.
 * Improve  - The product list Social column shows its state as text, not colour alone.
 * Improve  - The per-product switch is now labelled "Enable social sharing output" and states that search structured data is not affected.
+* Fix      - Shop Managers can save the settings; the form was shown to them but saving was refused.
 * Fix      - Product category pages keep og:title and og:description when "Override titles and descriptions" is enabled.
 * Fix      - Sold-out products show share buttons again.
 * Fix      - Turning off social output for a product now also removes its share buttons, share assets and Open Graph namespace.
