@@ -37,7 +37,7 @@
 | `enable_product_sitemap` | bool | true | Sitemaps > Enable Product Sitemaps |
 | `sitemap_products_per_page` | int 100 to 1000 | 500 | Sitemaps > Products Per Sitemap |
 | `disable_title_description` | bool | false | Advanced > Override SEO Titles |
-| `debug_mode` | bool | false | No switch in the settings screen; read only by `wog_debug_log()` |
+| `debug_mode` | bool | false | Left over from versions before 2.1.0. Nothing reads it. |
 | `delete_data_on_uninstall` | bool | false | Advanced > Delete Data On Uninstall |
 
 The settings screen saves each tab by merging that tab's fields over the stored option, so saving one tab never resets another. Imports and code that call the validator without a tab rebuild every key.

@@ -115,6 +115,7 @@ Yes, the plugin is fully translatable and supports RTL languages.
 * Improve  - New settings screen under WB Plugins > Open Graph: an Overview of what the plugin does on your store, then General, Share Buttons, Structured Data, Sitemaps and Advanced tabs. Existing settings carry over unchanged.
 * Improve  - The Structured Data tab names its master switch and marks the options that depend on it, and the Overview reports Organization schema only when it is actually published.
 * Improve  - Removed the Debug Mode switch, which had no effect on your pages.
+* Improve  - The Social Platforms switches, the Default Social Image hint and the product Social Media Image note now say exactly what is added and which image will be shared.
 * Improve  - X (Twitter) cards use the large-image card when the product has an image, and the summary card otherwise.
 * Improve  - Share text shows a price range for variable and grouped products whose prices differ.
 * Improve  - The product list Social column shows its state as text, not colour alone.
@@ -132,6 +133,9 @@ Yes, the plugin is fully translatable and supports RTL languages.
 * Fix      - An invalid X (Twitter) username is rejected with a message and the previously saved username is kept.
 * Fix      - The Social column in the product list appears again.
 * Fix      - Social title and description placeholders in the product editor show exactly what will be published.
+* Fix      - The sitemap address answers directly instead of redirecting to a trailing-slash URL.
+* Fix      - Sitemap addresses no longer stay at 404 after a permalink refresh made while WooCommerce or the sitemap was switched off.
+* Fix      - Pinterest Rich Pins get the product price and availability tags even when the Facebook switch is off.
 * Fix      - Generating sitemaps reports that the work is queued, and the Last Generated time is set only when a sitemap is actually written.
 * Fix      - The documented wog_social_share JavaScript event now fires on every share, and the readme names the correct global.
 * Fix      - Share text no longer shows a doubled separator when a product has no description.
@@ -140,7 +144,9 @@ Yes, the plugin is fully translatable and supports RTL languages.
 * Fix      - Removed the retired X (Twitter) Card Validator link from Testing Tools.
 * Security - The [wog_social_share] shortcode renders nothing for draft, private or password-protected products.
 * Security - Structured data escapes HTML tags inside product text.
-* Dev      - One settings sanitizer and one defaults array are shared by the settings screen, import and activation; removed the unused cache_meta_tags setting.
+* Dev      - One settings sanitizer and one defaults array are shared by the settings screen and activation; removed the unused cache_meta_tags setting.
+* Dev      - Removed code nothing called: settings import, export and reset, system info, debug logging, manual sitemap helpers and their wog_config_summary, wog_system_info, wog_settings_imported, wog_settings_reset and wog_{section}_settings hooks, plus the non-standard linkedin:* tags.
+* Compat   - Tested with WooCommerce 10.7.
 * Dev      - New wog_social_enabled_for_product filter decides social output per product.
 
 = 2.0.4 - September 2026 =

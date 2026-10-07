@@ -29,16 +29,6 @@ function wog_get_settings() {
 }
 
 /**
- * Log debug message.
- *
- * @param string $message The debug message.
- * @param mixed  $data    Optional data to log.
- */
-function wog_debug_log( $message, $data = null ) {
-	wog()->debug_log( $message, $data );
-}
-
-/**
  * Get a product GTIN.
  *
  * Prefers WooCommerce's native global unique id (WC 9.2+) before custom meta.

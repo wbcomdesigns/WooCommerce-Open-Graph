@@ -18,18 +18,18 @@ Breadcrumbs need the product to belong to a category.
 
 ## The sitemap shows a 404 page
 
-**Cause:** WordPress has not loaded the sitemap address rules yet.
+**Cause:** the sitemap is switched off, or WordPress has not loaded the sitemap address rules yet. The plugin re-adds missing rules by itself on the next page load.
 
 **Fix:**
 1. Make sure **WB Plugins > Open Graph > Sitemaps > Enable Product Sitemaps** is on and saved.
-2. Go to **Settings > Permalinks** and click **Save Changes** without changing anything.
-3. Open `yourstore.com/wog-sitemap.xml` again.
+2. Open `yourstore.com/wog-sitemap.xml` again.
+3. Still a 404? Your site may use plain permalinks (`?p=123`), which the sitemap addresses need. Go to **Settings > Permalinks**, choose any other structure, and click **Save Changes**.
 
 ## Test Sitemaps fails
 
 | Message | Cause | Fix |
 |---|---|---|
-| Sitemap returned HTTP 404 | Rewrite rules not loaded | Save **Settings > Permalinks** once, then test again |
+| Sitemap returned HTTP 404 | Sitemap off, or plain permalinks | Check the two points above, then test again |
 | Sitemap returned HTTP 500 or similar | A server error while building the sitemap | Check your PHP error log. Lower **Products Per Sitemap** if your server runs out of memory |
 | Failed to fetch sitemap: ... | Your server cannot reach its own address (firewall, password protection, local or staging site) | Open the sitemap address in your browser instead. If it loads, the sitemap works |
 | Invalid sitemap format | Another plugin or a cache is returning a different page | Clear caches and test again |

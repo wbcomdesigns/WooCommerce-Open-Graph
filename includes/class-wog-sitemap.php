@@ -81,7 +81,8 @@ class WOG_Sitemap {
 	private function init_hooks() {
 		if ( ! empty( $this->settings['enable_product_sitemap'] ) ) {
 			add_action( 'init', array( $this, 'add_sitemap_rewrite_rules' ) );
-			add_action( 'template_redirect', array( $this, 'handle_sitemap_requests' ) );
+			// Before redirect_canonical (priority 10), which would 301 to a trailing slash.
+			add_action( 'template_redirect', array( $this, 'handle_sitemap_requests' ), 1 );
 
 			// Optimized update hooks for large catalogs.
 			add_action( 'save_post', array( $this, 'maybe_update_sitemap' ), 10, 2 );
@@ -140,10 +141,11 @@ class WOG_Sitemap {
 		add_rewrite_tag( '%wog_sitemap%', '([^&]+)' );
 		add_rewrite_tag( '%wog_sitemap_page%', '([0-9]+)' );
 
-		// Ensure rewrite rules are flushed.
-		if ( ! get_option( 'wog_rewrite_rules_flushed_v2' ) ) {
-			flush_rewrite_rules();
-			update_option( 'wog_rewrite_rules_flushed_v2', true );
+		// Self-heal: a flush made while these rules were not registered (WooCommerce
+		// off, sitemap switched off) drops them, and a one-time flag never restored them.
+		$rules = get_option( 'rewrite_rules' );
+		if ( is_array( $rules ) && ! isset( $rules['^wog-sitemap\\.xml$'] ) ) {
+			flush_rewrite_rules( false );
 		}
 	}
 
@@ -1219,82 +1221,6 @@ class WOG_Sitemap {
 	}
 
 	/**
-	 * Manually generate sitemap index.
-	 *
-	 * @return string
-	 */
-	public function manual_generate_sitemap_index() {
-		ob_start();
-		$this->generate_sitemap_index();
-		return ob_get_clean();
-	}
-
-	/**
-	 * Manually generate product sitemap.
-	 *
-	 * @param int $page The page number.
-	 * @return string
-	 */
-	public function manual_generate_product_sitemap( $page = 1 ) {
-		ob_start();
-		$this->generate_product_sitemap( $page );
-		return ob_get_clean();
-	}
-
-	/**
-	 * Manually generate category sitemap.
-	 *
-	 * @return string
-	 */
-	public function manual_generate_category_sitemap() {
-		ob_start();
-		$this->generate_category_sitemap();
-		return ob_get_clean();
-	}
-
-	/**
-	 * Force regenerate all sitemaps.
-	 *
-	 * @return bool
-	 */
-	public function force_regenerate_all() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return false;
-		}
-
-		$this->clear_sitemap_cache();
-		delete_option( 'wog_rewrite_rules_flushed_v2' );
-
-		$this->add_sitemap_rewrite_rules();
-		flush_rewrite_rules();
-
-		$this->generate_all_sitemaps_background();
-
-		return true;
-	}
-
-	/**
-	 * Get sitemap statistics.
-	 *
-	 * @return array
-	 */
-	public function get_sitemap_stats() {
-		return array(
-			'total_products'       => $this->get_published_product_count(),
-			'products_per_sitemap' => $this->get_products_per_sitemap(),
-			'total_sitemap_pages'  => ceil( $this->get_published_product_count() / $this->get_products_per_sitemap() ),
-			'last_generated'       => get_option( 'wog_sitemap_last_generated', 0 ),
-			'cache_enabled'        => true,
-			'memory_limit'         => ini_get( 'memory_limit' ),
-			'urls'                 => array(
-				'main_index'      => home_url( '/wog-sitemap.xml' ),
-				'products_page_1' => home_url( '/product-sitemap-1.xml' ),
-				'categories'      => home_url( '/product-category-sitemap.xml' ),
-			),
-		);
-	}
-
-	/**
 	 * Log debug message.
 	 *
 	 * @param string $message The debug message.
@@ -1304,68 +1230,6 @@ class WOG_Sitemap {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug mode only.
 			error_log( 'EWOG Sitemap: ' . $message );
 		}
-	}
-
-	/**
-	 * Display debug sitemap information.
-	 */
-	public function debug_sitemap_info() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		$stats = $this->get_sitemap_stats();
-
-		echo "<div class='wog-debug-info'>";
-		echo '<h3>EWOG Sitemap Debug Information</h3>';
-		echo "<table class='widefat'>";
-
-		foreach ( $stats as $key => $value ) {
-			if ( is_array( $value ) ) {
-				$value = '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $value ) ) . '</li></ul>';
-			} else {
-				$value = esc_html( $value );
-			}
-			echo '<tr><td><strong>' . esc_html( ucwords( str_replace( '_', ' ', $key ) ) ) . '</strong></td><td>' . wp_kses_post( $value ) . '</td></tr>';
-		}
-
-		echo '</table>';
-
-		// Test buttons.
-		echo '<p>';
-		echo "<a href='" . esc_url( home_url( '/wog-sitemap.xml' ) ) . "' target='_blank' class='button'>" . esc_html__( 'Test Main Index', 'woo-open-graph' ) . '</a> ';
-		echo "<a href='" . esc_url( home_url( '/product-sitemap-1.xml' ) ) . "' target='_blank' class='button'>" . esc_html__( 'Test Products', 'woo-open-graph' ) . '</a> ';
-		echo "<button onclick='wogClearCache()' class='button'>" . esc_html__( 'Clear Cache', 'woo-open-graph' ) . '</button>';
-		echo '</p>';
-
-		echo "<script>
-        function wogClearCache() {
-            if (confirm('Clear all sitemap cache?')) {
-                fetch(ajaxurl, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'action=wog_clear_cache&nonce=' + wogAdmin.nonce
-                }).then(() => location.reload());
-            }
-        }
-        </script>";
-
-		echo '</div>';
-	}
-
-	/**
-	 * Get sitemap URLs for robots.txt.
-	 *
-	 * @return array
-	 */
-	public function get_sitemap_urls() {
-		$urls = array();
-
-		if ( ! empty( $this->settings['enable_product_sitemap'] ) ) {
-			$urls[] = home_url( '/wog-sitemap.xml' );
-		}
-
-		return $urls;
 	}
 
 	/**

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-07T10:49:30+00:00\n"
+"POT-Creation-Date: 2026-10-07T12:58:13+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: woo-open-graph\n"
@@ -73,7 +73,7 @@ msgid "Social Platforms"
 msgstr ""
 
 #: admin/class-wog-admin.php:161
-msgid "Choose which networks get product-aware tags when a product link is shared."
+msgid "The basic Open Graph tags (title, description, image) are always added, and LinkedIn, WhatsApp and most apps read them. Each switch also shows that network's share button."
 msgstr ""
 
 #: admin/class-wog-admin.php:163
@@ -82,7 +82,7 @@ msgid "Facebook"
 msgstr ""
 
 #: admin/class-wog-admin.php:163
-msgid "Generate Facebook Open Graph meta tags for better sharing"
+msgid "Adds your Facebook App ID and the product price, availability, brand and category tags."
 msgstr ""
 
 #: admin/class-wog-admin.php:164
@@ -90,7 +90,7 @@ msgid "Twitter"
 msgstr ""
 
 #: admin/class-wog-admin.php:164
-msgid "Generate Twitter Card meta tags for better sharing"
+msgid "Adds X (Twitter) card tags, with the price and availability."
 msgstr ""
 
 #: admin/class-wog-admin.php:165
@@ -98,7 +98,7 @@ msgid "LinkedIn"
 msgstr ""
 
 #: admin/class-wog-admin.php:165
-msgid "Optimize sharing for LinkedIn professional network"
+msgid "Shows the LinkedIn share button. LinkedIn reads the basic tags, so no extra tags are needed."
 msgstr ""
 
 #: admin/class-wog-admin.php:166
@@ -107,7 +107,7 @@ msgid "Pinterest"
 msgstr ""
 
 #: admin/class-wog-admin.php:166
-msgid "Enable Pinterest Rich Pins with product data"
+msgid "Turns on Rich Pins, with the product price and availability tags."
 msgstr ""
 
 #: admin/class-wog-admin.php:167
@@ -115,7 +115,7 @@ msgid "WhatsApp"
 msgstr ""
 
 #: admin/class-wog-admin.php:167
-msgid "Optimize sharing for WhatsApp mobile messaging"
+msgid "Shows the WhatsApp share button. WhatsApp reads the basic tags, so no extra tags are needed."
 msgstr ""
 
 #: admin/class-wog-admin.php:171
@@ -155,7 +155,7 @@ msgid "Default Social Image"
 msgstr ""
 
 #: admin/class-wog-admin.php:195
-msgid "Default image when products don't have featured images (recommended: 1200x630px)"
+msgid "Shared when a product has no featured or gallery image, and on pages without their own image. It is shared at its uploaded size, so 1200x630px works best. Empty uses the WooCommerce placeholder image."
 msgstr ""
 
 #: admin/class-wog-admin.php:199
@@ -626,7 +626,7 @@ msgstr ""
 
 #: admin/views/overview.php:102
 #: admin/views/overview.php:127
-#: includes/class-wog-meta-boxes.php:271
+#: includes/class-wog-meta-boxes.php:282
 msgid "Off"
 msgstr ""
 
@@ -740,65 +740,49 @@ msgid "Featured image will be used"
 msgstr ""
 
 #: includes/class-wog-meta-boxes.php:170
-msgid "No featured image set"
+msgid "First gallery image will be used"
 msgstr ""
 
-#: includes/class-wog-meta-boxes.php:171
-msgid "Set a featured image to improve social media sharing."
+#: includes/class-wog-meta-boxes.php:176
+msgid "The WooCommerce placeholder image will be used"
 msgstr ""
 
-#: includes/class-wog-meta-boxes.php:255
+#: includes/class-wog-meta-boxes.php:178
+msgid "The Default Social Image will be used"
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:182
+msgid "Set a featured image to show this product when it is shared."
+msgstr ""
+
+#: includes/class-wog-meta-boxes.php:266
 msgid "Social"
 msgstr ""
 
-#: includes/class-wog-meta-boxes.php:271
+#: includes/class-wog-meta-boxes.php:282
 msgid "Social output disabled for this product"
 msgstr ""
 
-#: includes/class-wog-meta-boxes.php:273
+#: includes/class-wog-meta-boxes.php:284
 msgid "Custom"
 msgstr ""
 
-#: includes/class-wog-meta-boxes.php:273
+#: includes/class-wog-meta-boxes.php:284
 msgid "Custom social title or description"
 msgstr ""
 
-#: includes/class-wog-meta-boxes.php:275
+#: includes/class-wog-meta-boxes.php:286
 msgid "Auto"
 msgstr ""
 
-#: includes/class-wog-meta-boxes.php:275
+#: includes/class-wog-meta-boxes.php:286
 msgid "Automatic social content"
 msgstr ""
 
-#: includes/class-wog-settings.php:448
-msgid "Invalid JSON format"
-msgstr ""
-
-#: includes/class-wog-settings.php:452
-msgid "No valid settings found in import data"
-msgstr ""
-
-#: includes/class-wog-settings.php:464
-msgid "No valid settings found in import"
-msgstr ""
-
 #. translators: %s: rejected username.
-#: includes/class-wog-settings.php:525
+#: includes/class-wog-settings.php:265
 #, php-format
 msgid "\"%s\" is not a valid X (Twitter) username: use 1-15 letters, numbers or underscores. The username was not changed."
-msgstr ""
-
-#: includes/class-wog-sitemap.php:1336
-msgid "Test Main Index"
-msgstr ""
-
-#: includes/class-wog-sitemap.php:1337
-msgid "Test Products"
-msgstr ""
-
-#: includes/class-wog-sitemap.php:1338
-msgid "Clear Cache"
 msgstr ""
 
 #: includes/class-wog-social-share.php:172
@@ -866,8 +850,4 @@ msgstr ""
 
 #: open-graph-for-woocommerce.php:259
 msgid "Plugin Activation Error"
-msgstr ""
-
-#: open-graph-for-woocommerce.php:472
-msgid "Invalid import data"
 msgstr ""

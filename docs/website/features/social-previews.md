@@ -28,14 +28,14 @@ The General tab has one switch per network. They do not all do the same thing, b
 |---|---|---|
 | Facebook | Facebook App ID tag (if you set one), product price, currency, availability, condition, brand and category tags | The Facebook share button |
 | Twitter | The X card tags: card type, account name, title, description, image, price and availability labels | The Twitter share button |
-| LinkedIn | Two extra LinkedIn title and description tags | The LinkedIn share button |
-| Pinterest | A tag that switches on Pinterest Rich Pins | The Pinterest share button |
-| WhatsApp | Nothing extra on the page | The WhatsApp share button |
+| LinkedIn | Nothing extra on the page (LinkedIn reads the basic tags) | The LinkedIn share button |
+| Pinterest | A tag that switches on Pinterest Rich Pins, plus the product price, currency, availability, condition, brand and category tags | The Pinterest share button |
+| WhatsApp | Nothing extra on the page (WhatsApp reads the basic tags) | The WhatsApp share button |
 
 Two things to know:
 
 - The basic tags (title, description, image, link, site name, type, language) are always printed, whatever the switches say. Facebook, LinkedIn and WhatsApp read these.
-- Pinterest Rich Pins use the price and availability tags printed by the Facebook switch. Keep Facebook on if you want Rich Pins.
+- Facebook and Pinterest share the same product tags. They are printed once when either switch is on, so Rich Pins work with Facebook switched off.
 
 ## X (Twitter) cards
 

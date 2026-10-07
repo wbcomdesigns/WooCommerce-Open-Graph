@@ -9,7 +9,7 @@ Every product has its own **Social Media Settings** box on the product edit scre
 | Enable social sharing output for this product | On by default. Untick it to remove the social preview tags and the share buttons for this product. Search structured data (what Google reads for product results) is not affected. |
 | Social Media Title | Your own title for social posts. Up to 60 characters, with a live counter. Leave empty to use the product name. |
 | Social Media Description | Your own description for social posts. Up to 155 characters, with a live counter. Leave empty to use the product description. |
-| Social Media Image | Information only. Shows "Featured image will be used" or "No featured image set". |
+| Social Media Image | Information only. Shows which image will be shared: the featured image, the first gallery image, your Default Social Image, or the WooCommerce placeholder. |
 
 The empty title and description fields show a grey hint of exactly what will be published when you leave them empty.
 

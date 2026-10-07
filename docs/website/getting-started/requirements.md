@@ -4,7 +4,7 @@
 |---|---|
 | WordPress | 5.0 or later (tested up to 6.9) |
 | PHP | 7.4 or later |
-| WooCommerce | 4.0 or later (tested up to 8.5 in the plugin header) |
+| WooCommerce | 4.0 or later (tested up to 10.7) |
 
 ## WooCommerce must be active
 
