@@ -69,7 +69,7 @@ composer require wbcomdesigns/open-graph-for-woocommerce
 ## ⚙️ Quick Setup
 
 1. **Install & Activate** the plugin
-2. **Navigate** to **WooCommerce → Social Media**
+2. **Navigate** to **WB Plugins → Open Graph**
 3. **Enable Platforms** you want to support
 4. **Choose Style** for share buttons
 5. **Configure Settings** as needed
@@ -257,7 +257,7 @@ window.wogShare.copyLink(url);
 define('WOG_DEBUG', true);
 
 // Or via admin
-WooCommerce → Social Media → Advanced → Debug Mode
+WB Plugins → Open Graph → Advanced → Debug Mode
 ```
 
 ## 📝 Contributing

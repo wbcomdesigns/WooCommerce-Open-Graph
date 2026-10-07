@@ -1,10 +1,16 @@
 <?php
 /**
  * Admin Interface Class
- * Handles the WordPress admin interface for plugin settings
+ *
+ * Card-panel settings screen under the shared WB Plugins hub, the same shell
+ * every Wbcom plugin uses (reference: BuddyPress Member Reviews).
+ *
+ * Data contract is unchanged: one `wog_settings` option in the
+ * `wog_settings_group` group, validated by WOG_Settings::validate_settings(),
+ * and the `page=woo-open-graph` slug, so stored settings and links survive.
  *
  * @package Woo_Open_Graph
- * @version 2.0.0
+ * @version 2.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,6 +23,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handles the WordPress admin interface for plugin settings.
  */
 class WOG_Admin {
+
+	/**
+	 * Menu slug. Kept from the old WooCommerce submenu so bookmarks and the
+	 * plugin action link still resolve.
+	 */
+	const MENU_SLUG = 'woo-open-graph';
+
+	/**
+	 * Settings group and option name (unchanged).
+	 */
+	const OPTION_GROUP = 'wog_settings_group';
+	const OPTION_NAME  = 'wog_settings';
+
+	/**
+	 * Hidden field that tells the sanitizer which tab posted.
+	 */
+	const TAB_FIELD = '_wog_tab';
 
 	/**
 	 * Singleton instance.
@@ -47,8 +70,12 @@ class WOG_Admin {
 	 */
 	private function init_hooks() {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+		// Priority 999 reclaims the shared hub landing render when a legacy
+		// wbcom-wrapper plugin registered wbcomplugins first.
+		add_action( 'admin_menu', array( $this, 'takeover_hub_landing' ), 999 );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
+		add_action( 'in_admin_header', array( $this, 'suppress_foreign_notices' ), 1 );
 		add_filter( 'plugin_action_links_' . plugin_basename( WOG_PLUGIN_FILE ), array( $this, 'add_action_links' ) );
 
 		add_action( 'wp_ajax_wog_generate_sitemap', array( $this, 'ajax_generate_sitemap' ) );
@@ -56,527 +83,357 @@ class WOG_Admin {
 	}
 
 	/**
-	 * Add admin menu under WooCommerce
+	 * Sidebar tabs, keyed by slug.
+	 *
+	 * @return array<string, array{label:string, icon:string, group:string}>
+	 */
+	public static function get_tabs() {
+		$tabs = array(
+			'overview'        => array(
+				'label' => __( 'Overview', 'woo-open-graph' ),
+				'icon'  => 'dashicons-chart-bar',
+				'group' => 'main',
+			),
+			'general'         => array(
+				'label' => __( 'General', 'woo-open-graph' ),
+				'icon'  => 'dashicons-admin-generic',
+				'group' => 'settings',
+			),
+			'sharing'         => array(
+				'label' => __( 'Share Buttons', 'woo-open-graph' ),
+				'icon'  => 'dashicons-share',
+				'group' => 'settings',
+			),
+			'structured-data' => array(
+				'label' => __( 'Structured Data', 'woo-open-graph' ),
+				'icon'  => 'dashicons-editor-code',
+				'group' => 'settings',
+			),
+			'sitemaps'        => array(
+				'label' => __( 'Sitemaps', 'woo-open-graph' ),
+				'icon'  => 'dashicons-networking',
+				'group' => 'settings',
+			),
+			'advanced'        => array(
+				'label' => __( 'Advanced', 'woo-open-graph' ),
+				'icon'  => 'dashicons-admin-tools',
+				'group' => 'settings',
+			),
+			'discover'        => array(
+				'label' => __( 'Discover', 'woo-open-graph' ),
+				'icon'  => 'dashicons-products',
+				'group' => 'discover',
+			),
+		);
+
+		/**
+		 * Filter the settings screen tabs.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param array $tabs Tab descriptors keyed by slug.
+		 */
+		return apply_filters( 'wog_admin_tabs', $tabs );
+	}
+
+	/**
+	 * Settings sections per tab: the one registry that drives registration,
+	 * rendering and the per-tab save merge.
+	 *
+	 * @return array<string, array<string, array{title:string, desc:string, fields:array}>>
+	 */
+	private function get_sections() {
+		$checkbox = static function ( $title, $description ) {
+			return array(
+				'type'        => 'checkbox',
+				'title'       => $title,
+				'description' => $description,
+			);
+		};
+
+		return array(
+			'general'         => array(
+				'wog_core_section'     => array(
+					'title'  => __( 'Social Platforms', 'woo-open-graph' ),
+					'desc'   => __( 'Choose which networks get product-aware tags when a product link is shared.', 'woo-open-graph' ),
+					'fields' => array(
+						'enable_facebook'  => $checkbox( __( 'Facebook', 'woo-open-graph' ), __( 'Generate Facebook Open Graph meta tags for better sharing', 'woo-open-graph' ) ),
+						'enable_twitter'   => $checkbox( __( 'Twitter', 'woo-open-graph' ), __( 'Generate Twitter Card meta tags for better sharing', 'woo-open-graph' ) ),
+						'enable_linkedin'  => $checkbox( __( 'LinkedIn', 'woo-open-graph' ), __( 'Optimize sharing for LinkedIn professional network', 'woo-open-graph' ) ),
+						'enable_pinterest' => $checkbox( __( 'Pinterest', 'woo-open-graph' ), __( 'Enable Pinterest Rich Pins with product data', 'woo-open-graph' ) ),
+						'enable_whatsapp'  => $checkbox( __( 'WhatsApp', 'woo-open-graph' ), __( 'Optimize sharing for WhatsApp mobile messaging', 'woo-open-graph' ) ),
+					),
+				),
+				'wog_platform_section' => array(
+					'title'  => __( 'Platform Accounts', 'woo-open-graph' ),
+					'desc'   => __( 'Optional platform-specific settings for enhanced integration.', 'woo-open-graph' ),
+					'fields' => array(
+						'facebook_app_id'  => array(
+							'type'        => 'text',
+							'title'       => __( 'Facebook App ID', 'woo-open-graph' ),
+							'placeholder' => '123456789012345',
+							'description' => __( 'Optional: Your Facebook App ID for better analytics and insights', 'woo-open-graph' ),
+						),
+						'twitter_username' => array(
+							'type'        => 'text',
+							'title'       => __( 'Twitter Username', 'woo-open-graph' ),
+							'placeholder' => 'yourstore',
+							'description' => __( 'Optional: Your Twitter username (without @) for attribution', 'woo-open-graph' ),
+						),
+					),
+				),
+				'wog_content_section'  => array(
+					'title'  => __( 'Image & Content Settings', 'woo-open-graph' ),
+					'desc'   => __( 'Configure how images and content appear when shared on social media.', 'woo-open-graph' ),
+					'fields' => array(
+						'fallback_image' => array(
+							'type'        => 'image',
+							'title'       => __( 'Default Social Image', 'woo-open-graph' ),
+							'description' => __( 'Default image when products don\'t have featured images (recommended: 1200x630px)', 'woo-open-graph' ),
+						),
+						'image_size'     => array(
+							'type'        => 'select',
+							'title'       => __( 'Social Image Size', 'woo-open-graph' ),
+							'options'     => array_intersect_key(
+								array(
+									'medium' => __( 'Medium (300x300)', 'woo-open-graph' ),
+									'large'  => __( 'Large (1024x1024)', 'woo-open-graph' ),
+									'full'   => __( 'Full Size', 'woo-open-graph' ),
+								),
+								array_flip( WOG_Settings::IMAGE_SIZES )
+							),
+							'description' => __( 'Size of product images used for social sharing', 'woo-open-graph' ),
+						),
+					),
+				),
+			),
+			'sharing'         => array(
+				'wog_sharing_section' => array(
+					'title'  => __( 'Social Sharing Buttons', 'woo-open-graph' ),
+					'desc'   => __( 'Configure social sharing buttons that appear on your product pages.', 'woo-open-graph' ),
+					'fields' => array(
+						'enable_social_share'   => $checkbox( __( 'Enable Share Buttons', 'woo-open-graph' ), __( 'Add social share buttons to product pages', 'woo-open-graph' ) ),
+						'enable_email'          => $checkbox( __( 'Email Button', 'woo-open-graph' ), __( 'Show an Email share button (opens the shopper\'s email app with the product link)', 'woo-open-graph' ) ),
+						'share_button_style'    => array(
+							'type'        => 'select',
+							'title'       => __( 'Button Style', 'woo-open-graph' ),
+							'options'     => array(
+								'modern'  => __( 'Modern', 'woo-open-graph' ),
+								'classic' => __( 'Classic', 'woo-open-graph' ),
+								'minimal' => __( 'Minimal', 'woo-open-graph' ),
+							),
+							'description' => __( 'Visual style for share buttons', 'woo-open-graph' ),
+						),
+						'share_button_position' => array(
+							'type'        => 'select',
+							'title'       => __( 'Button Position', 'woo-open-graph' ),
+							'options'     => array(
+								'after_add_to_cart'  => __( 'After Add to Cart Button', 'woo-open-graph' ),
+								'before_add_to_cart' => __( 'Before Add to Cart Button', 'woo-open-graph' ),
+								'after_summary'      => __( 'After Product Summary', 'woo-open-graph' ),
+								'after_tabs'         => __( 'After Product Tabs', 'woo-open-graph' ),
+							),
+							'description' => __( 'Where to display social share buttons on product pages', 'woo-open-graph' ),
+						),
+					),
+				),
+			),
+			'structured-data' => array(
+				'wog_schema_section'       => array(
+					'title'  => __( 'Product Schema', 'woo-open-graph' ),
+					'desc'   => __( 'WooCommerce already outputs Product structured data. These options only add what it leaves out.', 'woo-open-graph' ),
+					'fields' => array(
+						'enable_schema'            => $checkbox( __( 'Product Schema Gap-fill', 'woo-open-graph' ), __( 'Gap-fill WooCommerce\'s existing Product schema with extra fields (brand, GTIN, MPN, specifications). Off by default - WooCommerce already outputs Product structured data, so leave off unless you need the extra fields.', 'woo-open-graph' ) ),
+						'enable_enhanced_schema'   => $checkbox( __( 'Enhanced Schema', 'woo-open-graph' ), __( 'Include advanced product properties (GTIN, MPN, brand, specifications)', 'woo-open-graph' ) ),
+						'enable_breadcrumb_schema' => $checkbox( __( 'Breadcrumb Schema', 'woo-open-graph' ), __( 'Add breadcrumb navigation schema markup', 'woo-open-graph' ) ),
+					),
+				),
+				'wog_organization_section' => array(
+					'title'  => __( 'Organization', 'woo-open-graph' ),
+					'desc'   => __( 'Tell search engines who runs the store.', 'woo-open-graph' ),
+					'fields' => array(
+						'enable_organization_schema' => $checkbox( __( 'Organization Schema', 'woo-open-graph' ), __( 'Add organization and store information schema', 'woo-open-graph' ) ),
+						'organization_logo'          => array(
+							'type'        => 'image',
+							'title'       => __( 'Organization Logo', 'woo-open-graph' ),
+							'description' => __( 'Logo published in the Organization structured data. Leave empty to use your theme logo, then your Site Icon.', 'woo-open-graph' ),
+						),
+						'social_profiles'            => array(
+							'type'        => 'textarea',
+							'title'       => __( 'Social Profiles', 'woo-open-graph' ),
+							'placeholder' => "https://www.facebook.com/yourstore\nhttps://www.instagram.com/yourstore",
+							'description' => __( 'One profile URL per line. Published as sameAs in the Organization structured data so search engines can link your store to its profiles.', 'woo-open-graph' ),
+						),
+					),
+				),
+			),
+			'sitemaps'        => array(
+				'wog_sitemap_section' => array(
+					'title'  => __( 'XML Sitemaps', 'woo-open-graph' ),
+					'desc'   => __( 'Generate XML sitemaps to help search engines discover your products and categories.', 'woo-open-graph' ),
+					'fields' => array(
+						'enable_product_sitemap'    => array(
+							'type'        => 'sitemap',
+							'title'       => __( 'Enable Product Sitemaps', 'woo-open-graph' ),
+							'description' => __( 'Generate XML sitemaps for products and categories', 'woo-open-graph' ),
+						),
+						'sitemap_products_per_page' => array(
+							'type'        => 'number',
+							'title'       => __( 'Products Per Sitemap', 'woo-open-graph' ),
+							'min'         => 100,
+							'max'         => 1000,
+							'default'     => 500,
+							'description' => __( 'Number of products per sitemap file (recommended: 500)', 'woo-open-graph' ),
+						),
+					),
+				),
+			),
+			'advanced'        => array(
+				'wog_advanced_section' => array(
+					'title'  => __( 'Advanced Settings', 'woo-open-graph' ),
+					'desc'   => __( 'Advanced options for power users and specific use cases.', 'woo-open-graph' ),
+					'fields' => array(
+						'disable_title_description' => $checkbox( __( 'Override SEO Titles', 'woo-open-graph' ), __( 'Override titles and descriptions from other SEO plugins (use with caution)', 'woo-open-graph' ) ),
+						'debug_mode'                => $checkbox( __( 'Debug Mode', 'woo-open-graph' ), __( 'Enable debug mode for troubleshooting (adds HTML comments)', 'woo-open-graph' ) ),
+						'delete_data_on_uninstall'  => $checkbox( __( 'Delete Data On Uninstall', 'woo-open-graph' ), __( 'Delete all plugin data (settings and per-product social titles/descriptions) when the plugin is deleted', 'woo-open-graph' ) ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Settings page id for one tab (the do_settings_sections() page).
+	 *
+	 * @param string $tab Tab slug.
+	 * @return string
+	 */
+	public static function settings_page_id( $tab ) {
+		return 'wog_settings_' . $tab;
+	}
+
+	/**
+	 * Attach as a submenu under the shared WB Plugins hub.
 	 */
 	public function add_admin_menu() {
+		// First Wbcom plugin to load creates the shared WB Plugins hub.
+		if ( empty( $GLOBALS['admin_page_hooks']['wbcomplugins'] ) ) {
+			add_menu_page(
+				esc_html__( 'WB Plugins', 'woo-open-graph' ),
+				esc_html__( 'WB Plugins', 'woo-open-graph' ),
+				'manage_options',
+				'wbcomplugins',
+				array( $this, 'render_hub' ),
+				'dashicons-lightbulb',
+				59
+			);
+		}
+
 		add_submenu_page(
-			'woocommerce',
-			__( 'Woo Open Graph', 'woo-open-graph' ),
-			__( 'Social Media', 'woo-open-graph' ),
+			'wbcomplugins',
+			'Open Graph for WooCommerce',
+			esc_html__( 'Open Graph', 'woo-open-graph' ),
 			'manage_woocommerce',
-			'woo-open-graph',
+			self::MENU_SLUG,
 			array( $this, 'admin_page' )
 		);
 	}
 
 	/**
-	 * Register plugin settings and fields
+	 * Render the shared hub landing with the card-panel dashboard, whichever
+	 * Wbcom plugin registered the hub first.
+	 */
+	public function takeover_hub_landing() {
+		global $admin_page_hooks;
+		if ( empty( $admin_page_hooks['wbcomplugins'] ) ) {
+			return;
+		}
+		remove_all_actions( 'toplevel_page_wbcomplugins' );
+		add_action( 'toplevel_page_wbcomplugins', array( $this, 'render_hub' ) );
+	}
+
+	/**
+	 * Register the setting plus one settings page per tab.
 	 */
 	public function register_settings() {
-		register_setting( 'wog_settings_group', 'wog_settings', array( $this, 'sanitize_settings' ) );
+		register_setting( self::OPTION_GROUP, self::OPTION_NAME, array( $this, 'sanitize_settings' ) );
 
-		// Core Features Section.
-		add_settings_section(
-			'wog_core_section',
-			__( 'Core Features', 'woo-open-graph' ),
-			array( $this, 'core_section_callback' ),
-			'wog_settings'
-		);
-
-		$core_fields = array(
-			'enable_schema'    => __( 'Gap-fill WooCommerce\'s existing Product schema with extra fields (brand, GTIN, MPN, specifications). Off by default - WooCommerce already outputs Product structured data, so leave off unless you need the extra fields.', 'woo-open-graph' ),
-			'enable_facebook'  => __( 'Generate Facebook Open Graph meta tags for better sharing', 'woo-open-graph' ),
-			'enable_twitter'   => __( 'Generate Twitter Card meta tags for better sharing', 'woo-open-graph' ),
-			'enable_linkedin'  => __( 'Optimize sharing for LinkedIn professional network', 'woo-open-graph' ),
-			'enable_pinterest' => __( 'Enable Pinterest Rich Pins with product data', 'woo-open-graph' ),
-			'enable_whatsapp'  => __( 'Optimize sharing for WhatsApp mobile messaging', 'woo-open-graph' ),
-		);
-
-		foreach ( $core_fields as $id => $description ) {
-			$title = ucwords( str_replace( array( 'enable_', '_' ), array( '', ' ' ), $id ) );
-			add_settings_field(
-				$id,
-				$title,
-				array( $this, 'checkbox_field' ),
-				'wog_settings',
-				'wog_core_section',
-				array(
-					'id'          => $id,
-					'description' => $description,
-				)
-			);
-		}
-
-		// Social Sharing Section.
-		add_settings_section(
-			'wog_sharing_section',
-			__( 'Social Sharing Buttons', 'woo-open-graph' ),
-			array( $this, 'sharing_section_callback' ),
-			'wog_settings'
-		);
-
-		add_settings_field(
-			'enable_social_share',
-			__( 'Enable Share Buttons', 'woo-open-graph' ),
-			array( $this, 'checkbox_field' ),
-			'wog_settings',
-			'wog_sharing_section',
-			array(
-				'id'          => 'enable_social_share',
-				'description' => __( 'Add social share buttons to product pages', 'woo-open-graph' ),
-			)
-		);
-
-		add_settings_field(
-			'enable_email',
-			__( 'Email Button', 'woo-open-graph' ),
-			array( $this, 'checkbox_field' ),
-			'wog_settings',
-			'wog_sharing_section',
-			array(
-				'id'          => 'enable_email',
-				'description' => __( 'Show an Email share button (opens the shopper\'s email app with the product link)', 'woo-open-graph' ),
-			)
-		);
-
-		add_settings_field(
-			'share_button_style',
-			__( 'Button Style', 'woo-open-graph' ),
-			array( $this, 'select_field' ),
-			'wog_settings',
-			'wog_sharing_section',
-			array(
-				'id'          => 'share_button_style',
-				'options'     => array(
-					'modern'  => __( 'Modern', 'woo-open-graph' ),
-					'classic' => __( 'Classic', 'woo-open-graph' ),
-					'minimal' => __( 'Minimal', 'woo-open-graph' ),
-				),
-				'description' => __( 'Visual style for share buttons', 'woo-open-graph' ),
-			)
-		);
-
-		add_settings_field(
-			'share_button_position',
-			__( 'Button Position', 'woo-open-graph' ),
-			array( $this, 'select_field' ),
-			'wog_settings',
-			'wog_sharing_section',
-			array(
-				'id'          => 'share_button_position',
-				'options'     => array(
-					'after_add_to_cart'  => __( 'After Add to Cart Button', 'woo-open-graph' ),
-					'before_add_to_cart' => __( 'Before Add to Cart Button', 'woo-open-graph' ),
-					'after_summary'      => __( 'After Product Summary', 'woo-open-graph' ),
-					'after_tabs'         => __( 'After Product Tabs', 'woo-open-graph' ),
-				),
-				'description' => __( 'Where to display social share buttons on product pages', 'woo-open-graph' ),
-			)
-		);
-
-		// Sitemaps Section.
-		add_settings_section(
-			'wog_sitemap_section',
-			__( 'XML Sitemaps', 'woo-open-graph' ),
-			array( $this, 'sitemap_section_callback' ),
-			'wog_settings'
-		);
-
-		add_settings_field(
-			'enable_product_sitemap',
-			__( 'Enable Product Sitemaps', 'woo-open-graph' ),
-			array( $this, 'sitemap_field' ),
-			'wog_settings',
-			'wog_sitemap_section',
-			array(
-				'id'          => 'enable_product_sitemap',
-				'description' => __( 'Generate XML sitemaps for products and categories', 'woo-open-graph' ),
-			)
-		);
-
-		add_settings_field(
-			'sitemap_products_per_page',
-			__( 'Products Per Sitemap', 'woo-open-graph' ),
-			array( $this, 'number_field' ),
-			'wog_settings',
-			'wog_sitemap_section',
-			array(
-				'id'          => 'sitemap_products_per_page',
-				'min'         => 100,
-				'max'         => 1000,
-				'default'     => 500,
-				'description' => __( 'Number of products per sitemap file (recommended: 500)', 'woo-open-graph' ),
-			)
-		);
-
-		// Platform Settings Section.
-		add_settings_section(
-			'wog_platform_section',
-			__( 'Platform Settings', 'woo-open-graph' ),
-			array( $this, 'platform_section_callback' ),
-			'wog_settings'
-		);
-
-		add_settings_field(
-			'facebook_app_id',
-			__( 'Facebook App ID', 'woo-open-graph' ),
-			array( $this, 'text_field' ),
-			'wog_settings',
-			'wog_platform_section',
-			array(
-				'id'          => 'facebook_app_id',
-				'placeholder' => '123456789012345',
-				'description' => __( 'Optional: Your Facebook App ID for better analytics and insights', 'woo-open-graph' ),
-			)
-		);
-
-		add_settings_field(
-			'twitter_username',
-			__( 'Twitter Username', 'woo-open-graph' ),
-			array( $this, 'text_field' ),
-			'wog_settings',
-			'wog_platform_section',
-			array(
-				'id'          => 'twitter_username',
-				'placeholder' => 'yourstore',
-				'description' => __( 'Optional: Your Twitter username (without @) for attribution', 'woo-open-graph' ),
-			)
-		);
-
-		add_settings_field(
-			'organization_logo',
-			__( 'Organization Logo', 'woo-open-graph' ),
-			array( $this, 'image_field' ),
-			'wog_settings',
-			'wog_platform_section',
-			array(
-				'id'          => 'organization_logo',
-				'description' => __( 'Logo published in the Organization structured data. Leave empty to use your theme logo, then your Site Icon.', 'woo-open-graph' ),
-			)
-		);
-
-		add_settings_field(
-			'social_profiles',
-			__( 'Social Profiles', 'woo-open-graph' ),
-			array( $this, 'textarea_field' ),
-			'wog_settings',
-			'wog_platform_section',
-			array(
-				'id'          => 'social_profiles',
-				'placeholder' => "https://www.facebook.com/yourstore\nhttps://www.instagram.com/yourstore",
-				'description' => __( 'One profile URL per line. Published as sameAs in the Organization structured data so search engines can link your store to its profiles.', 'woo-open-graph' ),
-			)
-		);
-
-		// Image & Content Settings Section.
-		add_settings_section(
-			'wog_content_section',
-			__( 'Image & Content Settings', 'woo-open-graph' ),
-			array( $this, 'content_section_callback' ),
-			'wog_settings'
-		);
-
-		add_settings_field(
-			'fallback_image',
-			__( 'Default Social Image', 'woo-open-graph' ),
-			array( $this, 'image_field' ),
-			'wog_settings',
-			'wog_content_section',
-			array(
-				'id'          => 'fallback_image',
-				'description' => __( 'Default image when products don\'t have featured images (recommended: 1200x630px)', 'woo-open-graph' ),
-			)
-		);
-
-		add_settings_field(
-			'image_size',
-			__( 'Social Image Size', 'woo-open-graph' ),
-			array( $this, 'select_field' ),
-			'wog_settings',
-			'wog_content_section',
-			array(
-				'id'          => 'image_size',
-				'options'     => array_intersect_key(
-					array(
-						'medium' => __( 'Medium (300x300)', 'woo-open-graph' ),
-						'large'  => __( 'Large (1024x1024)', 'woo-open-graph' ),
-						'full'   => __( 'Full Size', 'woo-open-graph' ),
-					),
-					array_flip( WOG_Settings::IMAGE_SIZES )
-				),
-				'description' => __( 'Size of product images used for social sharing', 'woo-open-graph' ),
-			)
-		);
-
-		// Advanced Settings Section.
-		add_settings_section(
-			'wog_advanced_section',
-			__( 'Advanced Settings', 'woo-open-graph' ),
-			array( $this, 'advanced_section_callback' ),
-			'wog_settings'
-		);
-
-		$advanced_fields = array(
-			'disable_title_description'  => __( 'Override titles and descriptions from other SEO plugins (use with caution)', 'woo-open-graph' ),
-			'enable_enhanced_schema'     => __( 'Include advanced product properties (GTIN, MPN, brand, specifications)', 'woo-open-graph' ),
-			'enable_breadcrumb_schema'   => __( 'Add breadcrumb navigation schema markup', 'woo-open-graph' ),
-			'enable_organization_schema' => __( 'Add organization and store information schema', 'woo-open-graph' ),
-			'debug_mode'                 => __( 'Enable debug mode for troubleshooting (adds HTML comments)', 'woo-open-graph' ),
-			'delete_data_on_uninstall'   => __( 'Delete all plugin data (settings and per-product social titles/descriptions) when the plugin is deleted', 'woo-open-graph' ),
-		);
-
-		foreach ( $advanced_fields as $id => $description ) {
-			$title = ucwords( str_replace( array( 'enable_', 'disable_', '_' ), array( '', '', ' ' ), $id ) );
-			add_settings_field(
-				$id,
-				$title,
-				array( $this, 'checkbox_field' ),
-				'wog_settings',
-				'wog_advanced_section',
-				array(
-					'id'          => $id,
-					'description' => $description,
-				)
-			);
+		foreach ( $this->get_sections() as $tab => $sections ) {
+			$page = self::settings_page_id( $tab );
+			foreach ( $sections as $section_id => $section ) {
+				add_settings_section( $section_id, $section['title'], '__return_false', $page );
+				foreach ( $section['fields'] as $id => $field ) {
+					add_settings_field(
+						$id,
+						$field['title'],
+						array( $this, $field['type'] . '_field' ),
+						$page,
+						$section_id,
+						array_merge( $field, array( 'id' => $id ) )
+					);
+				}
+			}
 		}
 	}
 
 	/**
-	 * Render the main admin page
+	 * Section descriptions for one tab, keyed by section id.
+	 *
+	 * @param string $tab Tab slug.
+	 * @return array<string, string>
+	 */
+	public function get_section_descriptions( $tab ) {
+		$sections = $this->get_sections();
+		return isset( $sections[ $tab ] ) ? wp_list_pluck( $sections[ $tab ], 'desc' ) : array();
+	}
+
+	/**
+	 * Render the shared WB Plugins hub landing page.
+	 */
+	public function render_hub() {
+		include WOG_PLUGIN_DIR . 'admin/views/hub.php';
+	}
+
+	/**
+	 * Render the settings screen: shell + active tab.
 	 */
 	public function admin_page() {
-		?>
-		<div class="wrap wog-admin-wrap">
-			<div class="wog-admin-header">
-				<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-				<p class="description"><?php esc_html_e( 'Configure how your WooCommerce products appear when shared on social media platforms. This plugin works alongside your existing SEO plugin to fill any gaps.', 'woo-open-graph' ); ?></p>
-			</div>
-			<?php // Required: without this marker core's common.js moves notices into the heading. ?>
-			<hr class="wp-header-end">
-			<?php
-			// Custom top-level pages do not print settings notices on their own:
-			// "Settings saved" and validation errors (e.g. an invalid username) need this.
-			settings_errors();
-			?>
-			
-			<div class="wog-admin-layout">
-				<div class="wog-main-content">
-					<form method="post" action="options.php" class="wog-settings-form">
-						<?php
-						settings_fields( 'wog_settings_group' );
-						do_settings_sections( 'wog_settings' );
-						submit_button( __( 'Save Settings', 'woo-open-graph' ), 'primary', 'submit', true, array( 'class' => 'button-primary button-large' ) );
-						?>
-					</form>
-				</div>
-				
-				<div class="wog-sidebar">
-					<div class="wog-sidebar-box">
-						<div class="wog-card-header">
-							<h3><span class="dashicons dashicons-dashboard"></span> <?php esc_html_e( 'Current Status', 'woo-open-graph' ); ?></h3>
-						</div>
-						<div class="wog-card-body">
-							<?php $this->display_quick_status(); ?>
-						</div>
-					</div>
-					
-					<div class="wog-sidebar-box">
-						<div class="wog-card-header">
-							<h3><span class="dashicons dashicons-external"></span> <?php esc_html_e( 'Testing Tools', 'woo-open-graph' ); ?></h3>
-						</div>
-						<div class="wog-card-body">
-							<p><?php esc_html_e( 'Test how your products look when shared:', 'woo-open-graph' ); ?></p>
-							<a href="https://developers.facebook.com/tools/debug/" target="_blank" class="wog-btn-block">
-								<span class="dashicons dashicons-facebook"></span>
-								<?php esc_html_e( 'Facebook Debugger', 'woo-open-graph' ); ?>
-							</a>
-							<a href="https://search.google.com/test/rich-results" target="_blank" class="wog-btn-block">
-								<span class="dashicons dashicons-google"></span>
-								<?php esc_html_e( 'Google Rich Results', 'woo-open-graph' ); ?>
-							</a>
-							<a href="https://www.linkedin.com/post-inspector/" target="_blank" class="wog-btn-block">
-								<span class="dashicons dashicons-linkedin"></span>
-								<?php esc_html_e( 'LinkedIn Inspector', 'woo-open-graph' ); ?>
-							</a>
-						</div>
-					</div>
-					
-					<div class="wog-sidebar-box">
-						<div class="wog-card-header">
-							<h3><span class="dashicons dashicons-info"></span> <?php esc_html_e( 'Plugin Information', 'woo-open-graph' ); ?></h3>
-						</div>
-						<div class="wog-card-body">
-							<p><strong><?php esc_html_e( 'Version:', 'woo-open-graph' ); ?></strong> <?php echo esc_html( WOG_VERSION ); ?></p>
-							<p><strong><?php esc_html_e( 'Works alongside:', 'woo-open-graph' ); ?></strong> Yoast, RankMath, SEOPress <?php esc_html_e( '(detects their Open Graph / Twitter tags and skips duplicates)', 'woo-open-graph' ); ?></p>
-							<p><strong><?php esc_html_e( 'Auto-generates:', 'woo-open-graph' ); ?></strong> <?php esc_html_e( 'Schema, Open Graph, Twitter Cards', 'woo-open-graph' ); ?></p>
-							
-							<hr>
-							
-							<h4><?php esc_html_e( 'Important Notes', 'woo-open-graph' ); ?></h4>
-							<ul>
-								<li><?php esc_html_e( 'Uses product featured images automatically', 'woo-open-graph' ); ?></li>
-								<li><?php esc_html_e( 'Individual products can have custom titles/descriptions', 'woo-open-graph' ); ?></li>
-								<li><?php esc_html_e( 'Works alongside existing SEO plugins', 'woo-open-graph' ); ?></li>
-								<li><?php esc_html_e( 'Uses WordPress built-in caching for performance', 'woo-open-graph' ); ?></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-		// Sitemap generation functions
-		function wogGenerateSitemap(button) {
-			button.disabled = true;
-			button.textContent = '<?php esc_html_e( 'Generating...', 'woo-open-graph' ); ?>';
-			
-			fetch(ajaxurl, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-				body: 'action=wog_generate_sitemap&nonce=<?php echo esc_js( wp_create_nonce( 'wog_admin_nonce' ) ); ?>'
-			})
-			.then(response => response.json())
-			.then(data => {
-				const results = document.getElementById('wog-sitemap-results');
-				if (data.success) {
-					results.innerHTML = '<div class="notice notice-success"><p>' + data.data.message + '</p></div>';
-				} else {
-					results.innerHTML = '<div class="notice notice-error"><p>' + (data.data ? data.data.message : 'Error occurred') + '</p></div>';
-				}
-			})
-			.catch(error => {
-				document.getElementById('wog-sitemap-results').innerHTML = '<div class="notice notice-error"><p>Request failed</p></div>';
-			})
-			.finally(() => {
-				button.disabled = false;
-				button.textContent = '<?php esc_html_e( 'Generate Now', 'woo-open-graph' ); ?>';
-			});
+		$wog_tabs  = self::get_tabs();
+		$tab_slugs = array_keys( $wog_tabs );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only tab routing.
+		$active = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : $tab_slugs[0];
+		if ( ! isset( $wog_tabs[ $active ] ) ) {
+			$active = $tab_slugs[0];
 		}
-		
-		function wogTestSitemap(button) {
-			button.disabled = true;
-			button.textContent = '<?php esc_html_e( 'Testing...', 'woo-open-graph' ); ?>';
-			
-			fetch(ajaxurl, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-				body: 'action=wog_test_sitemap&nonce=<?php echo esc_js( wp_create_nonce( 'wog_admin_nonce' ) ); ?>'
-			})
-			.then(response => response.json())
-			.then(data => {
-				const results = document.getElementById('wog-sitemap-results');
-				if (data.success) {
-					results.innerHTML = '<div class="notice notice-success"><p>' + data.data.message + '</p></div>';
-				} else {
-					results.innerHTML = '<div class="notice notice-error"><p>' + (data.data ? data.data.message : 'Test failed') + '</p></div>';
-				}
-			})
-			.catch(error => {
-				document.getElementById('wog-sitemap-results').innerHTML = '<div class="notice notice-error"><p>Test failed</p></div>';
-			})
-			.finally(() => {
-				button.disabled = false;
-				button.textContent = '<?php esc_html_e( 'Test Sitemaps', 'woo-open-graph' ); ?>';
-			});
+
+		$page_url = admin_url( 'admin.php?page=' . self::MENU_SLUG );
+
+		if ( in_array( $active, array( 'overview', 'discover' ), true ) ) {
+			$view_path = WOG_PLUGIN_DIR . 'admin/views/' . $active . '.php';
+		} else {
+			$view_path = WOG_PLUGIN_DIR . 'admin/views/settings.php';
 		}
-		
-		// Image selector function
-		function wogSelectImage(button) {
-			if (typeof wp === "undefined" || !wp.media) {
-				alert("WordPress media library not available");
-				return;
-			}
-			
-			var mediaUploader = wp.media({
-				title: "Choose Image",
-				button: { text: "Use This Image" },
-				multiple: false,
-				library: { type: "image" }
-			});
-			
-			mediaUploader.on("select", function() {
-				var attachment = mediaUploader.state().get("selection").first().toJSON();
-				var input = button.previousElementSibling;
-				input.value = attachment.url;
-				
-				var existingPreview = button.parentNode.querySelector(".wog-image-preview");
-				if (existingPreview) {
-					existingPreview.src = attachment.url;
-				} else {
-					var img = document.createElement("img");
-					img.src = attachment.url;
-					img.className = "wog-image-preview";
-					img.style.maxWidth = "80px";
-					img.style.height = "auto";
-					img.style.border = "1px solid #ddd";
-					img.style.borderRadius = "3px";
-					img.style.marginTop = "10px";
-					button.parentNode.appendChild(img);
-				}
-			});
-			
-			mediaUploader.open();
-		}
-		</script>
-		<?php
+
+		include WOG_PLUGIN_DIR . 'admin/views/shell.php';
 	}
 
 	/**
-	 * Section callback for core features.
-	 */
-	public function core_section_callback() {
-		echo '<p>' . esc_html__( 'Enable the core social media optimization features for your WooCommerce products.', 'woo-open-graph' ) . '</p>';
-	}
-
-	/**
-	 * Section callback for sharing settings.
-	 */
-	public function sharing_section_callback() {
-		echo '<p>' . esc_html__( 'Configure social sharing buttons that appear on your product pages.', 'woo-open-graph' ) . '</p>';
-	}
-
-	/**
-	 * Section callback for sitemap settings.
-	 */
-	public function sitemap_section_callback() {
-		echo '<p>' . esc_html__( 'Generate XML sitemaps to help search engines discover your products and categories.', 'woo-open-graph' ) . '</p>';
-	}
-
-	/**
-	 * Section callback for platform settings.
-	 */
-	public function platform_section_callback() {
-		echo '<p>' . esc_html__( 'Optional platform-specific settings for enhanced integration.', 'woo-open-graph' ) . '</p>';
-	}
-
-	/**
-	 * Section callback for content settings.
-	 */
-	public function content_section_callback() {
-		echo '<p>' . esc_html__( 'Configure how images and content appear when shared on social media.', 'woo-open-graph' ) . '</p>';
-	}
-
-	/**
-	 * Section callback for advanced settings.
-	 */
-	public function advanced_section_callback() {
-		echo '<p>' . esc_html__( 'Advanced options for power users and specific use cases.', 'woo-open-graph' ) . '</p>';
-	}
-
-	/**
-	 * Render a checkbox settings field.
+	 * Render a checkbox settings field as a switch.
 	 *
 	 * @param array $args The field arguments.
 	 */
 	public function checkbox_field( $args ) {
-		$settings = get_option( 'wog_settings', array() );
+		$settings = get_option( self::OPTION_NAME, array() );
 		$value    = isset( $settings[ $args['id'] ] ) ? $settings[ $args['id'] ] : false;
 
-		echo '<label>';
-		echo '<input type="checkbox" name="wog_settings[' . esc_attr( $args['id'] ) . ']" value="1" ' . checked( 1, $value, false ) . ' />';
-		echo ' ' . esc_html( $args['description'] );
+		echo '<div class="wog-switch-row">';
+		echo '<label class="wog-switch">';
+		echo '<input type="checkbox" id="wog_' . esc_attr( $args['id'] ) . '" name="wog_settings[' . esc_attr( $args['id'] ) . ']" value="1" ' . checked( 1, $value, false ) . ' />';
+		echo '<span class="wog-slider" aria-hidden="true"></span>';
 		echo '</label>';
+		echo '<label for="wog_' . esc_attr( $args['id'] ) . '" class="description">' . esc_html( $args['description'] ) . '</label>';
+		echo '</div>';
 	}
 
 	/**
@@ -585,7 +442,7 @@ class WOG_Admin {
 	 * @param array $args The field arguments.
 	 */
 	public function text_field( $args ) {
-		$settings    = get_option( 'wog_settings', array() );
+		$settings    = get_option( self::OPTION_NAME, array() );
 		$value       = isset( $settings[ $args['id'] ] ) ? $settings[ $args['id'] ] : '';
 		$placeholder = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
 
@@ -606,7 +463,7 @@ class WOG_Admin {
 	 * @param array $args The field arguments.
 	 */
 	public function textarea_field( $args ) {
-		$settings = get_option( 'wog_settings', array() );
+		$settings = get_option( self::OPTION_NAME, array() );
 		$value    = isset( $settings[ $args['id'] ] ) ? $settings[ $args['id'] ] : '';
 		$value    = is_array( $value ) ? implode( "\n", $value ) : (string) $value;
 
@@ -626,7 +483,7 @@ class WOG_Admin {
 	 * @param array $args The field arguments.
 	 */
 	public function select_field( $args ) {
-		$settings = get_option( 'wog_settings', array() );
+		$settings = get_option( self::OPTION_NAME, array() );
 		$value    = isset( $settings[ $args['id'] ] ) ? $settings[ $args['id'] ] : '';
 
 		echo '<select name="wog_settings[' . esc_attr( $args['id'] ) . ']">';
@@ -648,7 +505,7 @@ class WOG_Admin {
 	 * @param array $args The field arguments.
 	 */
 	public function number_field( $args ) {
-		$settings = get_option( 'wog_settings', array() );
+		$settings = get_option( self::OPTION_NAME, array() );
 		$value    = isset( $settings[ $args['id'] ] ) ? $settings[ $args['id'] ] : ( $args['default'] ?? '' );
 		$min_attr = isset( $args['min'] ) ? ' min="' . esc_attr( $args['min'] ) . '"' : '';
 		$max_attr = isset( $args['max'] ) ? ' max="' . esc_attr( $args['max'] ) . '"' : '';
@@ -671,21 +528,19 @@ class WOG_Admin {
 	 * @param array $args The field arguments.
 	 */
 	public function image_field( $args ) {
-		$settings = get_option( 'wog_settings', array() );
+		$settings = get_option( self::OPTION_NAME, array() );
 		$value    = isset( $settings[ $args['id'] ] ) ? $settings[ $args['id'] ] : '';
 
-		echo '<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">';
+		echo '<div class="wog-image-field">';
 		echo '<input type="url" ';
 		echo 'name="wog_settings[' . esc_attr( $args['id'] ) . ']" ';
 		echo 'value="' . esc_attr( $value ) . '" ';
 		echo 'placeholder="https://example.com/image.jpg" ';
 		echo 'class="regular-text" />';
 
-		echo '<button type="button" class="button" onclick="wogSelectImage(this)">' . esc_html__( 'Choose Image', 'woo-open-graph' ) . '</button>';
+		echo '<button type="button" class="button" data-wog-select-image>' . esc_html__( 'Choose Image', 'woo-open-graph' ) . '</button>';
 
-		if ( $value ) {
-			echo '<img src="' . esc_url( $value ) . '" class="wog-image-preview" style="max-width: 80px; height: auto; border: 1px solid #ddd; border-radius: 3px;" />';
-		}
+		echo '<img src="' . esc_url( $value ) . '" class="wog-image-preview" alt=""' . ( $value ? '' : ' hidden' ) . ' />';
 		echo '</div>';
 
 		if ( isset( $args['description'] ) ) {
@@ -699,112 +554,35 @@ class WOG_Admin {
 	 * @param array $args The field arguments.
 	 */
 	public function sitemap_field( $args ) {
-		$settings       = get_option( 'wog_settings', array() );
-		$value          = isset( $settings[ $args['id'] ] ) ? $settings[ $args['id'] ] : false;
+		$settings       = get_option( self::OPTION_NAME, array() );
+		$value          = ! empty( $settings[ $args['id'] ] );
 		$last_generated = get_option( 'wog_sitemap_last_generated', 0 );
 
-		echo '<label>';
-		echo '<input type="checkbox" name="wog_settings[' . esc_attr( $args['id'] ) . ']" value="1" ' . checked( 1, $value, false ) . ' />';
-		echo ' ' . esc_html( $args['description'] );
-		echo '</label>';
+		$this->checkbox_field( $args );
 
-		if ( $value ) {
-			echo '<div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 4px solid #00a32a; border-radius: 0 3px 3px 0;">';
-
-			if ( $last_generated ) {
-				echo '<p><strong>' . esc_html__( 'Last Generated:', 'woo-open-graph' ) . '</strong> ' . esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last_generated ) ) . '</p>';
-			}
-
-			echo '<p><strong>' . esc_html__( 'Sitemap URLs:', 'woo-open-graph' ) . '</strong></p>';
-			echo '<ul>';
-			echo '<li><a href="' . esc_url( home_url( '/wog-sitemap.xml' ) ) . '" target="_blank">' . esc_url( home_url( '/wog-sitemap.xml' ) ) . '</a> (Main Index)</li>';
-			echo '<li><a href="' . esc_url( home_url( '/product-sitemap-1.xml' ) ) . '" target="_blank">' . esc_url( home_url( '/product-sitemap-1.xml' ) ) . '</a> (Products)</li>';
-			echo '<li><a href="' . esc_url( home_url( '/product-category-sitemap.xml' ) ) . '" target="_blank">' . esc_url( home_url( '/product-category-sitemap.xml' ) ) . '</a> (Categories)</li>';
-			echo '</ul>';
-
-			echo '<p>';
-			echo '<button type="button" class="button" onclick="wogGenerateSitemap(this)">' . esc_html__( 'Generate Now', 'woo-open-graph' ) . '</button> ';
-			echo '<button type="button" class="button" onclick="wogTestSitemap(this)">' . esc_html__( 'Test Sitemaps', 'woo-open-graph' ) . '</button>';
-			echo '</p>';
-
-			echo '<div id="wog-sitemap-results"></div>';
-			echo '</div>';
+		if ( ! $value ) {
+			return;
 		}
-	}
 
-	/**
-	 * Display quick status overview
-	 */
-	private function display_quick_status() {
-		$settings = get_option( 'wog_settings', array() );
+		echo '<div class="wog-sitemap-box">';
 
-		// Core Features.
-		echo '<div style="margin-bottom: 20px;">';
-		echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . esc_html__( 'Core Features', 'woo-open-graph' ) . '</h4>';
-		$core_features = array(
-			'enable_schema'   => __( 'Schema Markup', 'woo-open-graph' ),
-			'enable_facebook' => __( 'Facebook', 'woo-open-graph' ),
-			'enable_twitter'  => __( 'Twitter', 'woo-open-graph' ),
-		);
-
-		foreach ( $core_features as $key => $label ) {
-			$enabled = ! empty( $settings[ $key ] );
-			$this->render_status_item( $label, $enabled );
+		if ( $last_generated ) {
+			echo '<p><strong>' . esc_html__( 'Last Generated:', 'woo-open-graph' ) . '</strong> ' . esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $last_generated ) ) . '</p>';
 		}
-		echo '</div>';
 
-		// Additional Platforms.
-		echo '<div style="margin-bottom: 20px;">';
-		echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . esc_html__( 'Additional Platforms', 'woo-open-graph' ) . '</h4>';
-		$additional_platforms = array(
-			'enable_linkedin'  => __( 'LinkedIn', 'woo-open-graph' ),
-			'enable_pinterest' => __( 'Pinterest', 'woo-open-graph' ),
-			'enable_whatsapp'  => __( 'WhatsApp', 'woo-open-graph' ),
-		);
+		echo '<p><strong>' . esc_html__( 'Sitemap URLs:', 'woo-open-graph' ) . '</strong></p>';
+		echo '<ul>';
+		echo '<li><a href="' . esc_url( home_url( '/wog-sitemap.xml' ) ) . '" target="_blank">' . esc_url( home_url( '/wog-sitemap.xml' ) ) . '</a> (Main Index)</li>';
+		echo '<li><a href="' . esc_url( home_url( '/product-sitemap-1.xml' ) ) . '" target="_blank">' . esc_url( home_url( '/product-sitemap-1.xml' ) ) . '</a> (Products)</li>';
+		echo '<li><a href="' . esc_url( home_url( '/product-category-sitemap.xml' ) ) . '" target="_blank">' . esc_url( home_url( '/product-category-sitemap.xml' ) ) . '</a> (Categories)</li>';
+		echo '</ul>';
 
-		foreach ( $additional_platforms as $key => $label ) {
-			$enabled = ! empty( $settings[ $key ] );
-			$this->render_status_item( $label, $enabled );
-		}
-		echo '</div>';
-
-		// Tools.
-		echo '<div>';
-		echo '<h4 style="margin: 0 0 10px 0; font-size: 13px; text-transform: uppercase; color: #666;">' . esc_html__( 'Tools', 'woo-open-graph' ) . '</h4>';
-		$tools = array(
-			'enable_social_share'    => __( 'Share Buttons', 'woo-open-graph' ),
-			'enable_product_sitemap' => __( 'XML Sitemaps', 'woo-open-graph' ),
-		);
-
-		foreach ( $tools as $key => $label ) {
-			$enabled = ! empty( $settings[ $key ] );
-			$this->render_status_item( $label, $enabled );
-		}
-		echo '</div>';
-
-		// Performance note.
-		echo '<div style="margin-top: 20px; padding: 10px; background: #f0f8f0; border-left: 4px solid #00a32a; border-radius: 0 3px 3px 0;">';
-		echo '<p style="margin: 0; font-size: 12px; color: #1e4620;">';
-		echo '<strong>' . esc_html__( 'Performance:', 'woo-open-graph' ) . '</strong> ';
-		echo esc_html__( 'This plugin uses WordPress built-in caching and works with all cache plugins automatically.', 'woo-open-graph' );
+		echo '<p class="wog-action-row">';
+		echo '<button type="button" class="button" data-wog-sitemap="generate">' . esc_html__( 'Generate Now', 'woo-open-graph' ) . '</button> ';
+		echo '<button type="button" class="button" data-wog-sitemap="test">' . esc_html__( 'Test Sitemaps', 'woo-open-graph' ) . '</button>';
 		echo '</p>';
-		echo '</div>';
-	}
 
-	/**
-	 * Render individual status item.
-	 *
-	 * @param string $label   The status item label.
-	 * @param bool   $enabled Whether the feature is enabled.
-	 */
-	private function render_status_item( $label, $enabled ) {
-		$status_class = $enabled ? 'enabled' : 'disabled';
-		$status_text  = $enabled ? __( 'On', 'woo-open-graph' ) : __( 'Off', 'woo-open-graph' );
-
-		echo '<div class="wog-status-item">';
-		echo '<span class="wog-status-icon ' . esc_attr( $status_class ) . '"></span>';
-		echo '<span class="wog-status-label">' . esc_html( $label ) . '</span>';
-		echo '<span class="wog-status-text">' . esc_html( $status_text ) . '</span>';
+		echo '<div id="wog-sitemap-results" aria-live="polite"></div>';
 		echo '</div>';
 	}
 
@@ -815,28 +593,64 @@ class WOG_Admin {
 	 * @return array
 	 */
 	public function add_action_links( $links ) {
-		$settings_link = '<a href="' . esc_url( admin_url( 'admin.php?page=woo-open-graph' ) ) . '">' . esc_html__( 'Settings', 'woo-open-graph' ) . '</a>';
+		$settings_link = '<a href="' . esc_url( admin_url( 'admin.php?page=' . self::MENU_SLUG ) ) . '">' . esc_html__( 'Settings', 'woo-open-graph' ) . '</a>';
 		array_unshift( $links, $settings_link );
 		return $links;
 	}
 
 	/**
-	 * Enqueue admin scripts and styles.
+	 * True on our settings screen or the shared hub landing (we own its render).
 	 *
-	 * @param string $hook The current admin page hook.
+	 * @return bool
 	 */
-	public function enqueue_admin_scripts( $hook ) {
-		if ( 'woocommerce_page_woo-open-graph' !== $hook ) {
+	private function is_our_screen() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || empty( $screen->id ) ) {
+			return false;
+		}
+		return (bool) preg_match( '/_page_' . preg_quote( self::MENU_SLUG, '/' ) . '$/', $screen->id )
+			|| 'toplevel_page_wbcomplugins' === $screen->id;
+	}
+
+	/**
+	 * Suppress third-party admin notices on our screen only.
+	 */
+	public function suppress_foreign_notices() {
+		if ( ! $this->is_our_screen() ) {
+			return;
+		}
+		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'all_admin_notices' );
+	}
+
+	/**
+	 * Enqueue admin scripts and styles.
+	 */
+	public function enqueue_admin_scripts() {
+		if ( ! $this->is_our_screen() ) {
 			return;
 		}
 
 		wp_enqueue_media();
 
-		wp_enqueue_style(
+		wp_enqueue_style( 'wog-admin', WOG_PLUGIN_URL . 'assets/css/admin.css', array(), WOG_VERSION );
+		wp_enqueue_script( 'wog-admin', WOG_PLUGIN_URL . 'assets/js/admin.js', array(), WOG_VERSION, true );
+		wp_localize_script(
 			'wog-admin',
-			WOG_PLUGIN_URL . 'assets/css/admin.css',
-			array(),
-			WOG_VERSION
+			'wogAdmin',
+			array(
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'wog_admin_nonce' ),
+				'i18n'    => array(
+					'generating'  => __( 'Generating...', 'woo-open-graph' ),
+					'generate'    => __( 'Generate Now', 'woo-open-graph' ),
+					'testing'     => __( 'Testing...', 'woo-open-graph' ),
+					'test'        => __( 'Test Sitemaps', 'woo-open-graph' ),
+					'failed'      => __( 'Request failed. Please try again.', 'woo-open-graph' ),
+					'chooseImage' => __( 'Choose Image', 'woo-open-graph' ),
+					'useImage'    => __( 'Use This Image', 'woo-open-graph' ),
+				),
+			)
 		);
 	}
 
@@ -921,12 +735,33 @@ class WOG_Admin {
 	/**
 	 * Sanitize and validate settings input.
 	 *
+	 * Each tab posts only its own fields, and validate_settings() rebuilds every
+	 * key from its input (a missing checkbox becomes false, a missing text ''),
+	 * so a tab save is merged over the stored option first. Without the merge,
+	 * saving one tab would reset every other tab to its defaults.
+	 *
 	 * @param array $input The raw settings input.
 	 * @return array
 	 */
 	public function sanitize_settings( $input ) {
+		$input = (array) $input;
+		$tab   = isset( $input[ self::TAB_FIELD ] ) ? sanitize_key( $input[ self::TAB_FIELD ] ) : '';
+		unset( $input[ self::TAB_FIELD ] );
+
+		$sections = $this->get_sections();
+		if ( isset( $sections[ $tab ] ) ) {
+			$merged = (array) get_option( self::OPTION_NAME, array() );
+			foreach ( $sections[ $tab ] as $section ) {
+				foreach ( array_keys( $section['fields'] ) as $field_id ) {
+					// Absent = unchecked checkbox; validate_settings() turns null into its "off" value.
+					$merged[ $field_id ] = isset( $input[ $field_id ] ) ? $input[ $field_id ] : null;
+				}
+			}
+			$input = $merged;
+		}
+
 		// One sanitizer for every write path (settings screen, import), so the
 		// accepted values cannot drift between them.
-		return WOG_Settings::get_instance()->validate_settings( (array) $input );
+		return WOG_Settings::get_instance()->validate_settings( $input );
 	}
 }
