@@ -1,32 +1,26 @@
 # Shortcodes
 
-The plugin registers two shortcodes, both handled by the social share class.
-
 ## `[wog_social_share]`
 
-Renders the social share row for the current product. Use it to place the share
-buttons somewhere other than the four built-in positions, for example inside a
-page-builder block or a product tab.
+Prints the share buttons.
 
-- On a single product page it uses the current product.
-- Elsewhere it uses the current post when that post is a product.
-- If no product is found, it outputs nothing.
-
-The rendered row respects the configured button style and enabled platforms.
-The shortcode takes no attributes.
+| Attribute | Default | Meaning |
+|---|---|---|
+| `id` | the product being viewed | A product ID. Any page or post can use it. |
 
 ```
 [wog_social_share]
+[wog_social_share id="123"]
 ```
+
+Behavior:
+
+- Uses the Button Style and the network switches from the settings. It does not check **Enable Share Buttons**, so it works even when automatic placement is off.
+- Prints nothing for a product that is not published, is password protected, or has social output switched off.
+- Given a variation ID, the visibility check uses the parent product.
+- With no product (no `id` and the page is not a product), it prints the HTML comment `<!-- wog_social_share: no product in scope; use [wog_social_share id="PRODUCT_ID"] -->`.
+- It loads the share script and styles where it prints, on any page.
 
 ## `[wog_debug_urls]`
 
-An admin-only debugging shortcode. For users with the `manage_options`
-capability, it prints the raw and cleaned title, the description, and the
-generated share URL for each platform, so you can inspect exactly what each
-share button will link to. Non-admins see an access-denied message. Use it on a
-single product page.
-
-```
-[wog_debug_urls]
-```
+For administrators only (the `manage_options` capability). Shows the share links the plugin builds for the current product, for testing. Other visitors see "Access denied - admin only". Not intended for production pages.

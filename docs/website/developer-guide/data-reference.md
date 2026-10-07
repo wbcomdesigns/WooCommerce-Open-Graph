@@ -1,66 +1,85 @@
-# Options and Meta Reference
+# Options, Meta and Data Reference
 
-## Options (`wp_options`)
+## Options
 
-| Option | Purpose |
+| Option | Holds |
 |---|---|
-| `wog_settings` | The single array holding every plugin setting |
-| `wog_version` | Installed plugin version |
-| `wog_migration_completed` | Flag set once legacy settings are migrated |
-| `wog_sitemap_last_generated` | Timestamp of the last sitemap generation |
-| `wog_flush_rewrite_rules` | Transient flag that triggers a rewrite flush after activation |
-| `wog_rewrite_rules_flushed_v2` | Guard so the sitemap rewrite rules flush only once |
+| `wog_settings` | One array with every setting (keys below) |
+| `wog_version` | Installed plugin version. A change triggers the upgrade routine once. |
+| `wog_migration_completed` | Set once pre-2.0 settings were carried over |
+| `wog_sitemap_last_generated` | Timestamp of the last time a sitemap file was written |
+| `wog_flush_rewrite_rules` | Set on activation so rewrite rules flush once |
+| `wog_rewrite_rules_flushed_v2` | Set once the sitemap rewrite rules were flushed |
 
-All plugin settings live inside `wog_settings`. Add new settings to the
-defaults array and let `wog_validated_settings` sanitize them rather than
-creating sibling options.
+### `wog_settings` keys
 
-## Product meta
+| Key | Type | Default | Screen label |
+|---|---|---|---|
+| `enable_facebook` | bool | true | General > Facebook |
+| `enable_twitter` | bool | true | General > Twitter |
+| `enable_linkedin` | bool | true | General > LinkedIn |
+| `enable_pinterest` | bool | true | General > Pinterest |
+| `enable_whatsapp` | bool | true | General > WhatsApp |
+| `facebook_app_id` | string | empty | General > Facebook App ID |
+| `twitter_username` | string, 1 to 15 of A-Z a-z 0-9 _ | empty | General > Twitter Username |
+| `fallback_image` | URL | empty | General > Default Social Image |
+| `image_size` | `medium`, `large`, `full` | `large` | General > Social Image Size |
+| `enable_social_share` | bool | true | Share Buttons > Enable Share Buttons |
+| `enable_email` | bool | false | Share Buttons > Email Button |
+| `share_button_style` | `modern`, `classic`, `minimal` | `modern` | Share Buttons > Button Style |
+| `share_button_position` | `after_add_to_cart`, `before_add_to_cart`, `after_summary`, `after_tabs` | `after_add_to_cart` | Share Buttons > Button Position |
+| `enable_schema` | bool | false | Structured Data > Structured Data (master switch) |
+| `enable_enhanced_schema` | bool | true | Structured Data > Enhanced Schema |
+| `enable_breadcrumb_schema` | bool | true | Structured Data > Breadcrumb Schema |
+| `enable_organization_schema` | bool | true | Structured Data > Organization Schema |
+| `organization_logo` | URL | empty | Structured Data > Organization Logo |
+| `social_profiles` | array of URLs | empty array | Structured Data > Social Profiles |
+| `enable_product_sitemap` | bool | true | Sitemaps > Enable Product Sitemaps |
+| `sitemap_products_per_page` | int 100 to 1000 | 500 | Sitemaps > Products Per Sitemap |
+| `disable_title_description` | bool | false | Advanced > Override SEO Titles |
+| `debug_mode` | bool | false | No switch in the settings screen; read only by `wog_debug_log()` |
+| `delete_data_on_uninstall` | bool | false | Advanced > Delete Data On Uninstall |
 
-Meta keys the plugin owns:
+The settings screen saves each tab by merging that tab's fields over the stored option, so saving one tab never resets another. Imports and code that call the validator without a tab rebuild every key.
 
-| Meta key | Purpose |
+## Post meta (products)
+
+| Key | Holds |
 |---|---|
-| `_wog_og_title` | Per-product social title override |
-| `_wog_og_description` | Per-product social description override |
-| `_wog_disable_og` | Set when Open Graph output is disabled for the product |
+| `_wog_og_title` | Custom social title. Deleted when empty. |
+| `_wog_og_description` | Custom social description. Deleted when empty. |
+| `_wog_disable_og` | `1` when social output is off for the product. Deleted when on. |
 
-Meta keys the plugin reads but does not own (used to fill gaps when present):
-
-- Brand: `_brand`, plus the taxonomies `product_brand`, `pwb-brand`,
-  `yith_product_brand`, `pa_brand`
-- Condition: `_condition`
-- GTIN family: `_gtin`, `_upc`, `_ean`, `_isbn`, `_gtin8`, `_gtin12`,
-  `_gtin13`, `_gtin14`
-- MPN: `_mpn`, `_manufacturer_part_number`
-- Manufacturer and model: `_manufacturer`, `_model`
-- Attributes: `_color`, `_size`, `_material`, and the `pa_color`, `pa_size`,
-  `pa_material` product attributes
-- Image alt text: `_wp_attachment_image_alt`
-- Yoast description on the shop page: `_yoast_wpseo_metadesc`
+The plugin also reads these when present: GTIN (`_gtin`, `_upc`, `_ean`, `_isbn`, `_gtin8`, `_gtin12`, `_gtin13`, `_gtin14`, after WooCommerce's own GTIN field), `_mpn`, `_manufacturer_part_number`, `_brand`, `_manufacturer`, `_model`, `_condition`, and the product attributes `pa_color`, `pa_size`, `pa_material`.
 
 ## Scheduled events
 
-| Event | Schedule | Purpose |
+| Event | When | Job |
 |---|---|---|
-| `wog_generate_sitemaps` | Daily | Rebuild all sitemaps in the background |
-| `wog_generate_single_sitemap` | One-off | Rebuild a single sitemap type or page |
+| `wog_generate_sitemaps` | Daily, and once about ten minutes after a product or category change | Clears saved sitemap copies and queues the rebuild |
+| `wog_generate_single_sitemap` | One-off, queued by the job above | Writes one sitemap (`index`, `products` page, `categories`, `brands`) |
 
-Both are cleared on deactivation, along with the plugin's transients.
+## Admin AJAX actions
 
-## AJAX actions
-
-Handled through `admin-ajax.php`:
-
-| Action | Access | Purpose |
+| Action | Who | Job |
 |---|---|---|
-| `wog_generate_sitemap` | Admin (`manage_woocommerce`) | Trigger a full sitemap regeneration from the settings page |
-| `wog_test_sitemap` | Admin (`manage_woocommerce`) | Fetch and validate the sitemap index |
-| `wog_track_share` | Public (logged in and logged out) | Report a front-end share event |
+| `wog_generate_sitemap` | Users with `manage_woocommerce`, nonce `wog_admin_nonce` | Queues sitemap generation (Generate Now) |
+| `wog_test_sitemap` | Users with `manage_woocommerce`, nonce `wog_admin_nonce` | Fetches the main index and checks it (Test Sitemaps) |
+| `wog_track_share` | Anyone, nonce `wog_share_nonce` | Fires `wog_social_share_tracked` |
 
-The admin actions verify the `wog_admin_nonce` and the `manage_woocommerce`
-capability. The share tracking action verifies the `wog_share_nonce`.
+## Transients
 
-## REST API
+Saved sitemap copies are stored as transients named `wog_sitemap_{type}` and `wog_sitemap_{type}_page_{n}` for one hour.
 
-The plugin does not register any REST API routes.
+## Menu and screen
+
+| Item | Value |
+|---|---|
+| Parent menu | `wbcomplugins` (WB Plugins, shared with other Wbcom plugins) |
+| Page slug | `woo-open-graph` (`admin.php?page=woo-open-graph`) |
+| Tab parameter | `&tab=` with `overview`, `general`, `sharing`, `structured-data`, `sitemaps`, `advanced` or `discover` |
+| Capability | `manage_woocommerce` |
+
+## Uninstall
+
+`uninstall.php` always removes the scheduled sitemap jobs and `wog_` transients. When `delete_data_on_uninstall` is on, it also deletes the options `wog_settings`, `wog_version`, `wog_migration_completed`, `wog_sitemap_last_generated`, `wog_flush_rewrite_rules` and `wog_rewrite_rules_flushed_v2`, and the post meta keys `_wog_og_title`, `_wog_og_description` and `_wog_disable_og`.

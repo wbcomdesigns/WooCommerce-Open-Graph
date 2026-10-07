@@ -1,34 +1,46 @@
-# Installation
+# Install and Open the Settings
 
-## Install and activate
+## Install from WordPress.org
 
-1. Make sure WooCommerce is installed and active first. The plugin will not
-   activate without it.
-2. Upload the plugin to `wp-content/plugins/open-graph-for-woocommerce`, or
-   install it from the Plugins screen.
-3. Activate the plugin from Plugins in wp-admin.
+1. In your WordPress admin, go to **Plugins > Add New Plugin**.
+2. Search for **Open Graph for WooCommerce**.
+3. Click **Install Now**, then **Activate**.
 
-On activation the plugin sets its default options, records its version, and
-schedules a daily background task that regenerates the product sitemap.
+## Install from a zip file
+
+1. Go to **Plugins > Add New Plugin**, then click **Upload Plugin**.
+2. Choose the zip file and click **Install Now**.
+3. Click **Activate Plugin**.
 
 ## Open the settings
 
-After activation, go to WooCommerce and then Social Media in the wp-admin menu.
-The direct URL is:
+1. In the admin menu, click **WB Plugins**.
+2. Click **Open Graph**.
 
-```
-/wp-admin/admin.php?page=woo-open-graph
-```
+You can also click **Settings** under the plugin name on **Plugins > Installed Plugins**.
 
-A Settings link is also added next to the plugin on the Plugins screen. Access
-requires the `manage_woocommerce` capability.
+**WB Plugins** is a shared menu used by all Wbcom Designs plugins. Its landing page lists every Wbcom plugin installed on your site. The old location, under the WooCommerce menu, no longer exists. If you used an older version, your saved settings carry over unchanged.
 
-## Defaults are ready to go
+## What you see
 
-The plugin ships with sensible defaults, so meta tags, schema, share buttons,
-and the sitemap all start working as soon as WooCommerce products exist. You
-only need to open the settings if you want to change which platforms are
-enabled, pick a share-button style, or add a Facebook App ID or X (Twitter)
-username.
+The left side has these tabs:
 
-See [Settings Reference](../usage/settings.md) for every option.
+| Tab | What it is for |
+|---|---|
+| Overview | A status page: how many products are covered, what is on, and links to testing tools |
+| General | Which social networks to support, Facebook and X account details, the default image |
+| Share Buttons | The buttons on your product pages |
+| Structured Data | Extra information for Google: product details, logo, social profiles |
+| Sitemaps | The product XML sitemap |
+| Advanced | SEO plugin override, delete data on uninstall |
+| Discover (shown as More Tools) | Other free plugins from Wbcom Designs |
+
+Each tab saves on its own with its own **Save Settings** button. Saving one tab never changes another tab.
+
+## It already works
+
+The plugin is useful the moment you activate it. You do not have to save anything. See [Set Up in 5 Minutes](../how-to/set-up-in-5-minutes.md) for the short list of things worth checking.
+
+## Upgrading from an older version
+
+Upgrading to 2.1.0 keeps your settings. Settings from versions before 2.0 are carried over once, and they never overwrite a value you changed since.

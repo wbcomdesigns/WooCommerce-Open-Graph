@@ -1,30 +1,24 @@
 # Requirements
 
-The plugin declares the following minimums in its main file header and readme.
-
-| Requirement | Value |
+| Requirement | Minimum |
 |---|---|
-| WordPress | 5.0 or later |
+| WordPress | 5.0 or later (tested up to 6.9) |
 | PHP | 7.4 or later |
-| WooCommerce | 4.0 or later (required) |
-| Tested up to (WordPress) | 6.9 |
-| Tested up to (WooCommerce) | 8.5 |
-| Plugin version | 2.0.2 |
+| WooCommerce | 4.0 or later (tested up to 8.5 in the plugin header) |
 
-## WooCommerce is a hard dependency
+## WooCommerce must be active
 
-WooCommerce must be installed and active. The plugin checks for the
-`WooCommerce` class:
+The plugin only works for WooCommerce stores.
 
-- On activation, if WooCommerce is not active the plugin deactivates itself and
-  shows an error explaining that WooCommerce is required.
-- On every load, if WooCommerce is absent the plugin shows an admin notice with
-  a link to install WooCommerce and does not register any of its features.
+- If WooCommerce is not active when you activate the plugin, activation stops and shows the message "Open Graph for WooCommerce requires WooCommerce to be installed and active."
+- If WooCommerce is deactivated later, the plugin switches itself off and shows a notice with an **Install WooCommerce** link. The settings screen is not available until WooCommerce is back.
 
-## WooCommerce feature compatibility
+## Who can change the settings
 
-The plugin declares compatibility with two WooCommerce features through
-`FeaturesUtil::declare_compatibility()`:
+You need a user role that has the WooCommerce management permission. Administrators and Shop Managers have it.
 
-- High-Performance Order Storage (`custom_order_tables`).
-- Cart and Checkout Blocks (`cart_checkout_blocks`).
+## Works with
+
+- WooCommerce High-Performance Order Storage.
+- WooCommerce Cart and Checkout blocks.
+- Yoast SEO, Rank Math and SEOPress. See [Use with an SEO Plugin](../how-to/use-with-seo-plugins.md).
