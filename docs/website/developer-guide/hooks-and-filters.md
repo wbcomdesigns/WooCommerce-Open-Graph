@@ -14,8 +14,6 @@ Everything below exists in the 2.1.0 source.
 | `wog_settings_cache_cleared` | none | The `wog_settings` option was updated and the settings cache rebuilt (also on saves from the settings screen) |
 | `wog_setting_updated` | `$key, $value` | `WOG_Settings::update()` changed one setting from code |
 | `wog_settings_updated` | `$settings` | `WOG_Settings::update_multiple()` saved settings from code. The settings screen does not call it. |
-| `wog_settings_reset` | none | `WOG_Settings::reset_to_defaults()` ran |
-| `wog_settings_imported` | `$sanitized_settings, $imported_data` | `WOG_Settings::import_settings()` ran |
 | `wog_settings_migrated` | `$migrated_settings, $old_settings` | Pre-2.0 settings were carried over once on upgrade |
 
 The reset and import methods have no screen in the admin. They run only if your code calls them.
@@ -30,12 +28,7 @@ The reset and import methods have no screen in the admin. They run only if your 
 | `wog_sitemap_include_images` | `$include` (default true) | Whether product images are listed in the sitemap |
 | `wog_admin_tabs` | `$tabs` | The settings screen tabs. Each entry: `label`, `icon`, `group`. A new tab also needs a matching section registry entry in `WOG_Admin::get_sections()` to show fields. |
 | `wog_default_settings` | `$defaults` | The defaults array |
-| `wog_validated_settings` | `$validated, $settings` | Settings after validation, before saving. Runs for settings screen saves and imports. |
-| `wog_{section}_settings` | `$section_settings` | Output of `WOG_Settings::get_section_settings()`. Sections: `schema`, `opengraph`, `sitemap`, `social_share`, `advanced`. |
-| `wog_config_summary` | `$summary` | Output of `WOG_Settings::get_config_summary()` |
-| `wog_system_info` | `$info` | Output of `Woo_Open_Graph::get_system_info()` |
-
-The last three run only when code calls those methods. The 2.1.0 screens do not.
+| `wog_validated_settings` | `$validated, $settings` | Settings after validation, before saving. Runs for settings screen saves. |
 
 ## JavaScript event
 

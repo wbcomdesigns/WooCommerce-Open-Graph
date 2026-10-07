@@ -14,7 +14,7 @@
  * Tested up to: 6.9
  * Requires PHP: 7.4
  * WC requires at least: 4.0
- * WC tested up to: 8.5
+ * WC tested up to: 10.7
  *
  * @package Woo_Open_Graph
  */
@@ -374,137 +374,6 @@ class Woo_Open_Graph {
 		return $this->settings ? $this->settings->get_all_settings() : array();
 	}
 
-	/**
-	 * Get plugin version.
-	 *
-	 * @return string
-	 */
-	public static function get_version() {
-		return WOG_VERSION;
-	}
-
-	/**
-	 * Check if debug mode is enabled.
-	 *
-	 * @return bool
-	 */
-	public function is_debug_mode() {
-		$settings = get_option( 'wog_settings', array() );
-		return ! empty( $settings['debug_mode'] );
-	}
-
-	/**
-	 * Log debug messages to error log.
-	 *
-	 * @param string $message The debug message.
-	 * @param mixed  $data    Optional data to log.
-	 */
-	public function debug_log( $message, $data = null ) {
-		if ( $this->is_debug_mode() && function_exists( 'error_log' ) ) {
-			$log_message = '[Open Graph for WooCommerce] ' . $message;
-
-			if ( null !== $data ) {
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-				$log_message .= ' | Data: ' . print_r( $data, true );
-			}
-
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( $log_message );
-		}
-	}
-
-	/**
-	 * Get system information for debugging.
-	 *
-	 * @return array
-	 */
-	public function get_system_info() {
-		global $wpdb;
-
-		$info = array(
-			'plugin_version'      => WOG_VERSION,
-			'wordpress_version'   => get_bloginfo( 'version' ),
-			'woocommerce_version' => defined( 'WC_VERSION' ) ? WC_VERSION : 'Not installed',
-			'php_version'         => PHP_VERSION,
-			'mysql_version'       => $wpdb->db_version(),
-			'server_info'         => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : 'Unknown',
-			'memory_limit'        => ini_get( 'memory_limit' ),
-			'max_execution_time'  => ini_get( 'max_execution_time' ),
-			'upload_max_filesize' => ini_get( 'upload_max_filesize' ),
-			'active_plugins'      => get_option( 'active_plugins' ),
-			'active_theme'        => get_template(),
-			'multisite'           => is_multisite() ? 'Yes' : 'No',
-			'settings'            => get_option( 'wog_settings', array() ),
-		);
-
-		return apply_filters( 'wog_system_info', $info );
-	}
-
-	/**
-	 * Export plugin settings as base64 encoded JSON.
-	 *
-	 * @return string
-	 */
-	public function export_settings() {
-		$settings    = get_option( 'wog_settings', array() );
-		$export_data = array(
-			'version'   => WOG_VERSION,
-			'timestamp' => current_time( 'mysql' ),
-			'settings'  => $settings,
-		);
-
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-		return base64_encode( wp_json_encode( $export_data ) );
-	}
-
-	/**
-	 * Import plugin settings from base64 encoded JSON.
-	 *
-	 * @param string $import_data The base64 encoded JSON settings data.
-	 * @return bool|WP_Error
-	 */
-	public function import_settings( $import_data ) {
-		try {
-			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-			$data = json_decode( base64_decode( $import_data ), true );
-
-			if ( ! $data || ! isset( $data['settings'] ) ) {
-				return new WP_Error( 'invalid_data', __( 'Invalid import data', 'woo-open-graph' ) );
-			}
-
-			if ( class_exists( 'WOG_Admin' ) ) {
-				$admin              = WOG_Admin::get_instance();
-				$sanitized_settings = $admin->sanitize_settings( $data['settings'] );
-			} else {
-				$sanitized_settings = array_map( 'sanitize_text_field', $data['settings'] );
-			}
-
-			update_option( 'wog_settings', $sanitized_settings );
-
-			return true;
-
-		} catch ( Exception $e ) {
-			return new WP_Error( 'import_error', $e->getMessage() );
-		}
-	}
-
-	/**
-	 * Legacy method for backward compatibility.
-	 *
-	 * @param int $product_id The product ID.
-	 */
-	public function clear_product_cache( $product_id ) {
-		$this->clear_product_object_cache( $product_id );
-	}
-
-	/**
-	 * Legacy method for backward compatibility.
-	 *
-	 * @param int $term_id The term ID.
-	 */
-	public function clear_category_cache( $term_id ) {
-		$this->clear_category_object_cache( $term_id );
-	}
 }
 
 // Initialize the plugin.

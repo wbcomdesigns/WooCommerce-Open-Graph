@@ -166,9 +166,20 @@ class WOG_Meta_Boxes {
 					<strong><?php esc_html_e( 'Social Media Image:', 'woo-open-graph' ); ?></strong>
 					<?php if ( $product && $product->get_image_id() ) : ?>
 						<span style="color: #00a32a;">&#10003; <?php esc_html_e( 'Featured image will be used', 'woo-open-graph' ); ?></span>
+					<?php elseif ( $product && $product->get_gallery_image_ids() ) : ?>
+						<span style="color: #00a32a;">&#10003; <?php esc_html_e( 'First gallery image will be used', 'woo-open-graph' ); ?></span>
 					<?php else : ?>
-						<span style="color: #d63638;">&#9888; <?php esc_html_e( 'No featured image set', 'woo-open-graph' ); ?></span>
-						<br><span class="description"><?php esc_html_e( 'Set a featured image to improve social media sharing.', 'woo-open-graph' ); ?></span>
+						<span style="color: #d63638;">&#9888;
+							<?php
+							$wog_settings = wog_get_settings();
+							if ( empty( $wog_settings['fallback_image'] ) ) {
+								esc_html_e( 'The WooCommerce placeholder image will be used', 'woo-open-graph' );
+							} else {
+								esc_html_e( 'The Default Social Image will be used', 'woo-open-graph' );
+							}
+							?>
+						</span>
+						<br><span class="description"><?php esc_html_e( 'Set a featured image to show this product when it is shared.', 'woo-open-graph' ); ?></span>
 					<?php endif; ?>
 				</p>
 			</div>

@@ -14,9 +14,9 @@ Choose which networks get product-aware tags when a product link is shared. Each
 |---|---|---|
 | Facebook | Adds Facebook tags: Facebook App ID (if set), product price, currency, availability, condition, brand and category. Also shows the Facebook share button. | On |
 | Twitter | Adds X (Twitter) card tags and shows the Twitter share button | On |
-| LinkedIn | Adds two LinkedIn tags and shows the LinkedIn share button | On |
-| Pinterest | Adds the Pinterest Rich Pins tag and shows the Pinterest share button | On |
-| WhatsApp | Shows the WhatsApp share button | On |
+| LinkedIn | Shows the LinkedIn share button. LinkedIn reads the basic tags, which are always added. | On |
+| Pinterest | Adds the Pinterest Rich Pins tag and the product price, currency, availability, condition, brand and category tags, and shows the Pinterest share button | On |
+| WhatsApp | Shows the WhatsApp share button. WhatsApp reads the basic tags, which are always added. | On |
 
 ### Platform Accounts
 
@@ -31,7 +31,7 @@ The username must be 1 to 15 letters, numbers or underscores. A leading @ is rem
 
 | Setting | What it does | Default |
 |---|---|---|
-| Default Social Image | The image used when a product, category or page has no image of its own. Recommended 1200 by 630 pixels. | Empty (WooCommerce placeholder image) |
+| Default Social Image | The image used when a product (no featured or gallery image), category or page has no image of its own. It is shared at its uploaded size, so 1200 by 630 pixels works best. | Empty (WooCommerce placeholder image) |
 | Social Image Size | Size of the product photo used in previews: Medium (300x300), Large (1024x1024) or Full Size | Large |
 
 ## Share Buttons tab

@@ -32,7 +32,6 @@ The plugin is one class per concern with a `WOG_` / `wog_` prefix. The main clas
 |---|---|
 | `wog()` | The `Woo_Open_Graph` instance |
 | `wog_get_settings()` | The settings array |
-| `wog_debug_log( $message, $data = null )` | Writes to the PHP error log when the stored `debug_mode` setting is true. Nothing in the plugin calls it, and Debug Mode has no switch in the settings screen. |
 | `wog_is_social_enabled_for_product( $product_id )` | Whether social output is allowed for a product. Applies the `wog_social_enabled_for_product` filter. |
 | `wog_get_fallback_image_url()` | Default Social Image, else the WooCommerce placeholder at the configured size |
 | `wog_get_product_price_text( $product )` | Price HTML, as a range for variable and grouped products whose prices differ |

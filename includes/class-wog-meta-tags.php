@@ -166,16 +166,17 @@ class WOG_Meta_Tags {
 
 		$this->output_basic_og_tags( $meta_data );
 
-		if ( ! empty( $this->settings['enable_facebook'] ) ) {
-			$this->output_facebook_tags( $meta_data );
+		if ( ! empty( $this->settings['enable_facebook'] ) && ! empty( $this->settings['facebook_app_id'] ) ) {
+			echo '<meta property="fb:app_id" content="' . esc_attr( $this->settings['facebook_app_id'] ) . '" />' . "\n";
+		}
+
+		// Facebook and Pinterest Rich Pins both read the product:* tags.
+		if ( ! empty( $this->settings['enable_facebook'] ) || ! empty( $this->settings['enable_pinterest'] ) ) {
+			$this->output_product_tags( $meta_data );
 		}
 
 		if ( ! empty( $this->settings['enable_twitter'] ) ) {
 			$this->output_twitter_tags( $meta_data );
-		}
-
-		if ( ! empty( $this->settings['enable_linkedin'] ) ) {
-			$this->output_linkedin_tags( $meta_data );
 		}
 
 		if ( ! empty( $this->settings['enable_pinterest'] ) ) {
@@ -489,15 +490,11 @@ class WOG_Meta_Tags {
 	}
 
 	/**
-	 * Output Facebook specific tags.
+	 * Output the Open Graph product:* tags (price, availability, condition, brand, category).
 	 *
 	 * @param array $meta_data The meta data array.
 	 */
-	private function output_facebook_tags( $meta_data ) {
-		if ( ! empty( $this->settings['facebook_app_id'] ) ) {
-			echo '<meta property="fb:app_id" content="' . esc_attr( $this->settings['facebook_app_id'] ) . '" />' . "\n";
-		}
-
+	private function output_product_tags( $meta_data ) {
 		if ( 'product' === $meta_data['type'] && ! empty( $meta_data['product'] ) ) {
 			$product = $meta_data['product'];
 
@@ -579,30 +576,13 @@ class WOG_Meta_Tags {
 	}
 
 	/**
-	 * Output LinkedIn optimization tags.
-	 *
-	 * @param array $meta_data The meta data array.
-	 */
-	private function output_linkedin_tags( $meta_data ) {
-		if ( ! empty( $meta_data['title'] ) ) {
-			echo '<meta name="linkedin:title" content="' . esc_attr( $meta_data['title'] ) . '" />' . "\n";
-		}
-
-		if ( ! empty( $meta_data['description'] ) ) {
-			echo '<meta name="linkedin:description" content="' . esc_attr( $meta_data['description'] ) . '" />' . "\n";
-		}
-	}
-
-	/**
 	 * Output Pinterest Rich Pins tags.
 	 *
 	 * @param array $meta_data The meta data array.
 	 */
 	private function output_pinterest_tags( $meta_data ) {
-		// Pinterest Rich Pins read the standard product:*/og:* tags emitted by
-		// output_facebook_tags(); the only Pinterest-specific tag needed is the
-		// rich-pin opt-in. Re-emitting product:price:*/availability here produced
-		// duplicate meta tags on every product page.
+		// Rich Pins read the standard product:*/og:* tags (output_product_tags());
+		// the only Pinterest-specific tag is the opt-in.
 		echo '<meta name="pinterest-rich-pin" content="true" />' . "\n";
 	}
 

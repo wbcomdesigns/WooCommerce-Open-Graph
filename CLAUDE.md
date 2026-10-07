@@ -105,7 +105,7 @@ This product had no Basecamp board until 2026-08-08, which is why none of the ab
 
 - [ ] **No CSS custom properties at all** - 354 raw hex across 47kb of CSS, zero `var()` uses. Cannot follow a theme, cannot do dark mode. Prerequisite for any visual work.
 - [ ] **176 functions in 12 files** - the highest density in the suite. Split by concern while fixing the P0.
-- [ ] **Dead-code leads: 15.** Largest: `debug_sitemap_info()` (42 LOC), `get_section_settings()` (42), `migrate_old_settings()` (27), `import_settings()` (23), `get_system_info()` (20). Check `migrate_old_settings()` carefully - it may only be reachable on upgrade.
+- [x] **Dead code removed in 2.1.0.** Uncalled settings getters, import/export/reset, system info, debug logging and the manual sitemap helpers are gone. `migrate_old_settings()` stays (upgrade path). Before deleting a method, grep for dynamic calls too: `'enable_' . $platform` and `$field['type'] . '_field'` reach code no literal grep finds.
 - [ ] **3 duplicate function bodies** inside the plugin.
 - [ ] Rendered surface only partly reviewed - the plugin is deactivated on the audit store because its fatal blocks everything. Re-run the visual pass after the fix.
 
@@ -222,7 +222,7 @@ assets/js/admin.js          sitemap Generate/Test + media picker, no inline JS, 
 
 - **`get_sections()` is the single registry.** A setting is added by adding one entry there (tab > section > field). It drives `register_settings()`, the rendered cards and the save merge - never register a field anywhere else.
 - **Every tab saves into the one `wog_settings` option.** `validate_settings()` rebuilds every key from its input, so `sanitize_settings()` merges the posted tab over the stored option first (the hidden `wog_settings[_wog_tab]` names the tab). Remove the merge and saving one tab resets every other tab. Imports and programmatic saves carry no `_wog_tab` and keep the old full-rebuild behaviour.
-- **Every validated key must belong to exactly one tab**, or it can never be changed from the UI and a tab save would never touch it. The one deliberate exception is `debug_mode`: its switch was removed in 2.1.0 because nothing called `wog_debug_log()`, so the key is validated but never shown.
+- **Every validated key must belong to exactly one tab**, or it can never be changed from the UI and a tab save would never touch it. The one deliberate exception is `debug_mode`: its switch and `wog_debug_log()` were removed in 2.1.0, so the key is validated but never shown or read.
 - Tabs are filterable via `wog_admin_tabs`; adding a settings tab also needs a `get_sections()` entry or it renders empty.
 
 ### The standard every plugin in this suite is measured against
@@ -335,8 +335,6 @@ Codebase: ~5,200 PHP LOC across 11 files.
 | `wog_product_meta_data` | Assembled product meta before output |
 | `wog_max_images_per_product` | Cap on images emitted per product |
 | `wog_sitemap_include_images` | Toggle images in the sitemap |
-| `wog_config_summary` | Config summary shown in admin |
-| `wog_system_info` | System info block |
 | `wog_admin_tabs` | Settings screen tabs (sidebar registry) |
 
 ## Settings & Data
@@ -348,7 +346,7 @@ Codebase: ~5,200 PHP LOC across 11 files.
 | `wog_version` | Installed version, drives migrations |
 | `wog_migration_completed` | Migration guard flag |
 | `wog_sitemap_last_generated` | Sitemap generation timestamp |
-| `wog_flush_rewrite_rules` / `wog_rewrite_rules_flushed_v2` | Rewrite-flush guards for the sitemap endpoint |
+| `wog_flush_rewrite_rules` | One-time flush after activation. The sitemap rules re-flush themselves whenever the stored rules lack `^wog-sitemap\.xml$` (`WOG_Sitemap::add_sitemap_rewrite_rules()`); `wog_rewrite_rules_flushed_v2` is legacy, deleted on uninstall only. |
 
 ### Post Meta
 | Key | Purpose |

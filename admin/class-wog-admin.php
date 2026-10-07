@@ -158,13 +158,13 @@ class WOG_Admin {
 			'general'         => array(
 				'wog_core_section'     => array(
 					'title'  => __( 'Social Platforms', 'woo-open-graph' ),
-					'desc'   => __( 'Choose which networks get product-aware tags when a product link is shared.', 'woo-open-graph' ),
+					'desc'   => __( 'The basic Open Graph tags (title, description, image) are always added, and LinkedIn, WhatsApp and most apps read them. Each switch also shows that network\'s share button.', 'woo-open-graph' ),
 					'fields' => array(
-						'enable_facebook'  => $checkbox( __( 'Facebook', 'woo-open-graph' ), __( 'Generate Facebook Open Graph meta tags for better sharing', 'woo-open-graph' ) ),
-						'enable_twitter'   => $checkbox( __( 'Twitter', 'woo-open-graph' ), __( 'Generate Twitter Card meta tags for better sharing', 'woo-open-graph' ) ),
-						'enable_linkedin'  => $checkbox( __( 'LinkedIn', 'woo-open-graph' ), __( 'Optimize sharing for LinkedIn professional network', 'woo-open-graph' ) ),
-						'enable_pinterest' => $checkbox( __( 'Pinterest', 'woo-open-graph' ), __( 'Enable Pinterest Rich Pins with product data', 'woo-open-graph' ) ),
-						'enable_whatsapp'  => $checkbox( __( 'WhatsApp', 'woo-open-graph' ), __( 'Optimize sharing for WhatsApp mobile messaging', 'woo-open-graph' ) ),
+						'enable_facebook'  => $checkbox( __( 'Facebook', 'woo-open-graph' ), __( 'Adds your Facebook App ID and the product price, availability, brand and category tags.', 'woo-open-graph' ) ),
+						'enable_twitter'   => $checkbox( __( 'Twitter', 'woo-open-graph' ), __( 'Adds X (Twitter) card tags, with the price and availability.', 'woo-open-graph' ) ),
+						'enable_linkedin'  => $checkbox( __( 'LinkedIn', 'woo-open-graph' ), __( 'Shows the LinkedIn share button. LinkedIn reads the basic tags, so no extra tags are needed.', 'woo-open-graph' ) ),
+						'enable_pinterest' => $checkbox( __( 'Pinterest', 'woo-open-graph' ), __( 'Turns on Rich Pins, with the product price and availability tags.', 'woo-open-graph' ) ),
+						'enable_whatsapp'  => $checkbox( __( 'WhatsApp', 'woo-open-graph' ), __( 'Shows the WhatsApp share button. WhatsApp reads the basic tags, so no extra tags are needed.', 'woo-open-graph' ) ),
 					),
 				),
 				'wog_platform_section' => array(
@@ -192,7 +192,7 @@ class WOG_Admin {
 						'fallback_image' => array(
 							'type'        => 'image',
 							'title'       => __( 'Default Social Image', 'woo-open-graph' ),
-							'description' => __( 'Default image when products don\'t have featured images (recommended: 1200x630px)', 'woo-open-graph' ),
+							'description' => __( 'Shared when a product has no featured or gallery image, and on pages without their own image. It is shared at its uploaded size, so 1200x630px works best. Empty uses the WooCommerce placeholder image.', 'woo-open-graph' ),
 						),
 						'image_size'     => array(
 							'type'        => 'select',
