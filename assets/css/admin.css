@@ -1,304 +1,1037 @@
 /**
- * Enhanced Woo Open Graph - Clean Admin Styles
- * WordPress-native styling without dark mode complexity
- * 
- * @package Enhanced_Woo_Open_Graph
- * @version 2.0.0
+ * Open Graph for WooCommerce - Admin (card panel) styles.
+ *
+ * Card-based settings panel following the wp-plugin-development skill
+ * Part 6 pattern and references/wbcom-wrapper-migration.md. All tokens
+ * scoped under --wog-admin-* so nothing leaks to other plugins on the
+ * same admin screen. Mirrors the buddypress-contact-me reference so the
+ * 22-plugin bundle shares one visual language.
+ *
+ * @since 2.1.0
  */
 
-/* === ADMIN PAGE LAYOUT === */
-.wog-admin-wrap {
-    max-width: 1200px;
-    margin: 20px 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+/* ═══════════════════════════════════════════════════════════
+   Design Tokens
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-admin {
+	--wog-admin-accent: #2563eb;
+	--wog-admin-accent-hover: #1d4ed8;
+	--wog-admin-accent-light: #eff6ff;
+
+	--wog-admin-white: #ffffff;
+	--wog-admin-surface-1: #f8fafc;
+	--wog-admin-surface-2: #f1f5f9;
+	--wog-admin-border: #e2e8f0;
+	--wog-admin-border-strong: #cbd5e1;
+
+	--wog-admin-text: #1e293b;
+	--wog-admin-text-2: #475569;
+	--wog-admin-text-3: #64748b;
+	--wog-admin-text-4: #374151;
+	--wog-admin-text-muted: #94a3b8;
+
+	--wog-admin-success: #16a34a;
+	--wog-admin-success-hover: #15803d;
+	--wog-admin-success-light: #dcfce7;
+	--wog-admin-warn: #f59e0b;
+	--wog-admin-warn-light: #fef9c3;
+	--wog-admin-danger: #dc2626;
+	--wog-admin-danger-hover: #b91c1c;
+	--wog-admin-danger-light: #fee2e2;
+
+	--wog-admin-radius: 8px;
+	--wog-admin-radius-sm: 6px;
+	--wog-admin-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+	--wog-admin-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.04);
+
+	--wog-admin-gap-sm: 8px;
+	--wog-admin-gap-md: 16px;
+	--wog-admin-gap-lg: 20px;
+	--wog-admin-gap-xl: 32px;
 }
 
-/* Header */
-.wog-admin-header {
-    background: #fff;
-    padding: 20px;
-    border: 1px solid #c3c4c7;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+/* ═══════════════════════════════════════════════════════════
+   Dark mode (ADMIN-1)
+   Full dark token scale for the admin panel. Gated behind an EXPLICIT
+   dark-admin signal (body.is-dark-theme) rather than prefers-color-scheme.
+   body.admin-color-dark is deliberately NOT a trigger: WP's "Dark" admin
+   colour scheme restyles only the menu and toolbar, so the content area
+   stays light and the panel's header text became light-on-light. Rationale: WP
+   admin core has no dark mode in 6.x/7.0, so keying off the OS preference
+   alone flips this panel dark while the surrounding WP admin chrome (and,
+   in testing, some card surfaces) stay light - a mixed, low-contrast
+   result. The opt-in keeps a normal admin cohesively light today and
+   adopts dark uniformly the moment a real dark admin context sets the class.
+   ═══════════════════════════════════════════════════════════ */
+body.is-dark-theme .wog-admin {
+	--wog-admin-white: #1e1e2e;
+	--wog-admin-surface-1: #181825;
+	--wog-admin-surface-2: #11111b;
+	--wog-admin-border: #313244;
+	--wog-admin-border-strong: #45475a;
+	--wog-admin-text: #e4e6eb;
+	--wog-admin-text-2: #b8bcc8;
+	--wog-admin-text-3: #9399a8;
+	--wog-admin-text-4: #c8ccd8;
+	--wog-admin-text-muted: #7f8496;
+	--wog-admin-accent-light: #1e293b;
+	--wog-admin-success-hover: #22c55e;
+	--wog-admin-success-light: #14311f;
+	--wog-admin-warn-light: #3a2f10;
+	--wog-admin-danger-hover: #ef4444;
+	--wog-admin-danger-light: #3a1518;
+	--wog-admin-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+	--wog-admin-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.45), 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.wog-admin-header h1 {
-    margin: 0 0 10px 0;
-    color: #1d2327;
-    font-size: 24px;
+/* ═══════════════════════════════════════════════════════════
+   Page wrapper + page header
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-admin {
+	margin: 0 20px 0 0;
+	color: var(--wog-admin-text);
+	font-size: 13px;
+	line-height: 1.5;
 }
 
-.wog-admin-header .description {
-    color: #646970;
-    font-size: 14px;
-    line-height: 1.5;
+.wog-admin h1,
+.wog-admin h2,
+.wog-admin h3,
+.wog-admin p {
+	margin: 0;
+	color: inherit;
 }
 
-/* Two Column Layout */
-.wog-admin-layout {
-    display: flex;
-    gap: 20px;
+.wog-admin a {
+	color: var(--wog-admin-accent);
 }
 
-.wog-main-content {
-    flex: 2;
-    min-width: 0;
+.wog-page-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--wog-admin-gap-md);
+	padding: 18px 0 14px;
+	margin: 0 0 18px;
+	border-bottom: 1px solid var(--wog-admin-border);
 }
 
-.wog-sidebar {
-    flex: 0 0 300px;
+.wog-page-header__title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
 
-/* === CARDS === */
-.wog-card,
-.wog-sidebar-box {
-    background: #fff;
-    border: 1px solid #c3c4c7;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    margin-bottom: 20px;
-    overflow: hidden;
+.wog-page-header__title h1 {
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.2;
+	margin: 0;
+	padding: 0;
 }
 
-.wog-card-header {
-    background: #f6f7f7;
-    border-bottom: 1px solid #c3c4c7;
-    padding: 15px 20px;
+.wog-page-header__title .dashicons {
+	color: var(--wog-admin-accent);
+	width: 24px;
+	height: 24px;
+	font-size: 24px;
 }
 
-.wog-card-header h2,
-.wog-card-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: #1d2327;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.wog-page-header__subtitle {
+	font-size: 13px;
+	color: var(--wog-admin-text-3);
+	margin: 2px 0 0;
 }
 
-.wog-card-header .dashicons {
-    color: #646970;
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+.wog-page-header__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
 }
 
-.wog-card-body {
-    padding: 20px;
+.wog-version-pill {
+	display: inline-block;
+	padding: 4px 10px;
+	background: var(--wog-admin-accent);
+	color: #fff;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.03em;
 }
 
-/* === STATUS INDICATORS === */
-.wog-status-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin: 15px 0;
+/* ═══════════════════════════════════════════════════════════
+   Two-column settings layout
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-settings-layout {
+	display: flex;
+	align-items: flex-start;
+	gap: 0;
+	margin-top: var(--wog-admin-gap-md);
 }
 
-.wog-status-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 15px;
-    border-radius: 4px;
-    border: 1px solid #e0e0e0;
-    background: #f9f9f9;
-    transition: all 0.2s ease;
+.wog-settings-sidebar {
+	width: 240px;
+	/* border-box, because the responsive rules below set width:100% and the 1px border
+	   on each side would otherwise push the sidebar 2px past the viewport. */
+	box-sizing: border-box;
+	flex-shrink: 0;
+	background: var(--wog-admin-white);
+	border: 1px solid var(--wog-admin-border);
+	border-radius: var(--wog-admin-radius);
+	box-shadow: var(--wog-admin-shadow);
+	position: sticky;
+	top: 32px;
+	overflow: hidden;
 }
 
-.wog-status-item.active {
-    border-color: #00a32a;
-    background: #f0f8f0;
+.wog-settings-sidebar-brand {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 16px 16px 14px;
+	border-bottom: 1px solid var(--wog-admin-surface-2);
 }
 
-.wog-status-item.inactive {
-    border-color: #d63638;
-    background: #fef7f7;
+.wog-settings-brand-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--wog-admin-radius-sm);
+	background: var(--wog-admin-accent);
+	color: #fff;
+	flex-shrink: 0;
 }
 
-.wog-status-icon {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    flex-shrink: 0;
+.wog-settings-brand-icon .dashicons {
+	color: #fff;
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
 }
 
-.wog-status-icon.enabled {
-    background: #00a32a;
+.wog-settings-brand-text {
+	min-width: 0;
 }
 
-.wog-status-icon.disabled {
-    background: #d63638;
+.wog-settings-brand-name {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--wog-admin-text);
+	line-height: 1.2;
 }
 
-.wog-status-label {
-    flex: 1;
-    font-weight: 500;
-    color: #1d2327;
-    font-size: 14px;
+.wog-settings-brand-sub {
+	margin: 2px 0 0;
+	font-size: 10px;
+	color: var(--wog-admin-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	font-weight: 600;
 }
 
-.wog-status-text {
-    font-size: 11px;
-    color: #646970;
-    text-transform: uppercase;
-    font-weight: 600;
+.wog-settings-sidebar-nav {
+	padding: 8px;
 }
 
-/* === BUTTONS AND ACTIONS === */
-.wog-btn-block {
-    width: 100%;
-    justify-content: flex-start;
-    text-align: start;
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    border: 1px solid #c3c4c7;
-    background: #f6f7f7;
-    color: #2c3338;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
+.wog-snav-link {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 9px 10px;
+	border-radius: var(--wog-admin-radius-sm);
+	color: var(--wog-admin-text-2);
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	transition: background 0.12s, color 0.12s;
+	margin-bottom: 1px;
 }
 
-.wog-btn-block:hover {
-    background: #f0f0f1;
-    border-color: #8c8f94;
-    color: #1d2327;
-    text-decoration: none;
+.wog-snav-link .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	flex-shrink: 0;
+	color: var(--wog-admin-text-muted);
+	transition: color 0.12s;
 }
 
-.wog-btn-block.button-primary {
-    background: #2271b1;
-    border-color: #2271b1;
-    color: #fff;
+.wog-snav-link:hover,
+.wog-snav-link:focus {
+	background: var(--wog-admin-surface-1);
+	color: var(--wog-admin-text);
+	box-shadow: none;
 }
 
-.wog-btn-block.button-primary:hover {
-    background: #135e96;
-    border-color: #135e96;
-    color: #fff;
+.wog-snav-link:focus:not(:focus-visible) {
+	outline: none;
 }
 
-.wog-btn-block .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+.wog-snav-link:hover .dashicons,
+.wog-snav-link:focus .dashicons {
+	color: var(--wog-admin-text-3);
 }
 
-/* === PLATFORM BADGES === */
-.wog-platform-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 10px 0;
+.wog-snav-link:focus-visible {
+	outline: 2px solid var(--wog-admin-accent);
+	outline-offset: 2px;
 }
 
-.wog-platform-badge {
-    background: #2271b1;
-    color: #fff;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 500;
+.wog-snav-link--active,
+.wog-snav-link--active:hover,
+.wog-snav-link--active:focus {
+	background: var(--wog-admin-accent-light);
+	color: var(--wog-admin-accent);
+	font-weight: 600;
 }
 
-.wog-no-platforms {
-    color: #646970;
-    font-style: italic;
-    padding: 15px;
-    text-align: center;
-    background: #f6f7f7;
-    border-radius: 4px;
+.wog-snav-link--active .dashicons {
+	color: var(--wog-admin-accent);
 }
 
-/* === FORM ELEMENTS === */
-.wog-settings-form .form-table th {
-    font-weight: 600;
-    color: #1d2327;
-    width: 200px;
-    padding: 15px 10px;
+/* Qualified on purpose: our own `.wog-snav-link .dashicons` rule (0,2,0) sizes every
+   icon in the nav at 16px and outranks a bare `.wog-snav-link__ext` (0,1,0). This used
+   to be forced with !important; winning on specificity is the honest fix. */
+.wog-snav-link .dashicons.wog-snav-link__ext {
+	margin-inline-start: auto;
+	width: 14px;
+	height: 14px;
+	font-size: 14px;
 }
 
-.wog-settings-form .form-table td {
-    padding: 15px 10px;
+.wog-snav-divider {
+	height: 1px;
+	background: var(--wog-admin-surface-2);
+	margin: 8px 0;
 }
 
-.wog-settings-form .form-table .description {
-    margin-top: 5px;
-    color: #646970;
-    font-size: 13px;
-    line-height: 1.4;
+.wog-snav-section-label {
+	margin: 8px 0 4px 10px;
+	font-size: 10px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--wog-admin-text-muted);
 }
 
-.wog-settings-form .button-large {
-    padding: 8px 30px;
-    font-size: 14px;
-    font-weight: 600;
-    height: auto;
-    background: #2271b1;
-    border-color: #2271b1;
-    color: #fff;
-    border-radius: 4px;
+.wog-settings-main {
+	flex: 1;
+	min-width: 0;
+	margin-left: var(--wog-admin-gap-lg);
 }
 
-.wog-settings-form .button-large:hover {
-    background: #135e96;
-    border-color: #135e96;
+/* ═══════════════════════════════════════════════════════════
+   Cards
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-card {
+	background: var(--wog-admin-white);
+	border: 1px solid var(--wog-admin-border);
+	border-radius: var(--wog-admin-radius);
+	box-shadow: var(--wog-admin-shadow);
+	margin-bottom: var(--wog-admin-gap-lg);
+	overflow: hidden;
 }
 
-/* === SECTION HEADINGS === */
-.wog-admin-wrap h2:not(:first-child) {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #f0f0f1;
-    color: #1d2327;
-    font-size: 18px;
+.wog-card__head {
+	padding: 14px 20px 12px;
+	border-bottom: 1px solid var(--wog-admin-border);
+	background: var(--wog-admin-surface-1);
 }
 
-.form-table tbody:before {
-    content: "";
-    display: block;
-    height: 10px;
+.wog-card__title {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--wog-admin-text);
+	margin: 0 0 2px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
 }
 
-/* === MEDIA QUERIES === */
-@media (max-width: 1200px) {
-    .wog-admin-layout {
-        flex-direction: column;
-    }
-    
-    .wog-sidebar {
-        flex: none;
-    }
+.wog-card__desc {
+	font-size: 13px;
+	color: var(--wog-admin-text-3);
+	margin: 0;
+	line-height: 1.5;
 }
 
-@media (max-width: 782px) {
-    .wog-admin-wrap {
-        margin: 10px;
-    }
-    
-    .wog-admin-header {
-        padding: 15px;
-    }
-    
-    .wog-card-header,
-    .wog-card-body {
-        padding: 15px;
-    }
-    
-    .wog-status-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .wog-btn-block {
-        text-align: center;
-        justify-content: center;
-    }
+.wog-card__body {
+	padding: 20px;
+}
+
+.wog-card .form-table {
+	margin: 0;
+}
+
+.wog-card .form-table th {
+	padding: 14px 20px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--wog-admin-text-4);
+	width: 260px;
+	vertical-align: middle;
+}
+
+.wog-card .form-table td {
+	padding: 14px 20px;
+}
+
+.wog-card .form-table tr {
+	border-bottom: 1px solid var(--wog-admin-surface-2);
+}
+
+.wog-card .form-table tr:last-child {
+	border-bottom: none;
+}
+
+.wog-status-on {
+	color: var(--wog-admin-success);
+	font-weight: 600;
+}
+
+.wog-status-off {
+	color: var(--wog-admin-text-3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Buttons
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-action-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.wog-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 8px 16px;
+	border-radius: var(--wog-admin-radius-sm);
+	border: 1px solid transparent;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	cursor: pointer;
+	text-decoration: none;
+	transition: background 0.12s, border-color 0.12s, color 0.12s;
+	min-height: 40px;
+	box-shadow: none;
+}
+
+.wog-btn .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+}
+
+.wog-btn-primary {
+	background: var(--wog-admin-accent);
+	color: #fff;
+	border-color: var(--wog-admin-accent);
+}
+
+.wog-btn-primary:hover,
+.wog-btn-primary:focus {
+	background: var(--wog-admin-accent-hover);
+	border-color: var(--wog-admin-accent-hover);
+	color: #fff;
+}
+
+.wog-btn-secondary {
+	background: var(--wog-admin-white);
+	color: var(--wog-admin-text);
+	border-color: var(--wog-admin-border-strong);
+}
+
+.wog-btn-secondary:hover,
+.wog-btn-secondary:focus {
+	background: var(--wog-admin-surface-1);
+	color: var(--wog-admin-text);
+	border-color: var(--wog-admin-border-strong);
+}
+
+.wog-btn-danger {
+	background: var(--wog-admin-white);
+	color: var(--wog-admin-danger);
+	border-color: var(--wog-admin-danger-light);
+}
+
+.wog-btn-danger:hover,
+.wog-btn-danger:focus {
+	background: var(--wog-admin-danger);
+	color: #fff;
+	border-color: var(--wog-admin-danger);
+}
+
+.wog-btn:focus-visible {
+	outline: 2px solid var(--wog-admin-accent);
+	outline-offset: 2px;
+}
+
+.wog-inline-hint {
+	display: inline-block;
+	margin-left: 8px;
+	font-size: 12px;
+	font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Overview — stat grid
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: var(--wog-admin-gap-md);
+	margin: 0 0 var(--wog-admin-gap-lg);
+}
+
+.wog-stat {
+	background: var(--wog-admin-white);
+	border: 1px solid var(--wog-admin-border);
+	border-radius: var(--wog-admin-radius);
+	box-shadow: var(--wog-admin-shadow);
+	padding: 18px;
+}
+
+.wog-stat__label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--wog-admin-text-muted);
+	margin: 0 0 6px;
+}
+
+.wog-stat__value {
+	font-size: 26px;
+	font-weight: 700;
+	color: var(--wog-admin-text);
+	line-height: 1.1;
+}
+
+.wog-stat__trend {
+	margin: 4px 0 0;
+	font-size: 12px;
+	color: var(--wog-admin-text-3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Notices + empty states
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-notice {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 12px 16px;
+	border-radius: var(--wog-admin-radius-sm);
+	border: 1px solid var(--wog-admin-border);
+	background: var(--wog-admin-surface-1);
+	margin-bottom: var(--wog-admin-gap-md);
+	font-size: 13px;
+}
+
+.wog-notice .dashicons {
+	flex-shrink: 0;
+}
+
+.wog-notice--info {
+	background: var(--wog-admin-accent-light);
+	border-color: rgba(37, 99, 235, 0.2);
+	color: var(--wog-admin-accent);
+}
+
+.wog-notice--warn {
+	background: var(--wog-admin-warn-light);
+	border-color: rgba(245, 158, 11, 0.3);
+	color: #92400e;
+}
+
+.wog-notice--warn a {
+	color: #92400e;
+	text-decoration: underline;
+}
+
+.wog-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: var(--wog-admin-white);
+	border: 1px solid var(--wog-admin-border);
+	border-radius: var(--wog-admin-radius);
+	box-shadow: var(--wog-admin-shadow);
+	padding: 56px 32px;
+	text-align: center;
+}
+
+.wog-empty-state__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	margin: 0 auto 16px;
+	background: var(--wog-admin-accent-light);
+	color: var(--wog-admin-accent);
+	border-radius: 50%;
+	font-size: 32px;
+}
+
+.wog-empty-state__icon .dashicons {
+	width: 32px;
+	height: 32px;
+	font-size: 32px;
+	line-height: 1;
+	color: inherit;
+}
+
+.wog-empty-state__title {
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--wog-admin-text);
+	margin: 0 0 6px;
+	line-height: 1.3;
+}
+
+.wog-empty-state__desc {
+	font-size: 13px;
+	color: var(--wog-admin-text-3);
+	margin: 0 auto;
+	max-width: 440px;
+	line-height: 1.55;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WB Plugins hub landing dashboard
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-hub-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: var(--wog-admin-gap-md);
+	margin: 0 0 var(--wog-admin-gap-lg);
+}
+
+.wog-hub-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 20px;
+	background: var(--wog-admin-white);
+	border: 1px solid var(--wog-admin-border);
+	border-radius: var(--wog-admin-radius);
+	box-shadow: var(--wog-admin-shadow);
+	text-decoration: none;
+	color: var(--wog-admin-text);
+	transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+
+.wog-hub-card:hover,
+.wog-hub-card:focus {
+	border-color: var(--wog-admin-accent);
+	box-shadow: var(--wog-admin-shadow-hover);
+	transform: translateY(-1px);
+	color: var(--wog-admin-text);
+	text-decoration: none;
+}
+
+.wog-hub-card:focus:not(:focus-visible) {
+	outline: none;
+}
+
+.wog-hub-card:focus-visible {
+	outline: 2px solid var(--wog-admin-accent);
+	outline-offset: 2px;
+}
+
+.wog-hub-card__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	background: var(--wog-admin-accent-light);
+	color: var(--wog-admin-accent);
+}
+
+.wog-hub-card__icon .dashicons {
+	width: 22px;
+	height: 22px;
+	font-size: 22px;
+	color: inherit;
+}
+
+.wog-hub-card__title {
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--wog-admin-text);
+	line-height: 1.2;
+}
+
+.wog-hub-card__subtitle {
+	font-size: 12px;
+	color: var(--wog-admin-text-3);
+	line-height: 1.4;
+}
+
+.wog-hub-card__cta {
+	margin-top: auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding-top: 6px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--wog-admin-accent);
+}
+
+.wog-hub-card__cta .dashicons {
+	width: 16px;
+	height: 16px;
+	font-size: 16px;
+	transition: transform 0.12s;
+}
+
+.wog-hub-card:hover .wog-hub-card__cta .dashicons {
+	transform: translateX(2px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Discover — ecosystem cross-promotion cards
+   Token-driven, matches the hub/overview card language. Responsive:
+   auto-fill collapses to 1 column on mobile, 2-3 columns on desktop.
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-discover-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: var(--wog-admin-gap-md);
+}
+
+.wog-discover-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 20px;
+	background: var(--wog-admin-white);
+	border: 1px solid var(--wog-admin-border);
+	border-radius: var(--wog-admin-radius);
+	box-shadow: var(--wog-admin-shadow);
+	transition: box-shadow 0.12s, border-color 0.12s, transform 0.12s;
+}
+
+.wog-discover-card:hover {
+	border-color: var(--wog-admin-border-strong);
+	box-shadow: var(--wog-admin-shadow-hover);
+	transform: translateY(-1px);
+}
+
+.wog-discover-card__logo {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 52px;
+	height: 52px;
+}
+
+.wog-discover-card__logo img {
+	width: 52px;
+	height: 52px;
+	object-fit: contain;
+	display: block;
+	border-radius: var(--wog-admin-radius-sm);
+}
+
+.wog-discover-card__title {
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--wog-admin-text);
+	line-height: 1.2;
+	margin: 0;
+}
+
+.wog-discover-card__desc {
+	font-size: 13px;
+	color: var(--wog-admin-text-3);
+	line-height: 1.5;
+	margin: 0;
+	flex: 1 1 auto;
+}
+
+.wog-discover-card__cta {
+	margin-top: 4px;
+}
+
+.wog-discover-card__cta .dashicons {
+	width: 14px;
+	height: 14px;
+	font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Settings notices ("Settings saved.")
+   ═══════════════════════════════════════════════════════════ */
+
+.wog-admin .notice {
+	border-radius: var(--wog-admin-radius);
+	box-shadow: var(--wog-admin-shadow);
+	padding: 12px 16px;
+	margin: 0 0 18px;
+	font-size: 14px;
+	line-height: 1.5;
+	border-width: 0;
+	border-inline-start-width: 4px;
+	border-style: solid;
+}
+
+.wog-admin .notice p {
+	margin: 0;
+	padding: 0;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.wog-admin .notice.is-dismissible {
+	padding-right: 38px;
+}
+
+.wog-admin .notice .notice-dismiss {
+	top: 8px;
+	right: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Settings fields: toggle switch, inputs, submit bar
+   ═══════════════════════════════════════════════════════════ */
+
+/* Toggle switch. Checkbox fields render label.wog-switch > checkbox + .wog-slider. */
+.wog-admin .wog-switch {
+	position: relative;
+	display: inline-block;
+	flex: 0 0 auto;
+	width: 40px;
+	height: 22px;
+	margin: 0;
+}
+
+.wog-admin .wog-switch input[type="checkbox"] {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	opacity: 0;
+	cursor: pointer;
+	z-index: 1;
+}
+
+.wog-admin .wog-slider {
+	position: absolute;
+	inset: 0;
+	border-radius: 999px;
+	background: var(--wog-admin-border-strong);
+	transition: background 0.15s;
+}
+
+.wog-admin .wog-slider::before {
+	content: "";
+	position: absolute;
+	top: 2px;
+	inset-inline-start: 2px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	transition: transform 0.15s;
+}
+
+.wog-admin .wog-switch input:checked + .wog-slider {
+	background: var(--wog-admin-accent);
+}
+
+.wog-admin .wog-switch input:checked + .wog-slider::before {
+	transform: translateX(18px);
+}
+
+[dir="rtl"] .wog-admin .wog-switch input:checked + .wog-slider::before {
+	transform: translateX(-18px);
+}
+
+.wog-admin .wog-switch input:focus-visible + .wog-slider {
+	outline: 2px solid var(--wog-admin-accent);
+	outline-offset: 2px;
+}
+
+.wog-card input[type="text"],
+.wog-card input[type="number"],
+.wog-card input[type="url"],
+.wog-card input[type="email"],
+.wog-card input.large-text,
+.wog-card textarea,
+.wog-card select {
+	border: 1px solid var(--wog-admin-border-strong);
+	border-radius: var(--wog-admin-radius-sm);
+	font-size: 13px;
+}
+
+.wog-card input.large-text {
+	width: 100%;
+	max-width: 480px;
+}
+
+.wog-card .submit,
+.wog-card p.submit {
+	padding: 16px 20px;
+	margin: 0;
+	border-top: 1px solid var(--wog-admin-border);
+	background: var(--wog-admin-surface-1);
+}
+
+
+/* Switch + its description on one line; the description wraps beside it. */
+.wog-switch-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+.wog-switch-row .description {
+	margin: 1px 0 0;
+	color: var(--wog-admin-text-3);
+	cursor: pointer;
+}
+
+.wog-card .form-table .description {
+	color: var(--wog-admin-text-3);
+}
+
+.wog-card textarea.large-text {
+	width: 100%;
+	max-width: 480px;
+}
+
+.wog-image-field {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+
+.wog-image-preview {
+	display: block;
+	max-width: 80px;
+	height: auto;
+	border: 1px solid var(--wog-admin-border);
+	border-radius: var(--wog-admin-radius-sm);
+}
+
+.wog-image-preview[hidden] {
+	display: none;
+}
+
+.wog-sitemap-box {
+	margin-top: 14px;
+	padding: 14px 16px;
+	background: var(--wog-admin-surface-1);
+	border: 1px solid var(--wog-admin-border);
+	border-inline-start: 4px solid var(--wog-admin-success);
+	border-radius: var(--wog-admin-radius-sm);
+}
+
+.wog-sitemap-box p,
+.wog-sitemap-box ul {
+	margin: 0 0 8px;
+}
+
+.wog-sitemap-box a {
+	overflow-wrap: anywhere;
+}
+
+#wog-sitemap-results .notice {
+	margin: 8px 0 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Responsive — exactly two media blocks (skill Part 7.5)
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+	.wog-settings-layout {
+		flex-direction: column;
+	}
+
+	.wog-settings-sidebar {
+		width: 100%;
+		position: static;
+		top: auto;
+	}
+
+	.wog-settings-sidebar-nav {
+		display: flex;
+		flex-wrap: wrap;
+		padding: 8px;
+	}
+
+	.wog-snav-link {
+		flex: 1 1 auto;
+		justify-content: center;
+	}
+
+	.wog-snav-divider,
+	.wog-snav-section-label {
+		display: none;
+	}
+
+	.wog-settings-main {
+		margin-left: 0;
+		margin-top: var(--wog-admin-gap-md);
+	}
+}
+
+@media (max-width: 640px) {
+	.wog-admin {
+		margin-right: 0;
+	}
+
+	.wog-page-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	.wog-card .form-table th,
+	.wog-card .form-table td {
+		display: block;
+		width: 100%;
+		padding: 8px 16px;
+		box-sizing: border-box;
+	}
+
+	.wog-card input.regular-text {
+		width: 100%;
+	}
+
+
+	.wog-stats-grid,
+	.wog-discover-grid {
+		grid-template-columns: 1fr;
+	}
 }

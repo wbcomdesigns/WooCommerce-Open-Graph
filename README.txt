@@ -54,7 +54,7 @@ This plugin works alongside other SEO plugins like Yoast, RankMath, and SEOPress
 == Installation ==
 
 1. Install and activate the plugin
-2. Go to **WooCommerce → Social Media**
+2. Go to **WB Plugins → Open Graph**
 3. Choose which platforms to enable
 4. Select your button style
 5. Done! Your products are now optimized for social sharing
@@ -112,6 +112,7 @@ Yes, the plugin is fully translatable and supports RTL languages.
 * New      - Optional Email share button.
 * New      - Option to delete all plugin data when the plugin is deleted (off by default).
 * New      - The [wog_social_share] shortcode accepts a product id, so share buttons can be placed on any page.
+* Improve  - New settings screen under WB Plugins > Open Graph: an Overview of what the plugin does on your store, then General, Share Buttons, Structured Data, Sitemaps and Advanced tabs. Existing settings carry over unchanged.
 * Improve  - X (Twitter) cards use the large-image card when the product has an image, and the summary card otherwise.
 * Improve  - Share text shows a price range for variable and grouped products whose prices differ.
 * Improve  - The product list Social column shows its state as text, not colour alone.

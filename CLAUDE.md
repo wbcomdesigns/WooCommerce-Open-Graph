@@ -71,7 +71,7 @@ Two bug cards from a UI/UX pass (Basecamp bucket 48880118, "Bugs" - note this is
 _The five meta-tag items below shipped in 2.0.3 (see the readme.txt changelog: schema de-dup, honest image hints, single `og:image:alt`, `og:description` fallback). Re-verify against `master` before re-opening any of them._
 
 - [ ] **De-duplication has never worked.** `scan_existing_tags()` listens for `wp_head_early_og`, an action only this plugin fires, so all 13 guard sites are permanent no-ops. Any store with Yoast/RankMath/SEOPress gets duplicate `og:` tags. Buffer `wp_head` itself instead. (`includes/class-wog-meta-tags.php:50-79`)
-- [ ] **Remove the "Compatible with: Yoast, RankMath, SEOPress" claim** at `admin/class-wog-admin.php:285` until the above actually works.
+- [x] **Remove the "Compatible with: Yoast, RankMath, SEOPress" claim** - the sidebar that carried it is gone with the old settings screen.
 - [ ] **Image hints are hardcoded** 1200/630/`image/png` at `class-wog-meta-tags.php:334-337, 659-662, 682-685, 701-704`. Derive from `wp_get_attachment_metadata()`; omit rather than guess.
 - [ ] **`og:image:alt` emitted twice** - delete the second emitter at `:510`.
 - [ ] **`og:description` vanishes when the tagline is empty** (`:698`) - add a fallback chain: excerpt, then content, then store name.
@@ -204,33 +204,26 @@ across 12 plugins. Notable here: `wog_track_share` (public, nopriv).
 - [ ] **Nonce is not authorisation.** Every route needs a capability check, plus an ownership check where it touches a record.
 - [ ] **Done when** `grep` for `admin-ajax` and `ajaxurl` returns nothing in this plugin.
 
-### Rebuild the admin panel to the standard shell
+### Admin panel (card-panel shell, same as Member Reviews)
 
-The one screen every store owner sees, and the least invested-in across the suite. Build to the pattern in
-**Who Viewed My Profile** (`who-viewed-my-profile`, `/wp-admin/admin.php?page=bp-profile-views-settings` on the
-release-skill site) - roughly 2,000 lines, already solved, copy it rather than reinvent.
+Settings live at **WB Plugins > Open Graph** (`admin.php?page=woo-open-graph`, slug kept from the old WooCommerce submenu).
+The shell is a port of BuddyPress Member Reviews' panel - keep the two visually in step rather than restyling one.
 
 ```
-includes/admin/class-<prefix>-admin.php   controller + get_tabs() registry + get_overview_stats()
-includes/admin/views/shell.php            page header, sidebar nav, body slot
-includes/admin/views/overview.php         stat tiles + config snapshot + quick actions
-includes/admin/views/settings-*.php       one file per settings group
-assets/css/admin.css
+admin/class-wog-admin.php   menu + hub, get_tabs(), get_sections() registry, field renderers, sanitize merge, AJAX
+admin/views/shell.php       header, sidebar nav, body slot (calls settings_errors() after wp-header-end)
+admin/views/overview.php    stat tiles, configuration-as-consequences, testing tools
+admin/views/settings.php    one card per section of the active tab, one form per tab
+admin/views/hub.php         WB Plugins landing (rendered by whichever shell plugin loads last)
+admin/views/discover.php    Wbcom ecosystem cards (logos in assets/images/ecosystem/)
+assets/css/admin.css        --wog-admin-* tokens; dark only under body.is-dark-theme
+assets/js/admin.js          sitemap Generate/Test + media picker, no inline JS, no alert()
 ```
 
-- [ ] **Land on an Overview, not a settings form.** Opening the plugin answers "what is this doing on my store right now?" before offering a single input.
-- [ ] **This plugin's Overview should surface:** tags emitted per product type, sitemap last generated, and whether an SEO plugin is also emitting og: tags.
-- [ ] **Stat tiles each carry an explanatory caption.** A bare number is not information - the reference writes "Every row recorded in the profile-views table" under its count.
-- [ ] **A "Current configuration" snapshot** written as consequences, not stored values - "Yes, anonymous visits are stored but filtered out of aggregate counts", never `exclude_logout_user_count: 1`.
-- [ ] **Quick actions** routing to the tab that changes the thing just described.
-- [ ] **Sidebar generated from a tab registry** - one array keyed by slug with `label`, `icon`, `group` (main / settings / account). Adding a screen touches one array, not markup in three places.
-- [ ] **Version pill in the header; dependency state shown on screen** rather than rendering an empty dashboard.
-- [ ] **Replace the shared `admin/wbcom/` header/nav framework** where present - do not layer the new shell on top of it.
-- [ ] **Verify at 1440px and 390px, light and dark, LTR and RTL.** Colours from CSS custom properties, never hardcoded hex.
-
-**Two things that will bite:**
-- `<hr class="wp-header-end">` immediately after the header is **required**. Without it core's `common.js` re-parents every `.notice` to the first `<h1>` and the "Settings saved" banner lands between the title and subtitle. The reference documents this in a comment - keep the comment.
-- Call `settings_errors()` yourself in the shell, after that marker.
+- **`get_sections()` is the single registry.** A setting is added by adding one entry there (tab > section > field). It drives `register_settings()`, the rendered cards and the save merge - never register a field anywhere else.
+- **Every tab saves into the one `wog_settings` option.** `validate_settings()` rebuilds every key from its input, so `sanitize_settings()` merges the posted tab over the stored option first (the hidden `wog_settings[_wog_tab]` names the tab). Remove the merge and saving one tab resets every other tab. Imports and programmatic saves carry no `_wog_tab` and keep the old full-rebuild behaviour.
+- **Every validated key must belong to exactly one tab**, or it can never be changed from the UI and a tab save would never touch it.
+- Tabs are filterable via `wog_admin_tabs`; adding a settings tab also needs a `get_sections()` entry or it renders empty.
 
 ### The standard every plugin in this suite is measured against
 We are not auditing against each plugin's own history - we are auditing against what a WooCommerce plugin **should** provide a store owner and a developer extending it. Scored across all 12 plugins on 2026-08-08.
@@ -291,12 +284,14 @@ Plain class-per-concern, no boilerplate loader. `Woo_Open_Graph` in the main fil
 | `includes/class-wog-sitemap.php` | Image sitemap generation and rewrite rules |
 | `includes/class-wog-settings.php` | Settings storage, defaults, validation, import/export, migration |
 | `includes/class-wog-meta-boxes.php` | Per-product meta box (OG title/description/disable) |
-| `admin/class-wog-admin.php` | Admin screens and menus |
+| `admin/class-wog-admin.php` | Settings screen controller (WB Plugins hub, tabs, sections registry, save merge) |
+| `admin/views/*.php` | Shell, Overview, settings, hub and Discover views |
 
 ### Assets
 - `assets/js/social-share.js` - share button behaviour
 - `assets/css/social-share.css` - front-end share widget
-- `assets/css/admin.css` - settings screen
+- `assets/css/admin.css` - settings screen (card-panel shell)
+- `assets/js/admin.js` - settings screen behaviour (sitemap buttons, media picker)
 
 **The plugin enqueues these unminified sources directly.** There is no build-time
 minification and no separate RTL stylesheet: the shipped file set equals the
@@ -342,6 +337,7 @@ Codebase: ~5,200 PHP LOC across 11 files.
 | `wog_sitemap_include_images` | Toggle images in the sitemap |
 | `wog_config_summary` | Config summary shown in admin |
 | `wog_system_info` | System info block |
+| `wog_admin_tabs` | Settings screen tabs (sidebar registry) |
 
 ## Settings & Data
 
