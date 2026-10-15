@@ -69,7 +69,7 @@ composer require wbcomdesigns/open-graph-for-woocommerce
 ## ⚙️ Quick Setup
 
 1. **Install & Activate** the plugin
-2. **Navigate** to **WooCommerce → Social Media**
+2. **Navigate** to **WB Plugins → Open Graph**
 3. **Enable Platforms** you want to support
 4. **Choose Style** for share buttons
 5. **Configure Settings** as needed
@@ -230,7 +230,7 @@ document.addEventListener('wog_social_share', function(event) {
 });
 
 // Custom copy functionality
-window.EWOGSocialShare.copyLink(url);
+window.wogShare.copyLink(url);
 ```
 
 ## 🐛 Troubleshooting
@@ -250,15 +250,6 @@ window.EWOGSocialShare.copyLink(url);
 **Copy button not working?**
 - Requires HTTPS for modern browsers
 - Fallback provided for HTTP
-
-### Debug Mode
-```php
-// Enable debug logging
-define('WOG_DEBUG', true);
-
-// Or via admin
-WooCommerce → Social Media → Advanced → Debug Mode
-```
 
 ## 📝 Contributing
 

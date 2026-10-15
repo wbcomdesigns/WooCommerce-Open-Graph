@@ -17,7 +17,7 @@
 .wog-share-label {
     font-size: 14px;
     font-weight: 600;
-    color: #333;
+    /* No explicit color: inherit the active theme's text color (currentColor cascade). */
     margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -34,8 +34,11 @@
 .wog-share-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     padding: 8px 12px;
+    min-height: 40px; /* Minimum 40x40 tap target (WCAG 2.5.5 / mobile). */
+    box-sizing: border-box;
     text-decoration: none;
     border-radius: 6px;
     font-size: 13px;
@@ -290,8 +293,8 @@
     }
     
     .wog-style-minimal .wog-share-btn {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
     }
 }
 
@@ -329,11 +332,7 @@
     .wog-social-share {
         border-top-color: #333;
     }
-    
-    .wog-share-label {
-        color: #e1e8ed;
-    }
-    
+
     .wog-style-modern .wog-share-btn {
         background: #2c3e50;
         color: #ecf0f1;

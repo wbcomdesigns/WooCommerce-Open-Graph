@@ -3,9 +3,9 @@ Contributors: wbcomdesigns
 Donate link: https://wbcomdesigns.com/donate
 Tags: woocommerce, open graph, social media, facebook, schema
 Requires at least: 5.0
-Tested up to: 6.8.1
+Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,7 +42,7 @@ Choose the style that matches your store:
 
 = Works With Your Existing Setup =
 
-This plugin works alongside other SEO plugins like Yoast, RankMath, and All in One SEO. It adds WooCommerce-specific features that general SEO plugins miss.
+This plugin works alongside other SEO plugins like Yoast, RankMath, and SEOPress. It detects the Open Graph and Twitter Card tags those plugins already output and skips duplicates, adding only the WooCommerce-specific tags they miss. Product schema is off by default because WooCommerce core already outputs Product structured data; enable it only to gap-fill Woo's schema with extra fields (brand, GTIN, MPN, specifications).
 
 = Perfect For =
 
@@ -54,7 +54,7 @@ This plugin works alongside other SEO plugins like Yoast, RankMath, and All in O
 == Installation ==
 
 1. Install and activate the plugin
-2. Go to **WooCommerce → Social Media**
+2. Go to **WB Plugins → Open Graph**
 3. Choose which platforms to enable
 4. Select your button style
 5. Done! Your products are now optimized for social sharing
@@ -105,6 +105,67 @@ Yes, the plugin is fully translatable and supports RTL languages.
 8. Advanced options for power users
 
 == Changelog ==
+
+= 2.1.0 - October 2026 =
+
+* New      - Organization Logo and Social Profiles settings feed the Organization structured data, with the theme logo and then the Site Icon as fallbacks.
+* New      - Optional Email share button.
+* New      - Option to delete all plugin data when the plugin is deleted (off by default).
+* New      - The [wog_social_share] shortcode accepts a product id, so share buttons can be placed on any page.
+* Improve  - New settings screen under WB Plugins > Open Graph: an Overview of what the plugin does on your store, then General, Share Buttons, Structured Data, Sitemaps and Advanced tabs. Existing settings carry over unchanged.
+* Improve  - The Structured Data tab names its master switch and marks the options that depend on it, and the Overview reports Organization schema only when it is actually published.
+* Improve  - Removed the Debug Mode switch, which had no effect on your pages.
+* Improve  - The Social Platforms switches, the Default Social Image hint and the product Social Media Image note now say exactly what is added and which image will be shared.
+* Improve  - X (Twitter) cards use the large-image card when the product has an image, and the summary card otherwise.
+* Improve  - Share text shows a price range for variable and grouped products whose prices differ.
+* Improve  - The product list Social column shows its state as text, not colour alone.
+* Improve  - The per-product switch is now labelled "Enable social sharing output" and states that search structured data is not affected.
+* Fix      - Shop Managers can save the settings; the form was shown to them but saving was refused.
+* Fix      - Product category pages keep og:title and og:description when "Override titles and descriptions" is enabled.
+* Fix      - Sold-out products show share buttons again.
+* Fix      - Turning off social output for a product now also removes its share buttons, share assets and Open Graph namespace.
+* Fix      - Share assets no longer load on product pages when share buttons are turned off.
+* Fix      - The [wog_social_share] shortcode renders on pages other than the product page.
+* Fix      - Products without a photo now include an image in their structured data.
+* Fix      - Organization structured data no longer publishes an empty logo or empty profile list.
+* Fix      - The store address publishes the country and region separately instead of a combined "US:CA" value.
+* Fix      - og:image:secure_url is emitted only for HTTPS image URLs.
+* Fix      - An invalid X (Twitter) username is rejected with a message and the previously saved username is kept.
+* Fix      - The Social column in the product list appears again.
+* Fix      - Social title and description placeholders in the product editor show exactly what will be published.
+* Fix      - The sitemap address answers directly instead of redirecting to a trailing-slash URL.
+* Fix      - Sitemap addresses no longer stay at 404 after a permalink refresh made while WooCommerce or the sitemap was switched off.
+* Fix      - Pinterest Rich Pins get the product price and availability tags even when the Facebook switch is off.
+* Fix      - Generating sitemaps reports that the work is queued, and the Last Generated time is set only when a sitemap is actually written.
+* Fix      - The documented wog_social_share JavaScript event now fires on every share, and the readme names the correct global.
+* Fix      - Share text no longer shows a doubled separator when a product has no description.
+* Fix      - Share text with accented letters, CJK or emoji is no longer cut in the middle of a character.
+* Fix      - Settings from versions before 2.0 are carried over once on upgrade, without overwriting values changed since.
+* Fix      - Removed the retired X (Twitter) Card Validator link from Testing Tools.
+* Security - The [wog_social_share] shortcode renders nothing for draft, private or password-protected products.
+* Security - Structured data escapes HTML tags inside product text.
+* Dev      - One settings sanitizer and one defaults array are shared by the settings screen and activation; removed the unused cache_meta_tags setting.
+* Dev      - Removed code nothing called: settings import, export and reset, system info, debug logging, manual sitemap helpers and their wog_config_summary, wog_system_info, wog_settings_imported, wog_settings_reset and wog_{section}_settings hooks, plus the non-standard linkedin:* tags.
+* Compat   - Tested with WooCommerce 10.7.
+* Dev      - New wog_social_enabled_for_product filter decides social output per product.
+
+= 2.0.4 - September 2026 =
+
+* Improve  - Removed CSS and JavaScript files that were shipped in the plugin but never loaded, including a legacy admin stylesheet and the unused minified and RTL copies.
+* Fix      - Copy Link button now works on product pages; the share script was present in the source but excluded from the packaged plugin, so it returned a 404 and the button did nothing.
+* Fix      - The "Share this product" label now inherits the active theme text color instead of a hardcoded gray, in both light and dark modes.
+* Fix      - Share buttons now meet a 40px minimum tap-target size on mobile.
+* Fix      - Section-heading styles on the settings screen are scoped to the plugin so they no longer affect other admin headings.
+* Fix      - Icon share links now expose a title tooltip, and admin and meta-box styles use logical properties for correct right-to-left layouts.
+
+= 2.0.3 - September 2026 =
+
+* Improve  - Stop duplicating WooCommerce's Product schema; Woo's own product schema is left to stand and the plugin gap-fills only through WooCommerce filters.
+* Fix      - Remove dishonest structured-data hints: no fabricated priceValidUntil and no always-new condition; GTIN, MPN and brand now come from real WooCommerce data.
+* Fix      - Real de-duplication with Yoast, Rank Math and SEOPress: og: and twitter: tags they already emit are no longer duplicated.
+* Fix      - og:image:alt is emitted once instead of twice on every page.
+* Fix      - Share image width, height and type are read from the real product image and omitted for placeholder or non-product URLs, instead of hardcoded values.
+* Fix      - og:description keeps a fallback to the site name so it is never dropped when the site tagline is empty.
 
 = 2.0.1 =
 * Updated for WordPress.org compliance
