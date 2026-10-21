@@ -2,10 +2,12 @@
 Contributors: wbcomdesigns
 Donate link: https://wbcomdesigns.com/donate
 Tags: woocommerce, open graph, social media, facebook, schema
-Requires at least: 5.0
-Tested up to: 6.9
-Requires PHP: 7.4
-Stable tag: 2.1.0
+Requires at least: 6.5
+Tested up to: 7.1
+Requires PHP: 8.1
+WC requires at least: 4.0
+WC tested up to: 11.2
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -105,6 +107,10 @@ Yes, the plugin is fully translatable and supports RTL languages.
 8. Advanced options for power users
 
 == Changelog ==
+
+= 2.1.1 - October 2026 =
+
+* Dev      - Declared the current supported range (Requires PHP 8.1, Requires at least 6.5, WooCommerce tested up to 11.2); PHP lint matrix covers 8.1 to 8.5.
 
 = 2.1.0 - October 2026 =
 
