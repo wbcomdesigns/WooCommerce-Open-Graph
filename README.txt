@@ -1,6 +1,5 @@
 === Open Graph for WooCommerce ===
 Contributors: wbcomdesigns
-Donate link: https://wbcomdesigns.com/donate
 Tags: woocommerce, open graph, social media, facebook, schema
 Requires at least: 6.5
 Tested up to: 7.1
@@ -77,7 +76,15 @@ Yes! Choose from three built-in styles or use CSS to create your own design.
 
 = Does it work with my theme? =
 
-Yes, it works with all WooCommerce-compatible themes.
+Yes. The share buttons attach to the standard WooCommerce single-product hooks, so any WooCommerce-compatible theme shows them. You can place them before or after the add-to-cart button, after the product summary, or after the product tabs. For page builders or custom layouts, use the `[wog_social_share id="123"]` shortcode to show the buttons for any product on any page.
+
+= Does it work with Yoast SEO, Rank Math or SEOPress? =
+
+Yes. Before adding its tags, the plugin reads the Open Graph and Twitter Card tags your SEO plugin has already printed and skips any duplicates. It only adds the WooCommerce product tags the SEO plugin leaves out.
+
+= Will it add a second Product schema next to WooCommerce's? =
+
+No. Product schema is off by default because WooCommerce already outputs Product structured data. If you turn it on, the plugin adds missing fields such as brand, GTIN and MPN to WooCommerce's own Product data instead of printing a second, competing block.
 
 = How do I know it's working? =
 
@@ -89,7 +96,11 @@ Absolutely! All share buttons work perfectly on mobile devices.
 
 = Does it work with variable products? =
 
-Yes, it works with all WooCommerce product types.
+Yes, it works with all WooCommerce product types. For variable and grouped products whose options have different prices, the share preview shows the price range.
+
+= Where can I find the documentation? =
+
+Setup guides, settings and developer notes are in the [Open Graph for WooCommerce documentation](https://docs.wbcomdesigns.com/woo-family/woo-open-graph/). For help, open a ticket at [Wbcom Designs support](https://wbcomdesigns.com/support/).
 
 = Is it translation ready? =
 

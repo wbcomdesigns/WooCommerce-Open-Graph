@@ -106,6 +106,7 @@ module.exports = function (grunt) {
                     '!plugin-check-report.json',
                     '!.distignore',
                     '!.github/**',
+                    '!.wordpress-org/**',
                     '!bin/**',
                     '!audit/**',
                     '!docs/**',
