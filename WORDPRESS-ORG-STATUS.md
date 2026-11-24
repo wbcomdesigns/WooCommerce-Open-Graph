@@ -24,8 +24,7 @@
 
 ### Build Command
 ```bash
-npm install
-npx grunt build
+bash bin/build-release.sh
 ```
 
 ## ⚠️ WordPress.org Plugin Check - ISSUES FOUND
@@ -175,7 +174,7 @@ Go through each file systematically and fix issues reported by plugin check
 3. Verify no ERROR-level issues remain
 4. Address WARNING-level issues
 5. Test plugin functionality after fixes
-6. Rebuild distribution ZIP: `npx grunt build`
+6. Rebuild distribution ZIP: `bash bin/build-release.sh`
 7. Submit to WordPress.org
 
 ## 📝 Notes

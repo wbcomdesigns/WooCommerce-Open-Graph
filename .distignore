@@ -1,0 +1,4 @@
+# Dev-only files kept out of the release zip (bin/build-release.sh).
+*.md
+.synced-from
+plugin-check-report.json

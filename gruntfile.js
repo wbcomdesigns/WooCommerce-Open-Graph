@@ -68,67 +68,6 @@ module.exports = function (grunt) {
                     updateTimestamp: true
                 }
             }
-        },
-
-        // Task for cleaning dist directory
-        clean: {
-            dist: ['dist'],
-            postbuild: ['dist/open-graph-for-woocommerce'],
-        },
-
-        // Task for copying files to dist.
-        // The plugin enqueues its unminified sources directly (no build-time
-        // minification), so the shipped file set equals the loaded file set:
-        // every CSS/JS asset copied here is one the plugin actually enqueues.
-        copy: {
-            dist: {
-                src: [
-                    '**',
-                    '!node_modules/**',
-                    '!.git/**',
-                    '!.gitignore',
-                    '!.gitattributes',
-                    '!dist/**',
-                    '!build/**',
-                    '!.DS_Store',
-                    '!**/.DS_Store',
-                    '!npm-debug.log',
-                    '!package.json',
-                    '!package-lock.json',
-                    '!Gruntfile.js',
-                    '!gruntfile.js',
-                    '!phpcs.xml',
-                    '!composer.json',
-                    '!composer.lock',
-                    '!*.zip',
-                    '!readme.md',
-                    '!**/*.md',
-                    '!plugin-check-report.json',
-                    '!.distignore',
-                    '!.github/**',
-                    '!bin/**',
-                    '!audit/**',
-                    '!docs/**',
-                    '!**/*.map',
-                ],
-                dest: 'dist/open-graph-for-woocommerce/',
-            },
-        },
-
-        // Task for creating ZIP file
-        compress: {
-            dist: {
-                options: {
-                    archive: 'dist/open-graph-for-woocommerce-<%= pkg.version %>.zip',
-                },
-                files: [
-                    {
-                        cwd: 'dist/open-graph-for-woocommerce/',
-                        src: ['**'],
-                        dest: 'open-graph-for-woocommerce/',
-                    },
-                ],
-            },
         }
     });
 
@@ -137,19 +76,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-checktextdomain');
     grunt.loadNpmTasks('grunt-shell');
-    grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-contrib-compress');
 
     // Register default tasks
     grunt.registerTask('default', ['checktextdomain', 'shell', 'watch']);
 
-    // Register build task for WordPress.org distribution
-    grunt.registerTask('build', [
-        'clean:dist',
-        'shell',
-        'copy:dist',
-        'compress:dist',
-        'clean:postbuild'
-    ]);
+    // Release zip: bin/build-release.sh (WordPress.org folder standard).
 };
