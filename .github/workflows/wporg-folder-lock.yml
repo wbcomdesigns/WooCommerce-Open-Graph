@@ -1,0 +1,34 @@
+name: WordPress.org folder lock
+
+# The plugin zip folder must equal the WordPress.org slug, so the store, GitHub and
+# WordPress.org copies install into the same folder. Two folder names for one plugin
+# means two copies on a site and a fatal error. Identical file in every Wbcom .org plugin.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip folder equals the WordPress.org slug
+        run: |
+          slug=$(sed -nE 's/^slug="?([a-z0-9-]+)"?.*/\1/p' bin/build-release.sh | head -1)
+          main=$(grep -lE '^[[:space:]]*\*?[[:space:]]*Plugin Name:' ./*.php | head -1)
+          main=${main#./}
+          if [ -z "$slug" ] || [ -z "$main" ]; then
+            echo "::error::bin/build-release.sh needs a 'slug=' line and the repo root a main plugin file"; exit 1
+          fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://plugins.svn.wordpress.org/$slug/trunk/$main")
+          if [ "$code" != 200 ]; then
+            echo "::error::slug=$slug is not the WordPress.org folder for $main (HTTP $code). Set slug= in bin/build-release.sh to the WordPress.org slug."; exit 1
+          fi
+          if ! grep -q 'WordPress.org folder lock' bin/build-release.sh; then
+            echo "::error::bin/build-release.sh is missing the standard WordPress.org folder lock block"; exit 1
+          fi
+          echo "OK: zip folder '$slug' matches WordPress.org ($main)"

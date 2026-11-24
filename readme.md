@@ -136,8 +136,8 @@ composer install
 # Start development
 npm run dev
 
-# Build for production
-npm run build
+# Build the release zip (dist/woo-open-graph-<version>.zip)
+bash bin/build-release.sh
 ```
 
 ### File Structure
